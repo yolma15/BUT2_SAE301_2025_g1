@@ -16,3 +16,14 @@ app.use((req, res) => {
 });
 
 app.listen(3000);
+
+// Catalogue
+app.get('/catalogue', async (req, res) => {
+    try {
+        const produits = await produitModel.getAllProduits();
+        res.render('catalogue', { produits });
+    } catch (err) {
+        console.error('Erreur lors de la récupération des produits :', err);
+        res.render('catalogue', { produits: [] });
+    }
+});
