@@ -1,12 +1,157 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/css/style.css" />
-    <title>Document</title>
-  </head>
-  <body>
-    TEST <%= MAVARIABLE %>
-  </body>
-</html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocFit</title>
+    <link href="/css/style.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+    <%- include('header') %>
+
+        <div class="Text-Bienvenue">
+            <div class="rectangle-index">
+                <h1 class="Text-Bienvenueindex">Bienvenue chez LocFit,</h1>
+                <p class="Text-Bienvenueindex">
+                    Votre partenaire de confiance pour la location de matériel sportif et de fitness !<br />
+                    Que vous soyez un amateur de sport ou un professionnel, nous mettons à votre disposition une large
+                    gamme<br />
+                    d’équipements modernes et de qualité, adaptés à tous vos besoins.<br /><br />
+                    Vous souhaitez vous équiper pour vos séances à domicile, votre salle de sport, ou pour un événement
+                    sportif ?<br />
+                    LocFit vous propose des solutions flexibles et abordables, sans compromis sur la performance.<br />
+                </p>
+            </div>
+
+            <div class="index-bouton">
+                <button class="offre-bouton">Starterpack</button>
+                <button class="offre-bouton">La nouvelle offre</button>
+            </div>
+        </div>
+
+        <div class="slider-container slider-1">
+            <div class="slider">
+                <img src="img/caroussel1.jpg" alt="Image 1">
+                <img src="img/caroussel2.jpg" alt="Image 2">
+                <img src="img/caroussel3.jpg" alt="Image 3">
+            </div>
+        </div>
+        <%- include('footer') %>
+
+</body>
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        color: white;
+        background-color: #FFF3D4;
+        height: 100%;
+    }
+
+    .Text-Bienvenue {
+        flex: 1;
+        max-width: 50%;
+        padding-left: 100px;
+        padding-top: 125px;
+        color: white;
+        margin-left:-80px;
+    }
+
+    .index-bouton {
+        display: flex;
+        gap: 122px;
+        margin-top: 43px;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+    }
+
+    .offre-bouton {
+        padding: 10px 20px;
+        background-color: #F08E88;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        border-radius: 30px;
+        font-size: 36px;
+        color: white;
+    }
+
+    .offre-bouton:hover {
+        background-color: #ffc2c2;
+    }
+
+    .rectangle-index {
+        background-color: #A8D5BA;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 100px;
+    }
+
+    .slider-1 {
+        max-width: 737px;
+        margin: 0;
+        overflow: hidden;
+        max-height: 1936px;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transform: translateY(-50%);
+        z-index: 1;
+        padding-top: 1080px;
+
+    }
+
+    .slider-1 img {
+        flex-shrink: 0;
+        width: 737px;
+        height: 827px;
+        object-fit: cover;
+        z-index: 1;
+    }
+
+    .slider-1 .slider {
+        animation: slider-1 12s infinite ease-in-out;
+        display: flex;
+    }
+
+    .slider-1 p {
+        background: #000;
+        flex-shrink: 0;
+        padding: 72px 0;
+        width: 100%;
+        text-align: center;
+        font-size: 45px;
+        color: #f1f1f1;
+    }
+
+    @keyframes slider-1 {
+
+        0%,
+        25% {
+            transform: translateX(0);
+        }
+
+        33%,
+        58% {
+            transform: translateX(-100%);
+        }
+
+        66%,
+        91% {
+            transform: translateX(-200%);
+        }
+
+        100% {
+            transform: translateX(0);
+        }
+    }
+</style>
