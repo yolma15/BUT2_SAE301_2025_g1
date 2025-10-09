@@ -1,0 +1,21 @@
+.footer {
+    position: static;
+    margin-top: auto;
+    width: 100%;
+    background: #fde4e4;
+    color: #FD5035;
+    text-align: center;
+    padding: 16px 0;
+    z-index: 100;
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 95%;
+}
