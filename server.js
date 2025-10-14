@@ -15,9 +15,6 @@ app.use((req, res) => {
   res.status(404).render("404");
 });
 
-app.listen(3000);
-
-// Catalogue
 app.get('/catalogue', async (req, res) => {
     try {
         const produits = await produitModel.getAllProduits();
@@ -27,3 +24,5 @@ app.get('/catalogue', async (req, res) => {
         res.render('catalogue', { produits: [] });
     }
 });
+
+app.listen(3000);
