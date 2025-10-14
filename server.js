@@ -2,9 +2,19 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import ejs from "ejs";
+import pool from "./db.js";
 
 const app = express();
 app.set("view engine", "ejs");
+
+app.get("/", async function(req, res) {
+  let data = await pool.query("SELECT * FROM produit");
+  console.log(data);
+  res.render("index", {data});
+});
+
+
+
 
 app.get("/", function (req, res) {
   res.render("home",
