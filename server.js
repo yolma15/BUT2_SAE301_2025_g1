@@ -8,9 +8,9 @@ const app = express();
 app.set("view engine", "ejs");
 
 app.get("/", async function(req, res) {
-  let data = await pool.query("SELECT * FROM produit");
+  let data = await pool.query("SELECT * FROM utilisateur");
   console.log(data);
-  res.render("index", {data});
+  res.render("index", {liste_user: data[0]});
 });
 
 
