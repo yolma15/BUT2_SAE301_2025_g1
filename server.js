@@ -13,9 +13,10 @@ app.get("/", async function(req, res) {
   res.render("index", {liste_user: data[0]});
 });
 
-app.get("/home", (req, res) => {
-  res.render("home");
-});
+
+
+
+
 
 app.get('/catalogue', async (req, res) => {
     try {
@@ -25,6 +26,21 @@ app.get('/catalogue', async (req, res) => {
         console.error('Erreur lors de la récupération des produits :', err);
         res.render('catalogue', { produits: [] });
     }
+});
+
+
+app.get('/product', async (req, res) => {
+    try {
+        const produits = await produitModel.getAllProduits();
+        res.render('product', { produits });
+    } catch (err) {
+        console.error('Erreur lors de la récupération des produits :', err);
+        res.render('product', { produits: [] });
+    }
+});
+
+app.use((req, res) => {
+  res.status(404).render("404");
 });
 
 app.get("/home", (req, res) => {
