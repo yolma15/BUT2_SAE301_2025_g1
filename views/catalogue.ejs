@@ -35,24 +35,31 @@
 
 
 
-        
-    <div class="product-list">
-        <% if (produits.length > 0) { %>
-            <% produits.forEach(produit => { %>
-            <div class="product-item">
-                <img src="https://via.placeholder.com/200" alt="<%= produit.marque %> <%= produit.modele %>">
-                <div class="container_info">
-                    <div class="product-title"><%= produit.marque %> <%= produit.modele %></div>
-                    <div class="product-price"><%= produit.prix %> €</div>
-                </div>
-                <div class="product-description"><%= produit.description %></div>
-                <a href="/produits.ejs"></a>
-            </div>
-            <% }) %>
-        <% } else { %>
-            <p>Aucun produit disponible.</p>
-        <% } %>
-    </div>
+
+        <div class="product-list">
+            <% if (produits.length> 0) { %>
+                <% produits.forEach(produit=> { %>
+                    <div class="product-item">
+                        <img src="https://via.placeholder.com/200" alt="<%= produit.marque %> <%= produit.modele %>">
+                        <div class="container_info">
+                            <div class="product-title">
+                                <%= produit.marque %>
+                                    <%= produit.modele %>
+                            </div>
+                            <div class="product-price">
+                                <%= produit.prix %> €
+                            </div>
+                        </div>
+                        <div class="product-description">
+                            <%= produit.description %>
+                        </div>
+                        <a href="/produits.ejs"></a>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <p>Aucun produit disponible.</p>
+                            <% } %>
+        </div>
 
 
 </body>
