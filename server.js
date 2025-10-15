@@ -7,30 +7,28 @@ import pool from "./db.js";
 const app = express();
 app.set("view engine", "ejs");
 
-app.get("/", async function(req, res) {
+app.get("/", async function (req, res) {
   let data = await pool.query("SELECT * FROM utilisateur");
   console.log(data);
-  res.render("index", {liste_users: data[0]});
+  res.render("index", { liste_users: data[0] });
 });
 
+app.get("/catalogue", async (req, res) => {
+  try {
+    const produits = await produitModel.getAllProduits();
+    res.render("catalogue", { produits });
+  } catch (err) {
+    console.error("Erreur lors de la récupération des produits :", err);
+    res.render("catalogue", { produits: [] });
+  }
+});
 
-
-
-
-app.get('/catalogue', async (req, res) => {
-    try {
-        const produits = await produitModel.getAllProduits();
-        res.render('catalogue', { produits });
-    } catch (err) {
-        console.error('Erreur lors de la récupération des produits :', err);
-        res.render('catalogue', { produits: [] });
-    }
+app.get("/home", (req, res) => {
+  res.render("home");
 });
 
 app.use((req, res) => {
   res.status(404).render("404");
 });
-
-
 
 app.listen(3000);
