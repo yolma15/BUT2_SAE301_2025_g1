@@ -10,8 +10,9 @@ app.set("view engine", "ejs");
 app.get("/", async function(req, res) {
   let data = await pool.query("SELECT * FROM utilisateur");
   console.log(data);
-  res.render("index", {liste_users: data[0]});
+  res.render("index", {liste_user: data[0]});
 });
+
 
 
 
@@ -29,6 +30,10 @@ app.get('/catalogue', async (req, res) => {
 
 app.use((req, res) => {
   res.status(404).render("404");
+});
+
+app.get("/home", (req, res) => {
+  res.render("home");
 });
 
 
