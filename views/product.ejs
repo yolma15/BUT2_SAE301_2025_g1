@@ -3,15 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/product.css">
     <title>Document</title>
 </head>
 <body>
     <!-- Integrer le header ici -->
+    <%- include('header'); %>
 
-    
+    <main>
+        <div class="gauche">
+            <div class="G_img">
+                <img src="https://picsum.photos/300/300" alt="">
+            </div>
+            <div class="P_img">
+                <img src="https://picsum.photos/300/300" alt="">
+                <img src="https://picsum.photos/300/300" alt="">
+                <img src="https://picsum.photos/300/300" alt="">
+                <img src="https://picsum.photos/300/300" alt="">
+                <img src="https://picsum.photos/300/300" alt="">
+            </div>
+        </div>
+        <div class="droite">
+            <h1>Nom du produit</h1>
+            <p class="prix">Prix</p>
+            <p class="description">Description</p>
+            <button>Louer</button>
+
+        </div>
+    </main>
 
 
-
+    <%- include('footer'); %>
     <!-- Integrer le footer ici -->
 </body>
 </html>
