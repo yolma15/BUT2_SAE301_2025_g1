@@ -4,8 +4,12 @@ import path from "path";
 import ejs from "ejs";
 import pool from "./db.js";
 
+
+
 const app = express();
 app.set("view engine", "ejs");
+
+app.use(express.static('public'));
 
 app.get("/", async function(req, res) {
   let data = await pool.query("SELECT * FROM utilisateur");
