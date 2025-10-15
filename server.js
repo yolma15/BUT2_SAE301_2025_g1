@@ -49,6 +49,12 @@ app.get("/home", (req, res) => {
   res.render("home");
 });
 
+app.use((req, res) => {
+  res.status(404).render("404");
+});
+
+
+
 
 
 app.listen(3000);
