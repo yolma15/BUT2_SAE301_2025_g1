@@ -13,10 +13,12 @@ app.get("/", async function(req, res) {
   res.render("index", {liste_user: data[0]});
 });
 
+app.use(express.static('public'));
 
 
-
-
+app.get("/home", (req, res) => {
+  res.render("home");
+});
 
 app.get('/catalogue', async (req, res) => {
     try {
