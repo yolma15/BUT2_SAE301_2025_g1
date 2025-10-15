@@ -28,13 +28,15 @@ app.get('/catalogue', async (req, res) => {
     }
 });
 
+app.get("/home", (req, res) => {
+  res.render("home");
+});
+
 app.use((req, res) => {
   res.status(404).render("404");
 });
 
-app.get("/home", (req, res) => {
-  res.render("home");
-});
+
 
 
 
