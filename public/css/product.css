@@ -1,0 +1,34 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    size: 100%;
+    overflow-x: hidden;
+}
+main {
+    margin: 20px;
+    display: flex;
+}
+
+.gauche {
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+    flex: 1;
+}
+
+.droite {
+    flex: 1;
+}
+.G_img {
+    width: 300px;
+    height: 300px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+.P_img {
+    display: flex;
+    gap: 10px;
+    scale: 0.2;
+}
+

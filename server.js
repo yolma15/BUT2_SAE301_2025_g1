@@ -7,11 +7,15 @@ import pool from "./db.js";
 const app = express();
 app.set("view engine", "ejs");
 
+app.use(express.static("public"));
+
 app.get("/", async function (req, res) {
   let data = await pool.query("SELECT * FROM utilisateur");
   console.log(data);
   res.render("index", { liste_users: data[0] });
 });
+
+app.use(express.static("public"));
 
 app.get("/catalogue", async (req, res) => {
   try {
@@ -20,6 +24,16 @@ app.get("/catalogue", async (req, res) => {
   } catch (err) {
     console.error("Erreur lors de la récupération des produits :", err);
     res.render("catalogue", { produits: [] });
+  }
+});
+
+app.get("/product", async (req, res) => {
+  try {
+    const produits = await produitModel.getAllProduits();
+    res.render("product", { produits });
+  } catch (err) {
+    console.error("Erreur lors de la récupération des produits :", err);
+    res.render("product", { produits: [] });
   }
 });
 
