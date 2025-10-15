@@ -27,6 +27,10 @@ app.get("/home", (req, res) => {
   res.render("home");
 });
 
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
 app.use((req, res) => {
   res.status(404).render("404");
 });
