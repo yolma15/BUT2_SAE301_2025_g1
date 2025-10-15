@@ -16,7 +16,9 @@ app.get("/", async function(req, res) {
 app.use(express.static('public'));
 
 
-
+app.get("/home", (req, res) => {
+  res.render("home");
+});
 
 app.get('/catalogue', async (req, res) => {
     try {
