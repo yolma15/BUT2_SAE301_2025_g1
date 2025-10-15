@@ -1,9 +1,9 @@
-.footer {
+footer {
     position: static;
     margin-top: auto;
     width: 100%;
-    background: #fde4e4;
-    color: #FD5035;
+    background: #FD5035;;
+    color: #fde4e4;
     text-align: center;
     padding: 16px 0;
     z-index: 100;
