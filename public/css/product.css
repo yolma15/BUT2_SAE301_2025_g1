@@ -1,0 +1,18 @@
+main {
+    margin: 20px;
+    display: flex;
+}
+
+.gauche {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.droite {
+    flex: 1;
+}
+.P_img {
+    gap: 10px;
+    scale: 0.2;
+}
+

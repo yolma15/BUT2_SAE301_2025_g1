@@ -13,7 +13,7 @@ app.get("/", async function(req, res) {
   res.render("index", {liste_user: data[0]});
 });
 
-
+app.use(express.static('public'));
 
 
 
@@ -25,6 +25,17 @@ app.get('/catalogue', async (req, res) => {
     } catch (err) {
         console.error('Erreur lors de la récupération des produits :', err);
         res.render('catalogue', { produits: [] });
+    }
+});
+
+
+app.get('/product', async (req, res) => {
+    try {
+        const produits = await produitModel.getAllProduits();
+        res.render('product', { produits });
+    } catch (err) {
+        console.error('Erreur lors de la récupération des produits :', err);
+        res.render('product', { produits: [] });
     }
 });
 
