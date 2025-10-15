@@ -8,22 +8,15 @@ const app = express();
 app.set("view engine", "ejs");
 
 app.get("/", async function(req, res) {
-  let data = await pool.query("SELECT * FROM utilisateur");
-  res.render("index", {liste_user : data[0]});
+  let data = await pool.query("SELECT * FROM produit");
+  console.log(data);
+  res.render("index", {data});
 });
 
 
 
 
 
-app.get("/", function (req, res) {
-  res.render("home",
-     { MAVARIABLE: "Hello World!" });
-});
-
-app.use((req, res) => {
-  res.status(404).render("404");
-});
 
 app.get('/catalogue', async (req, res) => {
     try {
@@ -34,5 +27,11 @@ app.get('/catalogue', async (req, res) => {
         res.render('catalogue', { produits: [] });
     }
 });
+
+app.use((req, res) => {
+  res.status(404).render("404");
+});
+
+
 
 app.listen(3000);
