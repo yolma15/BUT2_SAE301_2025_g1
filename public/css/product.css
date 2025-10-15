@@ -13,19 +13,22 @@ main {
 .gauche {
     display: flex;
     flex-direction: column;
-    align-items: center;
-
+    align-self: flex-start;
     flex: 1;
-
 }
 
 .droite {
     flex: 1;
 }
+.G_img {
+    width: 300px;
+    height: 300px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
 .P_img {
     display: flex;
     gap: 10px;
-
     scale: 0.2;
 }
 
