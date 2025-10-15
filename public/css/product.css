@@ -2,33 +2,70 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    size: 100%;
     overflow-x: hidden;
 }
+
 main {
-    margin: 20px;
+    margin: 5%;
     display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
 }
 
 .gauche {
     display: flex;
     flex-direction: column;
-    align-self: flex-start;
+    align-items: center;
     flex: 1;
+    min-width: 300px;
+}
+
+.G_img img {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    border-radius: 30px;
+    margin-bottom: 2%;
+    object-fit: cover;
+}
+
+.P_img {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.P_img img {
+    width: 60px;
+    height: 60px;
+    outline: #FD5035 solid 1px;
+    border-radius: 10px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.P_img img:hover {
+    transform: scale(1.1);
 }
 
 .droite {
     flex: 1;
-}
-.G_img {
-    width: 300px;
-    height: 300px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-.P_img {
+    min-width: 300px;
+    max-width: 800px;
     display: flex;
-    gap: 10px;
-    scale: 0.2;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5%;
+    outline: #FD5035 solid 4px;
+    border-radius: 30px;
 }
 
+@media (max-width: 900px) {
+    main {
+        flex-direction: column;
+        align-items: center;
+    }
+}
