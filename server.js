@@ -13,10 +13,9 @@ app.get("/", async function(req, res) {
   res.render("index", {liste_user: data[0]});
 });
 
-
-
-
-
+app.get("/home", (req, res) => {
+  res.render("home");
+});
 
 app.get('/catalogue', async (req, res) => {
     try {
