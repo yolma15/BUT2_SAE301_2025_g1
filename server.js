@@ -37,6 +37,20 @@ app.get("/product", async (req, res) => {
   }
 });
 
+app.get("/ajout_produit", async (req, res) => {
+  try {
+    const produits = await produitModel.getAllProduits();
+    res.render("ajout_produit", { produits });
+  } catch (err) {
+    console.error("Erreur lors de la récupération des produits :", err);
+    res.render("ajout_produit", { produits: [] });
+  }
+});
+
+app.get("/ajout_produit", (req, res) => {
+  res.render("ajout_produit");
+});
+
 app.get("/home", (req, res) => {
   res.render("home");
 });
