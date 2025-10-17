@@ -1,101 +1,108 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Connexion</title>
-  <style>
-    body {
-      background: #fff;
-      font-family: 'Montserrat', Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .login-container {
-      max-width: 350px;
-      margin: 40px auto;
-      padding: 32px 16px;
-      border: 3px solid #ff6542;
-      border-radius: 24px;
-      box-shadow: 0 3px 16px rgba(0,0,0,0.03);
-    }
-    h2 {
-      color: #ff6542;
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 2rem;
-      font-weight: 700;
-    }
-    .login-form input {
-      width: 100%;
-      padding: 13px;
-      margin-bottom: 18px;
-      border: 2px solid #eee;
-      border-radius: 22px;
-      font-size: 1rem;
-      transition: border-color 0.2s;
-    }
-    .login-form input:focus {
-      outline: none;
-      border-color: #ff6542;
-    }
-    .login-form button {
-      width: 100%;
-      padding: 12px;
-      background: #ff6542;
-      color: #fff;
-      border: none;
-      border-radius: 22px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      margin-bottom: 10px;
-      transition: background 0.2s;
-    }
-    .login-form button:hover {
-      background: #ff8263;
-    }
-    .google-login {
-      text-align: center;
-      margin-top: 24px;
-    }
-    .google-login p {
-      margin-bottom: 10px;
-      color: #ff6542;
-      font-weight: 600;
-    }
-    .google-icon {
-      background: #fff;
-      border-radius: 50%;
-      display: inline-block;
-      padding: 8px;
-      border: 2px solid #eee;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-      transition: box-shadow 0.2s;
-    }
-    .google-icon:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-    .google-icon img {
-      height: 36px;
-      width: 36px;
-    }
-  </style>
-</head>
-<body>
-  <div class="login-container">
-    <h2>Connexion</h2>
-    <form class="login-form" action="/auth/login" method="POST">
-      <input name="email" type="email" placeholder="Adresse mail" required>
-      <input name="password" type="password" placeholder="Mot de passe" required>
-      <button type="submit">S’identifier</button>
-    </form>
-    <div class="google-login">
-      <p>Se connecter avec</p>
-      <a href="/auth/google" class="google-icon">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
-      </a>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Connexion</title>
+    <style>
+      body {
+        background: #fff;
+        font-family: "Montserrat", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .login-container {
+        max-width: 400px;
+        margin: 40px auto;
+        padding: 32px 16px;
+        border: 3px solid #ff6542;
+        border-radius: 24px;
+        box-shadow: 0 3px 16px rgba(0, 0, 0, 0.03);
+      }
+      h2 {
+        color: #ff6542;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2rem;
+        font-weight: 700;
+      }
+      .login-form input {
+        width: 90%;
+        padding: 13px;
+        margin-bottom: 18px;
+        border: 2px solid #eee;
+        border-radius: 22px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+      .login-form input:focus {
+        outline: none;
+        border-color: #ff6542;
+      }
+      .login-form button {
+        width: 100%;
+        padding: 12px;
+        background: #ff6542;
+        color: #fff;
+        border: none;
+        border-radius: 22px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: background 0.2s;
+      }
+      .login-form button:hover {
+        background: #ff8263;
+      }
+      .google-login {
+        text-align: center;
+        margin-top: 24px;
+      }
+      .google-login p {
+        margin-bottom: 10px;
+        color: #ff6542;
+        font-weight: 600;
+      }
+      .google-icon {
+        background: #fff;
+        border-radius: 50%;
+        display: inline-block;
+        padding: 8px;
+        border: 2px solid #eee;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+        transition: box-shadow 0.2s;
+      }
+      .google-icon:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+      .google-icon img {
+        height: 46px;
+        width: 36px;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('header'); %>
+    <div class="login-container">
+      <h2>Connexion</h2>
+      <form class="login-form" action="/auth/login" method="POST">
+        <input name="email" type="email" placeholder="Adresse mail" required />
+        <input
+          name="password"
+          type="password"
+          placeholder="Mot de passe"
+          required
+        />
+        <button type="submit">S’identifier</button>
+      </form>
+      <div class="google-login">
+        <p>Se connecter avec</p>
+        <a href="/auth/google" class="google-icon">
+          <img src="/img/google.png" alt="Google" />
+        </a>
+      </div>
     </div>
-  </div>
-</body>
+    <%- include('footer'); %>
+  </body>
 </html>
