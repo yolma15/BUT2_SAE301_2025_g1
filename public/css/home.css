@@ -22,6 +22,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 30px;
+    
 }
 
 .offre-bouton {
@@ -44,6 +45,7 @@ body {
     padding: 20px;
     border-radius: 10px;
     margin-top: 100px;
+    outline: #FD5035 solid 3px;
 }
 
 .slider-1 {
@@ -63,7 +65,7 @@ body {
 .slider-1 img {
     flex-shrink: 0;
     width: 737px;
-    height: 700px;
+    height: 600px;
     object-fit: cover;
     z-index: 1;
 }
