@@ -9,10 +9,8 @@ app.set("view engine", "ejs");
 
 app.use(express.static("public"));
 
-app.get("/", async function (req, res) {
-  let data = await pool.query("SELECT * FROM utilisateur");
-  console.log(data);
-  res.render("index", { liste_users: data[0] });
+app.get("/", function (req, res) {
+  res.render("home");
 });
 
 app.use(express.static("public"));
@@ -35,10 +33,6 @@ app.get("/product", async (req, res) => {
     console.error("Erreur lors de la récupération des produits :", err);
     res.render("product", { produits: [] });
   }
-});
-
-app.get("/home", (req, res) => {
-  res.render("home");
 });
 
 app.get("/login", (req, res) => {
