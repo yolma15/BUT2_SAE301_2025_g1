@@ -63,18 +63,20 @@ main {
   transform: scale(1.1);
 }
 
+
 .P_img {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
-  max-width: 400px;
-  margin-top: 15px;
+  max-width: 100%;
+  margin-top: 20px;
 }
 
 .P_img img {
-  width: clamp(45px, 5vw, 80px);
-  height: clamp(45px, 6vw, 80px);
+  flex: 0 1 auto;
+  width: clamp(35px, 4vw, 60px);
+  height: clamp(35px, 4vw, 60px);
   outline: #FD5035 solid 1px;
   object-fit: cover;
   cursor: pointer;
@@ -84,6 +86,8 @@ main {
 .P_img img:hover {
   transform: scale(1.1);
 }
+
+
 
 /*##################################################################################################################################################################*/
 
@@ -122,9 +126,13 @@ main {
   margin-bottom: 10%;
 }
 
+.droite a {
+    text-decoration: none;
+    align-self: center;
+}
 .droite button {
-  width: clamp(120px, 30vw, 150px);
-  height: clamp(45px, 10vw, 50px);
+  width: clamp(120px, 35vw, 150px);
+  height: clamp(45px, 15vw, 50px);
   background-color: #fff;
   color: #FD5035;
   border: 3px solid #FD5035;
