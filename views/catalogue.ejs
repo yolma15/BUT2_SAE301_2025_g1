@@ -1,64 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Catalogue</title>
     <link rel="stylesheet" href="/css/Catalogue.css" />
-</head>
+  </head>
 
-<body>
+  <body>
     <%- include('header') %>
 
-        <div class="search-container">
-            <input type="text" id="searchBar" placeholder="Rechercher un produit...">
-            <select class="sort-dropdown" id="sortMenu">
-                <option value="default">Trier par...</option>
-                <option value="priceAsc">Prix : croissant</option>
-                <option value="priceDesc">Prix : décroissant</option>
-                <option value="popularity">Popularité</option>
-                <option value="rating">Meilleures notes</option>
-            </select>
-            <button id="searchBtn">🔍</button>
+    <div class="search-container">
+      <input
+        type="text"
+        id="searchBar"
+        placeholder="Rechercher un produit..."
+      />
+      <select class="sort-dropdown" id="sortMenu">
+        <option value="default">Trier par...</option>
+        <option value="priceAsc">Prix : croissant</option>
+        <option value="priceDesc">Prix : décroissant</option>
+        <option value="popularity">Popularité</option>
+        <option value="rating">Meilleures notes</option>
+      </select>
+      <button id="searchBtn">🔍</button>
+    </div>
+
+    <div class="sidebar">
+      <button id="homeBtn">Accueil</button>
+      <button id="productsBtn">Produits</button>
+      <button id="servicesBtn">Services</button>
+      <button id="contactBtn">Contact</button>
+      <button id="aboutBtn">À propos</button>
+    </div>
+
+    <div class="product-list">
+      <% if (produits.length> 0) { %> <% produits.forEach(produit=> { %>
+      <div class="product-item">
+        <img
+          src="https://via.placeholder.com/200"
+          alt="<%= produit.marque %> <%= produit.modele %>"
+        />
+        <div class="container_info">
+          <div class="product-title">
+            <%= produit.marque %> <%= produit.modele %>
+          </div>
+          <div class="product-price"><%= produit.prix %> €</div>
         </div>
-
-
-        <div class="sidebar">
-            <button id="homeBtn">Accueil</button>
-            <button id="productsBtn">Produits</button>
-            <button id="servicesBtn">Services</button>
-            <button id="contactBtn">Contact</button>
-            <button id="aboutBtn">À propos</button>
-        </div>
-
-
-        <div class="product-list">
-            <% if (produits.length> 0) { %>
-                <% produits.forEach(produit=> { %>
-                    <div class="product-item">
-                        <img src="https://via.placeholder.com/200" alt="<%= produit.marque %> <%= produit.modele %>">
-                        <div class="container_info">
-                            <div class="product-title">
-                                <%= produit.marque %>
-                                    <%= produit.modele %>
-                            </div>
-                            <div class="product-price">
-                                <%= produit.prix %> €
-                            </div>
-                        </div>
-                        <div class="product-description">
-                            <%= produit.description %>
-                        </div>
-                        <a href="/produits.ejs"></a>
-                    </div>
-                    <% }) %>
-                        <% } else { %>
-                            <p>Aucun produit disponible.</p>
-                            <% } %>
-        </div>
-
-
-</body>
-
+        <div class="product-description"><%= produit.description %></div>
+        <a href="/produits.ejs"></a>
+      </div>
+      <% }) %> <% } else { %>
+      <p>Aucun produit disponible.</p>
+      <% } %>
+    </div>
+  </body>
 </html>
