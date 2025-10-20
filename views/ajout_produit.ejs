@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produit</title>
+    <link rel="stylesheet" href="/css/ajout_produit.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <%- include('header'); %>
+
+    <main>
+        <div>
+            <h1>Ajout Produit</h1>
+        </div>
+
+        <form action="/ajout_produit" method="POST">
+            <div class="gauche">
+                <label for="nom"></label>
+                <input type="text" id="nom" name="nom" placeholder="Nom" required><br><br>
+
+                <label for="prix"></label>
+                <input type="number" id="prix" name="prix" step="0.01" placeholder="Prix" required><br><br>
+
+                <label for="description"></label>
+                <textarea id="description" name="description" placeholder="Details" required></textarea><br><br>
+            </div>
+
+            <div class="droite">
+                <label for="image"></label>
+                <input type="file" id="image" name="image" required><br><br>
+            </div>
+
+            <input type="submit" value="Ajouter le produit">
+        </form>
+    </main>
+
+    <%- include('footer'); %>
+</body>
+
+</html>

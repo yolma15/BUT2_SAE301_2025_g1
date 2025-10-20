@@ -6,8 +6,8 @@ footer {
   color: #fde4e4;
   text-align: center;
   padding: 3rem 0;
-  z-index: 100;
-  margin: 0 auto;
+  margin: 0 ;
+  z-index: 9999;
 }
 
 .footer-content {
@@ -18,5 +18,5 @@ footer {
   gap: 16px;
   max-width: 1200px;
   margin: 0 auto;
-  width: 95%;
+  width: 100%;
 }
