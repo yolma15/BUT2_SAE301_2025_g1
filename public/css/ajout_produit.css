@@ -2,48 +2,112 @@ body {
     font-family: 'Lexend', sans-serif;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
     background-color: #fff;
-    color: #000;
-    }
-h1 {
-    text-align: center;
-    margin-top: 5%;
-    margin-bottom: 5%;
-}
-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-label {
-    font-size: 1.2em;
-    font-weight: bold;
-}
-input[type="text"], input[type="number"], textarea {
-    width: 300px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1em;
-}
-textarea {
-    height: 100px;
-    resize: vertical;
-}
-button {
-    width: 150px;
-    padding: 10px;
-    background-color: #FD5035;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    cursor: pointer;
-}
-button:hover {
-    background-color: #e04e2b;
+    color: #333;
 }
 
-/*##################################################################################################################################################################*/
+main {
+    padding: 20px;
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+h1 {
+    text-align: center;
+    color: #F1653D;
+    font-weight: 700;
+    margin-bottom: 40px;
+}
+
+form {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.gauche, .droite {
+    display: flex;
+    flex-direction: column;
+}
+
+.gauche {
+    flex: 1;
+    min-width: 250px;
+}
+
+.droite {
+    flex: 1;
+    min-width: 250px;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+input[type="file"] {
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #F1653D;
+    border-radius: 20px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+    height: 120px;
+}
+
+input[type="submit"],
+button {
+    padding: 12px 24px;
+    background-color: #F1653D;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+input[type="submit"]:hover,
+button:hover {
+    background-color: #e0552c;
+}
+input[type="file"] {
+    padding: 6px;
+    border-radius: 10px;
+}
+input[type="file"]::file-selector-button {
+    padding: 8px 16px;
+    background-color: #F1653D;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+}
+input[type="file"]::file-selector-button:hover {
+    background-color: #e0552c;
+}
+@media (max-width: 600px) {
+    form {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .gauche, .droite {
+        width: 100%;
+        max-width: 400px;
+    }
+}
