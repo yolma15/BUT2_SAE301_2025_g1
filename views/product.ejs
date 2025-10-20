@@ -1,54 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/product.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/product.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Document</title>
+  </head>
 
-        <title>Document</title>
-</head>
-
-<body>
+  <body>
     <!-- Integrer le header ici -->
     <%- include('header'); %>
 
-        <main>
-            <div class="gauche">
-                <div class="G_img">
-                <span><i class="fa-solid fa-chevron-left"></i></span>
-                    <img src="https://picsum.photos/300/300" alt="">
-                <span><i class="fa-solid fa-chevron-right"></i></span>
-                </div>
+    <main>
+      <div class="gauche">
+        <div class="G_img">
+          <span><i class="fa-solid fa-chevron-left"></i></span>
+          <img src="https://picsum.photos/300/300" alt="" />
+          <span><i class="fa-solid fa-chevron-right"></i></span>
+        </div>
 
-                <div class="P_img">
-                    <img src="https://picsum.photos/300/300" alt="">
-                    <img src="https://picsum.photos/300/300" alt="">
-                    <img src="https://picsum.photos/300/300" alt="">
-                    <img src="https://picsum.photos/300/300" alt="">
-                    <img src="https://picsum.photos/300/300" alt="">
-                </div>
-            </div>
-            <div class="droite">
-                <h1>Nom du produit</h1>
-                <h2 class="prix">Prix</h2>
-                <p class="description">Description</p>
-                <button>Louer</button>
+        <div class="P_img">
+          <img src="https://picsum.photos/300/300" alt="" />
+          <img src="https://picsum.photos/300/300" alt="" />
+          <img src="https://picsum.photos/300/300" alt="" />
+          <img src="https://picsum.photos/300/300" alt="" />
+          <img src="https://picsum.photos/300/300" alt="" />
+        </div>
+      </div>
+      <div class="droite">
+        <h1>Nom du produit</h1>
+        <h2 class="prix">Prix</h2>
+        <p class="description">Description</p>
+        <button>Louer</button>
+      </div>
+    </main>
 
-            </div>
-        </main>
-
-
-        <%- include('footer'); %>
-            <!-- Integrer le footer ici -->
-</body>
-
+    <%- include('footer'); %>
+    <!-- Integrer le footer ici -->
+  </body>
 </html>
