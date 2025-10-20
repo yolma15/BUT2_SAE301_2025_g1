@@ -10,23 +10,21 @@
     <%- include('header') %>
     <div class="login-container">
       <h2>Connexion</h2>
-      <form class="login-form" action="/auth/login" method="POST">
-        <input name="email" type="email" placeholder="Adresse mail" required />
-        <input
-          name="password"
-          type="password"
-          placeholder="Mot de passe"
-          required
-        />
-        <button type="submit">S’identifier</button>
+      <p><% if (this.message){ %> <%= message %> <% } %></p>
+
+      <form class="login-form" action="/login" method="POST">
+        <label for="login"><b>Username</b></label>
+        <input type="text" placeholder="Enter Username" name="login" required />
+
+        <label for="password"><b>Mot de passe :</b></label>
+        <input type="password" placeholder="Enter 1234" name="password" required />
+
+        <button type="submit">Se connecter</button>
       </form>
       <div class="google-login">
         <p>Se connecter avec</p>
         <a href="/auth/google" class="google-icon">
-          <img
-            src="img/google.png"
-            alt="Google"
-          />
+          <img src="img/google.png" alt="Google" />
         </a>
       </div>
     </div>
