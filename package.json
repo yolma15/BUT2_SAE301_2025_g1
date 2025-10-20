@@ -18,8 +18,10 @@
   },
   "homepage": "https://github.com/yolma15/BUT2_SAE301_2025_g1#readme",
   "dependencies": {
+    "body-parser": "^2.2.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.15.2"
   }
