@@ -3,6 +3,7 @@ body {
   color: rgb(255, 255, 255);
   background-color: #ffffff;
   height: 100%;
+  margin: 0;
 }
 
 .Text-Bienvenue {
@@ -59,7 +60,7 @@ body {
 
 .slider-1 img {
   flex-shrink: 0;
-  width: 737px;
+  width: 700px;
   height: 700px;
   object-fit: cover;
   z-index: 1;
@@ -99,4 +100,10 @@ body {
   100% {
     transform: translateX(0);
   }
+}
+
+.slider-container{
+  z-index: -1;
+  margin-top: 40px;
+  
 }

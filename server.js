@@ -32,26 +32,6 @@ app.get("/home", function (req, res) {
 
 app.use(express.static("public"));
 
-app.get("/catalogue", async (req, res) => {
-  try {
-    const produits = await produitModel.getAllProduits();
-    res.render("catalogue", { produits });
-  } catch (err) {
-    console.error("Erreur lors de la récupération des produits :", err);
-    res.render("catalogue", { produits: [] });
-  }
-});
-
-app.get("/product", async (req, res) => {
-  try {
-    const produits = await produitModel.getAllProduits();
-    res.render("product", { produits });
-  } catch (err) {
-    console.error("Erreur lors de la récupération des produits :", err);
-    res.render("product", { produits: [] });
-  }
-});
-
 app.get("/login", async (req, res) => {
   res.render("login");
 });
