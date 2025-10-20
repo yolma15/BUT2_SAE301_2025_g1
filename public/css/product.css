@@ -1,19 +1,15 @@
 body {
-  font-family: 'Lexend', sans-serif;
+  font-family: lexend;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: #fff;
-  color: #000;
 }
 
 main {
   margin: 5%;
   display: flex;
   flex-wrap: wrap;
-  gap: 80px;
-  justify-content: center;
-  align-items: flex-start;
+  gap: 40px;
 }
 
 .gauche {
@@ -22,62 +18,31 @@ main {
   align-items: center;
   flex: 1;
   min-width: 300px;
-  max-width: 700px;
   position: relative;
-}
-
-.G_img {
-  position: relative;
-  width: 100%;
-  max-width: 75%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
 }
 
 .G_img img {
-  width: 100%;
+  width: clamp(250px, 50vw, 700px); /* ✅ Grows with viewport width */
   height: auto;
   aspect-ratio: 1 / 1;
   border-radius: 30px;
+  margin-bottom: 2%;
   object-fit: cover;
-  transition: all 0.3s ease-in-out;
-  display: block;
+  transition: all 0.3s ease-in-out; /* smooth scaling on resize */
 }
 
-.fa-chevron-left,
-.fa-chevron-right {
-  position: static;
-  font-size: clamp(1.5em, 4vw, 3em);
-  color: #000;
-  cursor: pointer;
-  transition: color 0.3s, transform 0.2s;
-  user-select: none;
-  z-index: 2;
-}
-
-.fa-chevron-left:hover,
-.fa-chevron-right:hover {
-  color: #FD5035;
-  transform: scale(1.1);
-}
-
-
+/* Responsive thumbnails */
 .P_img {
   display: flex;
   justify-content: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 10px;
-  max-width: 100%;
-  margin-top: 20px;
 }
 
 .P_img img {
-  flex: 0 1 auto;
-  width: clamp(35px, 4vw, 60px);
-  height: clamp(35px, 4vw, 60px);
-  outline: #FD5035 solid 1px;
+  width: clamp(45px, 8vw, 60px);
+  height: clamp(45px, 8vw, 60px);
+  outline: #fd5035 solid 1px;
   object-fit: cover;
   cursor: pointer;
   transition: transform 0.2s;
@@ -87,35 +52,31 @@ main {
   transform: scale(1.1);
 }
 
-
-
-/*##################################################################################################################################################################*/
-
+/* Responsive text section */
 .droite {
   flex: 1;
   min-width: 300px;
   max-width: 800px;
-  max-height: 75%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 5%;
-  outline: #FD5035 solid 4px;
+  outline: #fd5035 solid 4px;
   border-radius: 30px;
-  box-sizing: border-box;
-  margin-left: 50px;
 }
 
+/* Headings */
 .droite h1 {
-  font-family: 'Medula One', cursive;
+  font-family: "Medula One", cursive;
   font-size: clamp(2em, 5vw, 3em);
-  font-weight: 100;
+  font-weight: 90;
   margin: 0 0 10px 0;
+  text-align: left;
 }
 
 .droite h2 {
   font-size: clamp(1.5em, 3.5vw, 2em);
-  color: #FD5035;
+  color: #fd5035;
   margin-bottom: 3%;
   font-weight: bold;
 }
@@ -126,16 +87,13 @@ main {
   margin-bottom: 10%;
 }
 
-.droite a {
-    text-decoration: none;
-    align-self: center;
-}
+/* Button responsiveness */
 .droite button {
-  width: clamp(120px, 35vw, 150px);
-  height: clamp(45px, 15vw, 50px);
-  background-color: #fff;
-  color: #FD5035;
-  border: 3px solid #FD5035;
+  width: clamp(120px, 30vw, 150px);
+  height: clamp(45px, 10vw, 50px);
+  background-color: #ffffff;
+  color: #fd5035;
+  border: 3px solid #fd5035;
   border-radius: 25px;
   font-size: clamp(1.2em, 3vw, 2em);
   cursor: pointer;
@@ -144,44 +102,65 @@ main {
 }
 
 .droite button:hover {
-  background-color: #FD5035;
-  color: #fff;
+  background-color: #fd5035;
+  color: #ffffff;
   transform: scale(1.05);
+}
+
+/* Arrows */
+.fa-chevron-left,
+.fa-chevron-right {
+  font-size: clamp(1.5em, 5vw, 2em);
+  color: #000000;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.fa-chevron-left:hover,
+.fa-chevron-right:hover {
+  color: #fd5035;
+  transform: scale(1.1);
+}
+
+/* Arrow positioning relative to the image */
+.fa-chevron-left,
+.fa-chevron-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.fa-chevron-left {
+  left: 5%;
+}
+
+.fa-chevron-right {
+  right: 5%;
 }
 
 @media (max-width: 900px) {
   main {
     flex-direction: column;
     align-items: center;
-    gap: 60px;
-  }
-
-  .droite {
-    max-width: 90%;
-    padding: 8%;
-    margin-left: 0;
-  }
-
-  .G_img {
-    max-width: 90%;
-  }
-}
-
-@media (max-width: 600px) {
-  .G_img img {
-    border-radius: 20px;
   }
 
   .fa-chevron-left,
   .fa-chevron-right {
     font-size: 1.5em;
-    color: #ffffff;
-    text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+    left: 2%;
+    right: 2%;
+  }
+}
+
+@media (max-width: 600px) {
+  .G_img img {
+    max-width: 90%;
+    border-radius: 20px;
   }
 
-  .fa-chevron-left:hover,
-  .fa-chevron-right:hover {
-    color: #FD5035;
-    transform: scale(1.1);
+  .fa-chevron-left,
+  .fa-chevron-right {
+    font-size: 1.3em;
   }
 }

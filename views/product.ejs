@@ -1,99 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/product.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produit</title>
-    <link rel="stylesheet" href="/css/product.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
+    <title>Document</title>
+  </head>
 
-<body>
+  <body>
+    <!-- Integrer le header ici -->
     <%- include('header'); %>
 
-        <main>
-            <div class="gauche">
-                <div class="G_img">
-                    <i class="fa-solid fa-chevron-left"></i>
-                    <img src="https://picsum.photos/600/600" alt="Produit">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </div>
+    <main>
+      <div class="gauche">
+        <div class="G_img">
+          <span><i class="fa-solid fa-chevron-left"></i></span>
+          <img src="https://picsum.photos/300/300" alt="" />
+          <span><i class="fa-solid fa-chevron-right"></i></span>
+        </div>
 
-                <div class="P_img">
-                    <img src="https://picsum.photos/301/301" alt="">
-                    <img src="https://picsum.photos/302/302" alt="">
-                    <img src="https://picsum.photos/303/303" alt="">
-                    <img src="https://picsum.photos/304/304" alt="">
-                    <img src="https://picsum.photos/305/305" alt="">
-                </div>
-            </div>
+        <div class="P_img">
+          <img src="https://picsum.photos/300/300" alt="" />
+          <img src="https://picsum.photos/300/300" alt="" />
+          <img src="https://picsum.photos/300/300" alt="" />
+          <img src="https://picsum.photos/300/300" alt="" />
+          <img src="https://picsum.photos/300/300" alt="" />
+        </div>
+      </div>
+      <div class="droite">
+        <h1>Nom du produit</h1>
+        <h2 class="prix">Prix</h2>
+        <p class="description">Description</p>
+        <button>Louer</button>
+      </div>
+    </main>
 
-            <div class="droite">
-                <h1>TAPIS DE COURSE CONNECTE RUN500 - pliage compact</h1>
-                <h2 class="prix">5,99€</h2>
-                <p class="description">Tapis de course performant allant jusqu'à 16km/h et inclinaison motorisée à 10%,
-                    connecté aux meilleures applications de pratique. Sans montage et avec un pliage compact pour un
-                    rangement facile.</p>
-                <a href="#"><button>Louer</button></a>
-            </div>
-        </main>
-
-
-        <script>
-            const mainImage = document.querySelector('.G_img img');
-            const thumbnails = document.querySelectorAll('.P_img img');
-            const leftArrow = document.querySelector('.fa-chevron-left');
-            const rightArrow = document.querySelector('.fa-chevron-right');
-
-            let currentIndex = 0;
-
-            const images = [
-                'https://picsum.photos/600/600?1',
-                'https://picsum.photos/600/600?2',
-                'https://picsum.photos/600/600?3',
-                'https://picsum.photos/600/600?4',
-                'https://picsum.photos/600/600?5'
-            ];
-
-            // Mettre à jour l'image principale
-            function updateMainImage(index) {
-                currentIndex = index;
-                mainImage.src = images[currentIndex];
-                // Optionnel : mettre un style sur la miniature active
-                thumbnails.forEach((thumb, i) => {
-                    thumb.style.border = i === currentIndex ? '2px solid #FD5035' : '1px solid #FD5035';
-                });
-            }
-
-            // Cliquer sur les flèches
-            leftArrow.addEventListener('click', () => {
-                const nextIndex = (currentIndex - 1 + images.length) % images.length;
-                updateMainImage(nextIndex);
-            });
-
-            rightArrow.addEventListener('click', () => {
-                const nextIndex = (currentIndex + 1) % images.length;
-                updateMainImage(nextIndex);
-            });
-
-            // Cliquer sur une miniature
-            thumbnails.forEach((thumb, i) => {
-                thumb.addEventListener('click', () => {
-                    updateMainImage(i);
-                });
-            });
-
-            // Initialiser
-            updateMainImage(0);
-        </script>
-
-        <!-- Footer -->
-        <%- include('footer'); %>
-</body>
-
+    <%- include('footer'); %>
+    <!-- Integrer le footer ici -->
+  </body>
 </html>
