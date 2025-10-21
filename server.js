@@ -71,6 +71,15 @@ app.get("/product", async (req, res) => {
 app.get("/login", async (req, res) => {
   res.render("login");
 });
+app.get("/catalogue", async (req, res) => {
+  res.render("catalogue");
+});
+app.get("/product", async (req, res) => {
+  res.render("product");
+});
+app.get("/ajout_produit", async (req, res) => {
+  res.render("ajout_produit");
+});
 
 app.post("/login", authMiddleware, (req, res) => {
   let login = req.body.login;
