@@ -30,6 +30,14 @@ app.get("/home", function (req, res) {
   res.render("home");
 });
 
+app.get("/", function (req, res) {
+  res.render("register");
+});
+
+app.get("/register", function (req, res) {
+  res.render("register");
+});
+
 app.use(express.static("public"));
 
 app.get("/catalogue", async (req, res) => {
