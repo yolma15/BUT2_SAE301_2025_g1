@@ -80,6 +80,9 @@ app.get("/product", async (req, res) => {
 app.get("/ajout_produit", async (req, res) => {
   res.render("ajout_produit");
 });
+app.get("/locations", async (req, res) => {
+  res.render("locations");
+});
 
 app.post("/login", authMiddleware, (req, res) => {
   let login = req.body.login;
