@@ -61,6 +61,9 @@ app.get("/catalogue", async (req, res) => {
 app.get("/product", async (req, res) => {
   res.render("product");
 });
+app.get("/ajout_produit", async (req, res) => {
+  res.render("ajout_produit");
+});
 
 app.post("/login", (req, res) => {
   let login = req.body.login;
