@@ -10,7 +10,7 @@
     <%- include('header') %>
     <div class="login-container">
       <h2>Connexion</h2>
-      <p><% if (this.message){ %> <%= message %> <% } %></p>
+      <p><% if (locals.message){ %> <%= message %> <% } %></p>
 
       <form class="login-form" action="/login" method="POST">
         <label for="login"><b>Username</b></label>
