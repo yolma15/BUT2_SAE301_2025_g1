@@ -9,9 +9,14 @@
   margin: 10px 20px 0px 40px;
 }
 
-.LogoLocfit {
-    width: 80px;
-    height: auto;
+.Logo img {
+  padding-left: 20px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  display: block;
+  width: 85px;
+  height: auto;
+  max-width: 100%;
 }
 
 .nav {
@@ -23,13 +28,7 @@
   color: #fff;
   text-decoration: none;
   font-size: 1.15em;
-  font-weight: 500;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-weight: 300;
 }
 
 .avatar {
@@ -40,103 +39,21 @@
   background: #eee;
 }
 
-.user-name {
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.1em;
-}
-
-.user-account {
-  color: #ffe1db;
-  font-size: 0.9em;
-}
-
-.main-title {
-  text-align: center;
-  color: #fc593a;
-  font-size: 2em;
-  font-weight: bold;
-  margin: 28px 0 28px 0;
-}
-
-.section {
-  margin: 30px 0 0 90px;
-  max-width: 650px;
-}
-
-.section-title {
-  color: #fc593a;
-  font-size: 1.35em;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-decoration: underline;
-  display: inline-block;
-}
-
-.pending,
-.confirmed {
-  margin-bottom: 30px;
-}
-
-.pending-text {
-  font-size: 1.3em;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.confirmed-list {
+.user-info {
   display: flex;
   align-items: center;
-  gap: 22px;
-  margin-top: 12px;
-  margin-bottom: 18px;
+  gap: 8px;
 }
 
-.item-img {
-  width: 75px;
-  height: 75px;
-  object-fit: contain;
-  border-radius: 60px;
-  background: #f6f6f6;
-  display: block;
-}
-
-.item-desc {
-  font-size: 1.1em;
-  font-weight: 700;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
-}
-
-.item-details {
-  font-size: 1em;
-  margin-bottom: 3px;
-}
-
-.item-price {
-  font-size: 1.02em;
-  color: #333;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-left: auto;
-}
-
-.action-btn {
-  background: #fc593a;
+.user-role {
   color: #fff;
-  border: none;
-  padding: 11px 34px;
-  border-radius: 25px;
-  font-size: 1em;
   font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
+  font-size: 1.1em;
+  font-weight: 500;
 }
 
-.action-btn:hover {
-  background: #e54a26;
+.user-mail {
+  color: #ffe1db;
+  font-size: 0.9em;
+  font-weight: 300;
 }
