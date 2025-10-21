@@ -1,113 +1,159 @@
 body {
-    font-family: 'Lexend', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #fff;
-    color: #333;
+  font-family: 'Lexend', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+  color: #333;
 }
 
 main {
-    padding: 20px;
-    max-width: 800px;
-    margin: 40px auto;
+  padding: 20px;
+  max-width: 800px;
+  margin: 20px auto;
 }
 
 h1 {
-    text-align: center;
-    color: #F1653D;
-    font-weight: 700;
-    margin-bottom: 40px;
+  text-align: center;
+  color: #F1653D;
+  font-weight: 700;
+  margin-bottom: 30px;
 }
 
 form {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .gauche, .droite {
-    display: flex;
-    flex-direction: column;
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
 }
 
-.gauche {
-    flex: 1;
-    min-width: 250px;
+.gauche input {
+  margin-bottom: 15px;
 }
 
-.droite {
-    flex: 1;
-    min-width: 250px;
-    justify-content: flex-end;
-    align-items: flex-start;
-}
-
-label {
-    margin-bottom: 8px;
-    font-weight: 500;
-    font-size: 14px;
+textarea {
+  resize: none;
+  height: 180px;
+  padding: 12px;
+  box-sizing: border-box;
+  margin-bottom: 15px;
 }
 
 input[type="text"],
 input[type="number"],
-textarea,
-input[type="file"] {
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #F1653D;
-    border-radius: 20px;
-    font-size: 16px;
-    width: 100%;
-    box-sizing: border-box;
-    outline: none;
-}
-
 textarea {
-    resize: vertical;
-    height: 120px;
+  padding: 12px 16px;
+  border: 1px solid #F1653D;
+  border-radius: 25px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  text-align: center;
 }
 
-input[type="submit"],
-button {
-    padding: 12px 24px;
-    background-color: #F1653D;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    font-size: 18px;
-    cursor: pointer;
-    margin-top: 10px;
+input::placeholder,
+textarea::placeholder {
+  text-align: center;
 }
 
-input[type="submit"]:hover,
-button:hover {
-    background-color: #e0552c;
+input:focus,
+textarea:focus {
+  border: 2px solid #F1653D;
 }
-input[type="file"] {
-    padding: 6px;
-    border-radius: 10px;
+
+.droite {
+  position: relative;
+  border: 1px solid #F1653D;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  overflow: hidden;
+  background-color: #fff;
+  padding: 8px;
+  height: calc(60px + 40px + 180px);
 }
-input[type="file"]::file-selector-button {
-    padding: 8px 16px;
-    background-color: #F1653D;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-size: 16px;
-    cursor: pointer;
+
+.droite input[type="file"] {
+  display: none;
 }
-input[type="file"]::file-selector-button:hover {
-    background-color: #e0552c;
+
+.droite label {
+  cursor: pointer;
+  padding: 8px 16px;
+  background-color: #F1653D;
+  color: white;
+  border-radius: 25px;
+  font-size: 16px;
+  text-align: center;
+  z-index: 2;
+  transition: all 0.3s ease;
+  margin-top: auto;
+  border: 2px solid transparent;
 }
+
+.droite label:hover {
+  background-color: #fff;
+  color: #F1653D;
+  border: 2px solid #F1653D;
+}
+
+.droite img {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 50px;
+  object-fit: cover;
+  display: none;
+  border-radius: 15px;
+}
+
+input[type="submit"] {
+  padding: 12px 24px;
+  background-color: #F1653D;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 18px;
+  cursor: pointer;
+  margin: 20px auto 0;
+  display: block;
+  width: fit-content;
+}
+
+input[type="submit"]:hover {
+  background-color: #fff;
+  color: #F1653D;
+  border: 2px solid #F1653D;
+  transition: all 0.3s ease;
+}
+
 @media (max-width: 600px) {
-    form {
-        flex-direction: column;
-        align-items: center;
-    }
+  form {
+    flex-direction: column;
+    align-items: center;
+  }
 
-    .gauche, .droite {
-        width: 100%;
-        max-width: 400px;
-    }
+  .gauche, .droite {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .droite {
+    height: auto;
+  }
+
+  textarea {
+    height: auto;
+  }
 }
