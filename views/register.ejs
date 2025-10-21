@@ -1,19 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <link rel="stylesheet" href="/css/register.css" />
+    <title>S'enregister</title>
   </head>
+
   <body>
-    <form action="/register" method="GET">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required />
-      <br />
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required />
-      <br />
-      <button type="submit">Login</button>
-    </form>
+    <%- include('header') %>
+    <div class="login-container">
+      <h2>S'inscrire</h2>
+      <p><% if (this.message){ %> <%= message %> <% } %></p>
+
+      <form class="login-form" action="/login" method="POST">
+        <label for="login"><b>Identifiant</b></label>
+        <input type="text" placeholder="Enter Username" name="login" required />
+
+        <label for="login"><b>Adresse mail</b></label>
+        <input type="text" placeholder="Enter adresse mail" name="login" required />
+
+        <label for="password"><b>Mot de passe :</b></label>
+        <input type="password" placeholder="Enter 1234" name="password" required />
+
+        <button type="submit">S'enregistrer</button>
+      </form>
+      <div class="google-login">
+        <p>Se connecter avec</p>
+        <a href="/auth/google" class="google-icon">
+          <img src="img/google.png" alt="Google" />
+        </a>
+      </div>
+    </div>
+    <%- include('footer') %>
   </body>
 </html>

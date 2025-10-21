@@ -6,6 +6,7 @@ import pool from "./db.js";
 import session from "express-session";
 import bodyParser from "body-parser";
 
+//Init express
 const app = express();
 app.set("view engine", "ejs");
 
@@ -17,10 +18,25 @@ app.use(
   session({
     secret: "keyboard cat",
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }, // Note: secure should be true in production with HTTPS
+    saveUninitialized: true, // Note: secure should be true in production with HTTPS
   })
 );
+//middleware  "maison"
+function authMiddleware(req, res, next) {
+  if (req.session.hasOwnProperty("userId")) {
+    next();
+  } else {
+    res.status(403).redirect("login");
+  }
+}
+
+function IsAdminMiddleware(req, res, next) {
+  if (req.session.userRole === "admin") {
+    next();
+  } else {
+    res.status(403).redirect("home");
+  }
+}
 
 app.get("/", function (req, res) {
   res.render("home");
@@ -28,6 +44,14 @@ app.get("/", function (req, res) {
 
 app.get("/home", function (req, res) {
   res.render("home");
+});
+
+app.get("/", function (req, res) {
+  res.render("register");
+});
+
+app.get("/register", function (req, res) {
+  res.render("register");
 });
 
 app.use(express.static("public"));
@@ -68,7 +92,7 @@ app.get("/locations", async (req, res) => {
   res.render("locations");
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", authMiddleware, (req, res) => {
   let login = req.body.login;
   let password = req.body.password;
   if (login && password) {
@@ -94,9 +118,7 @@ app.post("/login", (req, res) => {
   }
 });
 
-
-
-
+//404 middleware
 app.use((req, res) => {
   res.status(404).render("404");
 });
