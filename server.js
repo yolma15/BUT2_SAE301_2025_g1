@@ -35,6 +35,12 @@ app.use(express.static("public"));
 app.get("/login", async (req, res) => {
   res.render("login");
 });
+app.get("/catalogue", async (req, res) => {
+  res.render("catalogue");
+});
+app.get("/product", async (req, res) => {
+  res.render("product");
+});
 
 app.post("/login", (req, res) => {
   let login = req.body.login;

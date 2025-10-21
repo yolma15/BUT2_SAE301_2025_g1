@@ -55,4 +55,52 @@
     <%- include('footer'); %>
     <!-- Integrer le footer ici -->
   </body>
+  <script>
+  const mainImage = document.querySelector('.G_img img');
+  const thumbnails = document.querySelectorAll('.P_img img');
+  const leftArrow = document.querySelector('.fa-chevron-left');
+  const rightArrow = document.querySelector('.fa-chevron-right');
+
+  let currentIndex = 0;
+
+  const images = [
+    'https://picsum.photos/600/600?1',
+    'https://picsum.photos/600/600?2',
+    'https://picsum.photos/600/600?3',
+    'https://picsum.photos/600/600?4',
+    'https://picsum.photos/600/600?5'
+  ];
+
+  // Mettre à jour l'image principale
+  function updateMainImage(index) {
+    currentIndex = index;
+    mainImage.src = images[currentIndex];
+    // Optionnel : mettre un style sur la miniature active
+    thumbnails.forEach((thumb, i) => {
+      thumb.style.border = i === currentIndex ? '2px solid #FD5035' : '1px solid #FD5035';
+    });
+  }
+
+  // Cliquer sur les flèches
+  leftArrow.addEventListener('click', () => {
+    const nextIndex = (currentIndex - 1 + images.length) % images.length;
+    updateMainImage(nextIndex);
+  });
+
+  rightArrow.addEventListener('click', () => {
+    const nextIndex = (currentIndex + 1) % images.length;
+    updateMainImage(nextIndex);
+  });
+
+  // Cliquer sur une miniature
+  thumbnails.forEach((thumb, i) => {
+    thumb.addEventListener('click', () => {
+      updateMainImage(i);
+    });
+  });
+
+  // Initialiser
+  updateMainImage(0);
+</script>
+
 </html>
