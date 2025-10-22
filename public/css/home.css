@@ -45,4 +45,7 @@ body {
   border: 2px solid #fc1d05;
 }
 
-
+#caroussel {
+  width:20%; 
+  height:20%;
+}
