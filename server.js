@@ -94,6 +94,9 @@ app.get("/locations", async (req, res) => {
 app.get("/returnprod", async (req, res) => {
   res.render("returnprod");
 });
+app.get("/inscription_agent", async (req, res) => {
+  res.render("inscription_agent");
+});
 
 app.post("/login", authMiddleware, (req, res) => {
   let login = req.body.login;
