@@ -1,16 +1,118 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Retour Produit</title>
-  </head>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/css/returnprod.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <title>Retour Produit</title>
+</head>
+<body>
+  <%- include('header'); %>
 
-  <body>
-    <%- include('header'); %>
+  <div class="titre">
+    <h1>Retours Produits</h1>
+  </div>
+
+  <div class="main">
+    <div class="form-container" id="form-container">
+      <form id="returnForm" action="/returnprod" method="POST" enctype="multipart/form-data">
+        <div class="input-row">
+          <input type="text" id="name" name="name" placeholder="Nom du matériel" required />
+          <input type="text" id="locataire" name="locataire" placeholder="Locataire" required />
+          <input type="date" id="date" name="date" required />
+          <input type="number" id="cout" name="cout" placeholder="Coûts complémentaires" required />
+        </div>
+
+        <div class="etat-produit">
+          <label>Validé :</label>
+          <div class="icon-group">
+            <i id="valide" class="fa-solid fa-check"></i>
+            <i id="refuse" class="fa-solid fa-circle-minus"></i>
+          </div>
+        </div>
+        <input type="hidden" name="etat" id="etat" required />
+      </form>
+    </div>
+  </div>
+
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <p id="popup-message"></p>
+      <button id="close-popup">Fermer</button>
+    </div>
+  </div>
 
 
 
-    <%- include('footer'); %>
-  </body>
+
+  <div class="main">
+    <div class="form-container" id="form-container">
+      <form id="returnForm" action="/returnprod" method="POST" enctype="multipart/form-data">
+        <div class="input-row">
+          <input type="text" id="name" name="name" placeholder="Nom du matériel" required />
+          <input type="text" id="locataire" name="locataire" placeholder="Locataire" required />
+          <input type="date" id="date" name="date" required />
+          <input type="number" id="cout" name="cout" placeholder="Coûts complémentaires" required />
+        </div>
+
+        <div class="etat-produit">
+          <label>Validé :</label>
+          <div class="icon-group">
+            <i id="valide" class="fa-solid fa-check"></i>
+            <i id="refuse" class="fa-solid fa-circle-minus"></i>
+          </div>
+        </div>
+        <input type="hidden" name="etat" id="etat" required />
+      </form>
+    </div>
+  </div>
+
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <p id="popup-message"></p>
+      <button id="close-popup">Fermer</button>
+    </div>
+  </div>
+
+  <%- include('footer'); %>
+
+  <script>
+    const etatInput = document.getElementById('etat');
+    const formContainer = document.getElementById('form-container');
+    const icons = {
+      valide: document.getElementById('valide'),
+      refuse: document.getElementById('refuse')
+    };
+    const popup = document.getElementById('popup');
+    const popupMessage = document.getElementById('popup-message');
+    const closePopup = document.getElementById('close-popup');
+
+    function showPopup(message, color) {
+      popupMessage.textContent = message;
+      popupMessage.style.color = color;
+      popup.classList.add('active');
+    }
+
+    closePopup.addEventListener('click', () => {
+      popup.classList.remove('active');
+    });
+
+    icons.valide.addEventListener('click', () => {
+      icons.valide.style.color = "#FD5035";
+      icons.refuse.style.color = "#000";
+      etatInput.value = "oui";
+      showPopup("Retour accepté", "#FD5035");
+      formContainer.style.display = "none";
+    });
+
+    icons.refuse.addEventListener('click', () => {
+      icons.refuse.style.color = "#FD5035";
+      icons.valide.style.color = "#000";
+      etatInput.value = "non";
+      showPopup("Retour refusé", "#FD5035");
+      formContainer.style.display = "none";
+    });
+  </script>
+</body>
 </html>

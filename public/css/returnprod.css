@@ -1,7 +1,187 @@
 body {
-    font-family: 'Lexend', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #fff;
-    color: #FD5035;
-    }
+  font-family: 'Lexend', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+  color: #FD5035;
+}
+
+.titre {
+  text-align: center;
+  margin: 40px 0 20px 0;
+}
+
+h1 {
+  color: #F1653D;
+  font-weight: 500;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 60px;
+}
+
+.form-container {
+  background: #fff;
+  margin: 2%;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.input-row input[type="text"],
+.input-row input[type="date"],
+.input-row input[type="number"] {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #F1653D;
+  border-radius: 25px;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input-row input::placeholder {
+  text-align: center;
+}
+
+.input-row input:focus {
+  border: 2px solid #F1653D;
+}
+
+.etat-produit {
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+  margin-top: 20px;
+}
+
+.etat-produit label {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #000;
+  top: 10px;
+}
+
+.icon-group {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 10px;
+}
+
+.icon-group i {
+  font-size: 28px;
+  color: #000;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.icon-group i:hover {
+  transform: scale(1.1);
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup.active {
+  display: flex;
+}
+
+.popup-content {
+  background: #fff;
+  border-radius: 20px;
+  padding: 30px 40px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  animation: pop 0.3s ease;
+}
+
+#popup-message {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+#close-popup {
+  padding: 10px 20px;
+  border: none;
+  background: #F1653D;
+  color: white;
+  border-radius: 25px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#close-popup:hover {
+  background: #fff;
+  color: #F1653D;
+  border: 2px solid #F1653D;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .input-row {
+    flex-direction: column;
+  }
+  .input-row input[type="text"],
+  .input-row input[type="date"],
+  .input-row input[type="number"] {
+    width: 100%;
+  }
+  .etat-produit {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .icon-group {
+    gap: 20px;
+  }
+  .etat-produit label {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .input-row input[type="text"],
+  .input-row input[type="date"],
+  .input-row input[type="number"] {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+  .icon-group i {
+    font-size: 24px;
+  }
+  .etat-produit label {
+    font-size: 1rem;
+  }
+}
