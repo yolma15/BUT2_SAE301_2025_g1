@@ -6,17 +6,34 @@ body {
   margin: 0;
 }
 
+/* Added flex container for side-by-side layout */
+.content-container {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 120px 250px 50px 10px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 .Text-Bienvenue {
   flex: 1;
-  max-width: 50%;
-  padding-left: 100px;
+  /* Removed max-width and padding-left, margin-left */
   color: rgb(0, 0, 0);
-  margin-left: -80px;
+}
+
+/* Added container for image */
+.image-container {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 50px;
 }
 
 .index-bouton {
   display: flex;
-  gap: 122px;
+  gap: 100px;
   margin-top: 43px;
   align-items: center;
   justify-content: center;
@@ -24,8 +41,8 @@ body {
 }
 
 .offre-bouton {
-  padding: 10px 20px;
-  background-color: #f08e88;
+  padding: 10px 50px;
+  background-color: #fc1d05;
   border: none;
   cursor: pointer;
   font-weight: bold;
@@ -35,17 +52,34 @@ body {
 }
 
 .offre-bouton:hover {
-  background-color: #ffc2c2;
+  background-color: #f08e88;
 }
 
 .rectangle-index {
   padding: 20px;
   border-radius: 10px;
-  margin-top: 100px;
+  /* Removed margin-top as it's now handled by content-container */
   border: 2px solid #fc1d05;
 }
 
 #caroussel {
-  width:20%; 
-  height:20%;
+  /* Increased image size and added styling */
+  width: 700px;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-left: 150px;
+}
+
+/* Added responsive design for smaller screens */
+@media (max-width: 1024px) {
+  .content-container {
+    flex-direction: column;
+    padding: 50px 30px;
+  }
+
+  #caroussel {
+    width: 100%;
+    max-width: 500px;
+  }
 }

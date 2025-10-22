@@ -16,30 +16,35 @@
 <body>
   <%- include('header'); %>
 
-    <div class="Text-Bienvenue">
-      <div class="rectangle-index">
-        <h1 class="Text-Bienvenueindex">Bienvenue chez LocFit,</h1>
-        <p class="Text-Bienvenueindex">
-          Votre partenaire de confiance pour la location de matériel sportif et
-          de fitness !<br />
-          Que vous soyez un amateur de sport ou un professionnel, nous mettons à
-          votre disposition une large gamme<br />
-          d’équipements modernes et de qualité, adaptés à tous vos besoins.<br /><br />
-          Vous souhaitez vous équiper pour vos séances à domicile, votre salle
-          de sport, ou pour un événement sportif ?<br />
-          LocFit vous propose des solutions flexibles et abordables, sans
-          compromis sur la performance.<br />
-        </p>
+    <!-- Added container to position text and image side by side -->
+    <div class="content-container">
+      <div class="Text-Bienvenue">
+        <div class="rectangle-index">
+          <h1 class="Text-Bienvenueindex">Bienvenue chez LocFit,</h1>
+          <p class="Text-Bienvenueindex">
+            Votre partenaire de confiance pour la location de matériel sportif et
+            de fitness !<br />
+            Que vous soyez un amateur de sport ou un professionnel, nous mettons à
+            votre disposition une large gamme<br />
+            d'équipements modernes et de qualité, adaptés à tous vos besoins.<br /><br />
+            Vous souhaitez vous équiper pour vos séances à domicile, votre salle
+            de sport, ou pour un événement sportif ?<br />
+            LocFit vous propose des solutions flexibles et abordables, sans
+            compromis sur la performance.<br />
+          </p>
+        </div>
+
+        <div class="index-bouton">
+          <button class="offre-bouton">Starterpack</button>
+          <button class="offre-bouton">La nouvelle offre</button>
+        </div>
       </div>
 
-      <div class="index-bouton">
-        <button class="offre-bouton">Starterpack</button>
-        <button class="offre-bouton">La nouvelle offre</button>
+      <!-- Moved image inside content container -->
+      <div class="image-container">
+        <img id="caroussel" src="img/caroussel5.jpg" alt="LocFit Equipment"/>
       </div>
     </div>
-
-    <img id="caroussel" src="img/caroussel5.jpg"/>
-
 
     <%- include('footer'); %>
 </body>

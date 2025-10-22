@@ -1,3 +1,13 @@
+
+html {
+    scroll-behavior: smooth;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 .header {
   background: #fc593a;
   border-radius: 40px;

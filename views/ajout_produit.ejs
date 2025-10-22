@@ -12,21 +12,23 @@
 
   <main>
     <h1>Ajout Produit</h1>
+
     <form action="/ajout_produit" method="POST" enctype="multipart/form-data">
-      
-      <div class="gauche">
-        <input type="text" id="nom" name="nom" placeholder="Nom" required>
-        <input type="number" id="prix" name="prix" step="0.01" placeholder="Prix" required>
-        <textarea id="description" name="description" placeholder="Détails" required></textarea>
+      <div class="colonnes">
+        <div class="gauche">
+          <input type="text" id="nom" name="nom" placeholder="Nom" required>
+          <input type="number" id="prix" name="prix" step="0.01" placeholder="Prix" required>
+          <textarea id="description" name="description" placeholder="Détails" required></textarea>
+        </div>
+
+        <div class="droite">
+          <input type="file" id="image" name="image" accept="image/*">
+          <label for="image">Choisir un fichier</label>
+          <img id="preview" alt="Aperçu de l'image">
+        </div>
       </div>
 
-      <div class="droite">
-        <input type="file" id="image" name="image" accept="image/*">
-        <label for="image">Choisir un fichier</label>
-        <img id="preview" alt="Aperçu de l'image">
-      </div>
-
-      <input type="submit" value="Ajouter le produit">
+      <input type="submit" value="Ajouter">
     </form>
   </main>
 
