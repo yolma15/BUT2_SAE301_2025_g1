@@ -91,6 +91,18 @@ app.get("/ajout_produit", async (req, res) => {
 app.get("/locations", async (req, res) => {
   res.render("locations");
 });
+app.get("/returnprod", async (req, res) => {
+  res.render("returnprod");
+});
+
+
+
+
+
+
+
+
+
 
 app.post("/login", authMiddleware, (req, res) => {
   let login = req.body.login;
