@@ -1,132 +1,104 @@
 import express from "express";
-import fs from "fs";
 import path from "path";
 import ejs from "ejs";
-import pool from "./db.js";
 import session from "express-session";
 import bodyParser from "body-parser";
+import pool from "./db.js"; // Base de données
+import produitModel from "./models/produitModel.js"; // Import d’un modèle dédié (à créer si manquant)
 
-//Init express
 const app = express();
-app.set("view engine", "ejs");
 
+// Configuration moteur de template
+app.set("view engine", "ejs");
+app.set("views", path.join(process.cwd(), "views"));
+
+// Middleware de base
 app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Gestion de session
 app.use(
   session({
-    secret: "keyboard cat",
+    secret: process.env.SESSION_SECRET || "default_secret_key",
     resave: false,
-    saveUninitialized: true, // Note: secure should be true in production with HTTPS
+    saveUninitialized: false,
+    cookie: { secure: false }, // à mettre sur true en HTTPS production
   })
 );
-//middleware  "maison"
+
+// Middleware d’authentification
 function authMiddleware(req, res, next) {
-  if (req.session.hasOwnProperty("userId")) {
-    next();
-  } else {
-    res.status(403).redirect("login");
-  }
+  if (req.session?.userId) return next();
+  return res.status(403).redirect("/login");
 }
 
-function IsAdminMiddleware(req, res, next) {
-  if (req.session.userRole === "admin") {
-    next();
-  } else {
-    res.status(403).redirect("home");
-  }
+// Middleware administrateur
+function isAdmin(req, res, next) {
+  if (req.session?.userRole === "admin") return next();
+  return res.status(403).redirect("/home");
 }
 
-app.get("/", function (req, res) {
-  res.render("home");
-});
-
-app.get("/home", function (req, res) {
-  res.render("home");
-});
-
-app.get("/", function (req, res) {
-  res.render("register");
-});
-
-app.get("/register", function (req, res) {
-  res.render("register");
-});
-
-app.use(express.static("public"));
-
+// Routes principales
+app.get("/", (req, res) => res.render("home"));
+app.get("/home", (req, res) => res.render("home"));
+app.get("/register", (req, res) => res.render("register"));
+app.get("/login", (req, res) => res.render("login"));
 app.get("/catalogue", async (req, res) => {
   try {
     const produits = await produitModel.getAllProduits();
     res.render("catalogue", { produits });
   } catch (err) {
-    console.error("Erreur lors de la récupération des produits :", err);
-    res.render("catalogue", { produits: [] });
+    console.error("Erreur produits :", err);
+    res.status(500).render("catalogue", { produits: [] });
   }
 });
-
 app.get("/product", async (req, res) => {
   try {
     const produits = await produitModel.getAllProduits();
     res.render("product", { produits });
   } catch (err) {
-    console.error("Erreur lors de la récupération des produits :", err);
-    res.render("product", { produits: [] });
+    console.error("Erreur produits :", err);
+    res.status(500).render("product", { produits: [] });
   }
 });
 
-app.get("/login", async (req, res) => {
-  res.render("login");
-});
-app.get("/catalogue", async (req, res) => {
-  res.render("catalogue");
-});
-app.get("/product", async (req, res) => {
-  res.render("product");
-});
-app.get("/ajout_produit", async (req, res) => {
-  res.render("ajout_produit");
-});
-app.get("/locations", async (req, res) => {
-  res.render("locations");
-});
-app.get("/returnprod", async (req, res) => {
-  res.render("returnprod");
-});
-app.get("/inscription_agent", async (req, res) => {
-  res.render("inscription_agent");
-});
+// Pages secondaires
+app.get("/ajout_produit", isAdmin, (req, res) => res.render("ajout_produit"));
+app.get("/locations", authMiddleware, (req, res) => res.render("locations"));
+app.get("/returnprod", authMiddleware, (req, res) => res.render("returnprod"));
+app.get("/inscription_agent", isAdmin, (req, res) => res.render("inscription_agent"));
 
-app.post("/login", authMiddleware, (req, res) => {
-  let login = req.body.login;
-  let password = req.body.password;
-  if (login && password) {
-    pool.query(
+// Route de connexion
+app.post("/login", async (req, res) => {
+  const { login, password } = req.body;
+  if (!login || !password)
+    return res.render("login", { message: "Veuillez saisir vos identifiants." });
+
+  try {
+    const [results] = await pool.query(
       "SELECT * FROM utilisateur WHERE login = ? AND password = ?",
-      [login, password],
-      (error, results) => {
-        if (results[0].length > 0) {
-          req.session.userRole = results[0][0].role;
-          req.session.userId = results[0][0].id;
-          req.session.loggedin = true;
-          req.session.login = login;
-          res.redirect("/home");
-        } else {
-          res.render("login", { message: "Incorrect login and/or Password!" });
-        }
-        res.end();
-      }
+      [login, password]
     );
-  } else {
-    res.send("Please enter login and Password!");
-    res.end();
+
+    if (results.length > 0) {
+      const user = results[0];
+      req.session.userId = user.id;
+      req.session.userRole = user.role;
+      req.session.loggedin = true;
+      res.redirect("/home");
+    } else {
+      res.render("login", { message: "Identifiant ou mot de passe incorrect !" });
+    }
+  } catch (error) {
+    console.error("Erreur login :", error);
+    res.status(500).render("login", { message: "Erreur interne du serveur." });
   }
 });
 
-//404 middleware
-app.use((req, res) => {
-  res.status(404).render("404");
-});
+// Middleware 404
+app.use((req, res) => res.status(404).render("404"));
 
-app.listen(3000);
+// Démarrage du serveur
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Serveur démarré sur http://localhost:${PORT}`));
