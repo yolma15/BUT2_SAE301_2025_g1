@@ -95,15 +95,6 @@ app.get("/returnprod", async (req, res) => {
   res.render("returnprod");
 });
 
-
-
-
-
-
-
-
-
-
 app.post("/login", authMiddleware, (req, res) => {
   let login = req.body.login;
   let password = req.body.password;
