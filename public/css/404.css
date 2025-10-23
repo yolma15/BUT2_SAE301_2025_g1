@@ -1,0 +1,22 @@
+body{
+    background-color: #ffff;
+}
+
+.error-container{
+    text-align: center;
+    margin-top: 20%;
+    color: #ff4d35;
+    font-family: 'Arial', sans-serif;
+    font-size: 50px;
+}
+
+button{
+    background-color: #ff4d35;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
