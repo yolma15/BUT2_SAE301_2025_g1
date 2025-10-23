@@ -11,40 +11,43 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap"
     rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Medula+One&display=swap"
+    rel="stylesheet" />
 </head>
+
 
 <body>
   <%- include('header'); %>
-
-    <!-- Added container to position text and image side by side -->
-    <div class="content-container">
-      <div class="Text-Bienvenue">
-        <div class="rectangle-index">
-          <h1 class="Text-Bienvenueindex">Bienvenue chez LocFit,</h1>
-          <p class="Text-Bienvenueindex">
-            Votre partenaire de confiance pour la location de matériel sportif et
-            de fitness !<br />
-            Que vous soyez un amateur de sport ou un professionnel, nous mettons à
-            votre disposition une large gamme<br />
-            d'équipements modernes et de qualité, adaptés à tous vos besoins.<br /><br />
-            Vous souhaitez vous équiper pour vos séances à domicile, votre salle
-            de sport, ou pour un événement sportif ?<br />
-            LocFit vous propose des solutions flexibles et abordables, sans
-            compromis sur la performance.<br />
-          </p>
+    <main>
+      <div class="gauche">
+        <div class="texte">
+            <h1 class="Text-Bienvenueindex">Bienvenue chez LocFit,</h1>
+            <p class="Text-Bienvenueindex">
+              Votre partenaire de confiance pour la location de matériel sportif et
+              de fitness !<br />
+              Que vous soyez un amateur de sport ou un professionnel, nous mettons à
+              votre disposition une large gamme<br />
+              d'équipements modernes et de qualité, adaptés à tous vos besoins.<br /><br />
+              Vous souhaitez vous équiper pour vos séances à domicile, votre salle
+              de sport, ou pour un événement sportif ?<br />
+              LocFit vous propose des solutions flexibles et abordables, sans
+              compromis sur la performance.<br />
+            </p>
         </div>
 
-        <div class="index-bouton">
-          <button class="offre-bouton">Starterpack</button>
-          <button class="offre-bouton">La nouvelle offre</button>
-        </div>
+          <div class="boutons">
+            <button class="bouton">Starterpack</button>
+            <button class="bouton">La nouvelle offre</button>
+          </div>
       </div>
 
-      <!-- Moved image inside content container -->
-      <div class="image-container">
-        <img id="caroussel" src="img/caroussel5.jpg" alt="LocFit Equipment"/>
+      <div class="droite">
+            <img class="img" src="img/caroussel5.jpg" alt="LocFit Equipment" />
       </div>
-    </div>
+
+    </main>
+
 
     <%- include('footer'); %>
 </body>
