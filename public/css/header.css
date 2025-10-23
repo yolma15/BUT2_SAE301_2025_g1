@@ -1,11 +1,11 @@
-
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
-html, body {
-    height: 100%;
-    margin: 0;
+html,
+body {
+  height: 100%;
+  margin: 0;
 }
 
 .header {
@@ -66,4 +66,109 @@ html, body {
   color: #ffe1db;
   font-size: 0.9em;
   font-weight: 300;
+}
+
+/* New Header Styles */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: #ff4d35;
+  color: #fff;
+}
+
+.site-header a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.main-nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff2;
+}
+
+.username {
+  font-weight: 600;
+}
+
+.dropdown-toggle {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  color: #222;
+  min-width: 180px;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  padding: 0.25rem;
+  margin-top: 0.4rem;
+  display: none;
+  z-index: 20;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  color: #222;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.dropdown-item:hover {
+  background: #f3f4f6;
+}
+.dropdown-item.danger {
+  color: #e11d48;
+}
+
+.user-menu:hover .dropdown-menu,
+.user-menu:focus-within .dropdown-menu {
+  display: block;
+}
+
+.btn {
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.btn-login {
+  background: #ffffff24;
+}
+.btn-register {
+  background: #fff;
+  color: #ff4d35;
 }
