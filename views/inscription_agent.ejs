@@ -9,7 +9,24 @@
 <body>
      <%- include('header'); %>
 
-    <main></main>
+    <main>
+    <h1>Ajout Produit</h1>
+
+    <form action="/inscription_agent" method="POST" enctype="multipart/form-data">
+      <div class="colonnes">
+        <div class="gauche">
+          <input type="text" id="nom" name="nom" placeholder="Nom" required>
+        </div>
+        <div class="droite">
+          <input type="text" id="prenom" name="prenom" placeholder="Prénom" required>
+        </div>
+      </div>
+      <input type="email" id="email" name="email" placeholder="Email" required>
+      <input type="password" id="motdepasse" name="motdepasse" placeholder="Mot de passe" required>
+
+      <input type="submit" value="Ajouter">
+    </form>
+  </main>
 
 
       <%- include('footer'); %>
