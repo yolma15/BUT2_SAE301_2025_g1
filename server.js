@@ -44,6 +44,7 @@ app.get("/", (req, res) => res.render("home"));
 app.get("/home", (req, res) => res.render("home"));
 app.get("/register", (req, res) => res.render("register"));
 app.get("/login", (req, res) => res.render("login"));
+app.get("/locations", (req, res) => res.render("locations"));
 app.get("/catalogue", async (req, res) => {
   try {
     const produits = await produitModel.getAllProduits();

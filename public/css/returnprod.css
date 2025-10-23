@@ -95,6 +95,7 @@ form {
 
 .icon-group i:hover {
   transform: scale(1.1);
+  color: #F1653D;
 }
 
 .popup {
