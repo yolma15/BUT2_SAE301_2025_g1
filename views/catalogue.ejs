@@ -10,50 +10,93 @@
   <body>
     <%- include('header') %>
 
-    <div class="search-container">
-      <input
-        type="text"
-        id="searchBar"
-        placeholder="Rechercher un produit..."
-      />
-      <select class="sort-dropdown" id="sortMenu">
-        <option value="default">Trier par...</option>
-        <option value="priceAsc">Prix : croissant</option>
-        <option value="priceDesc">Prix : décroissant</option>
-        <option value="popularity">Popularité</option>
-        <option value="rating">Meilleures notes</option>
-      </select>
-      <button id="searchBtn">🔍</button>
-    </div>
-
-    <div class="sidebar">
-      <button id="homeBtn">Accueil</button>
-      <button id="productsBtn">Produits</button>
-      <button id="servicesBtn">Services</button>
-      <button id="contactBtn">Contact</button>
-      <button id="aboutBtn">À propos</button>
-    </div>
-
-    <div class="product-list">
-      <% if (produits.length> 0) { %> <% produits.forEach(produit=> { %>
-      <div class="product-item">
-        <img
-          src="https://via.placeholder.com/200"
-          alt="<%= produit.marque %> <%= produit.modele %>"
-        />
-        <div class="container_info">
-          <div class="product-title">
-            <%= produit.marque %> <%= produit.modele %>
-          </div>
-          <div class="product-price"><%= produit.prix %> €</div>
+  
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="searchBar" placeholder="Rechercher un produit...">
+            <select class="sort-dropdown" id="sortMenu">
+                <option value="default">Trier par...</option>
+                <option value="priceAsc">Prix : croissant</option>
+                <option value="priceDesc">Prix : décroissant</option>
+                <option value="popularity">Popularité</option>
+                <option value="rating">Meilleures notes</option>
+            </select>
+            <button id="searchBtn">🔍</button>
         </div>
-        <div class="product-description"><%= produit.description %></div>
-        <a href="/produits.ejs"></a>
-      </div>
-      <% }) %> <% } else { %>
-      <p>Aucun produit disponible.</p>
-      <% } %>
+        <div class="sidebar">
+            <button id="homeBtn">Accueil</button>
+            <button id="productsBtn">Produits</button>
+            <button id="servicesBtn">Services</button>
+            <button id="contactBtn">Contact</button>
+            <button id="aboutBtn">À propos</button>
+        </div>
+        <div class="product-list">
+            <!-- Product 1 -->
+            <div class="product-card">
+                <h3 class="product-title">Rameur ram 500</h3>
+                <div class="product-price">99.9 €...</div>
+                <img src="img/tapis-de-course-2.jpg" alt="Rameur ram 500" class="product-image">
+                <button class="product-button">Voir détails</button>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card">
+                <h3 class="product-title">Tapis de course run 500</h3>
+                <div class="product-price">99.9 €...</div>
+                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Tapis" alt="Tapis de course" class="product-image">
+                <button class="product-button">Voir détails</button>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card">
+                <h3 class="product-title">Vélo elliptique sans guidon walk 500</h3>
+                <div class="product-price">99.9 €...</div>
+                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Velo+Elliptique" alt="Vélo elliptique" class="product-image">
+                <button class="product-button">Voir détails</button>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="product-card">
+                <h3 class="product-title">Vélo d'appartement bike 500</h3>
+                <div class="product-price">99.9 €...</div>
+                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Velo" alt="Vélo d'appartement" class="product-image">
+                <button class="product-button">Voir détails</button>
+            </div>
+
+            <!-- Product 5 -->
+            <div class="product-card">
+                <h3 class="product-title">Bracket connecter samsung</h3>
+                <div class="product-price">99.9 €...</div>
+                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Bracket" alt="Bracket connecter" class="product-image">
+                <button class="product-button">Voir détails</button>
+            </div>
+
+            <!-- Product 6 -->
+            <div class="product-card">
+                <h3 class="product-title">Marcheur walk 500</h3>
+                <div class="product-price">99.9 €...</div>
+                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Marcheur" alt="Marcheur" class="product-image">
+                <button class="product-button">Voir détails</button>
+            </div>
+
+            <!-- Product 7 -->
+            <div class="product-card">
+                <h3 class="product-title">Vélo elliptique avec guidon walk 300</h3>
+                <div class="product-price">99.9 €...</div>
+                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Velo+Guidon" alt="Vélo elliptique avec guidon" class="product-image">
+                <button class="product-button">Voir détails</button>
+            </div>
+
+            <!-- Product 8 -->
+            <div class="product-card">
+                <h3 class="product-title">Rammeur ultralight machine</h3>
+                <div class="product-price">99.9 €...</div>
+                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Ultralight" alt="Rammeur ultralight" class="product-image">
+                <button class="product-button">Voir détails</button>
+            </div>
+        </div>
     </div>
+
     <%- include('footer') %>
   </body>
 </html>
