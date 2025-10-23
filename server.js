@@ -4,7 +4,6 @@ import ejs from "ejs";
 import session from "express-session";
 import bodyParser from "body-parser";
 import pool from "./db.js"; // Base de données
-import produitModel from "./models/produitModel.js"; // Import d’un modèle dédié (à créer si manquant)
 
 const app = express();
 
