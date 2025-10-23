@@ -119,20 +119,22 @@ app.post('/logout', (req, res) => {
 // Route de connexion
 app.post("/login", async (req, res) => {
   const { login, password } = req.body;
-  if (!login || !password)
+  if (!login || !password) {
     return res.render("login", { message: "Veuillez saisir vos identifiants." });
+  }
 
   try {
+    // Requête corrigée avec les vrais noms de champs
     const [results] = await pool.query(
-      "SELECT id, login, role FROM utilisateur WHERE login = ? AND password = ?",
+      "SELECT id, login, nom, prenom, type_utilisateur FROM utilisateur WHERE login = ? AND password = MD5(?)",
       [login, password]
     );
 
     if (results.length > 0) {
       const user = results[0];
       req.session.userId = user.id;
-      req.session.userRole = user.role;   // 'client' / 'agent' / 'admin'
-      req.session.username = user.login;  // affichage dans le header
+      req.session.userRole = user.type_utilisateur;  // 'client' / 'agent' / 'admin'
+      req.session.username = user.login;              // ou user.prenom si préféré
       req.session.loggedin = true;
 
       const nextUrl = req.session.postLoginRedirect || "/home";
@@ -146,6 +148,7 @@ app.post("/login", async (req, res) => {
     return res.status(500).render("login", { message: "Erreur interne du serveur." });
   }
 });
+
 
 
 // Middleware 404
