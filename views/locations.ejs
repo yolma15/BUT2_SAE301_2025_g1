@@ -6,9 +6,59 @@
     <link rel="stylesheet" href="/css/locations.css" />
   </head>
   <body>
-    <%- include('header'); %>
 
-    <div class="main-title">Vos Locations</div>
+    <%- include('headerclient'); %>
+
+    <main class="locations-container">
+
+      <!-- Ligne 1 : locations en attente -->
+      <section class="locations-row locations-pending">
+        <h2 class="row-title">Locations en attente</h2>
+
+        <div class="locations-grid">
+          <% if (typeof pendingLocations !== 'undefined' && pendingLocations.length) { %>
+            <% pendingLocations.forEach(function(loc){ %>
+              <article class="location-card">
+                <h3><%= loc.title %></h3>
+                <p><%= loc.description %></p>
+                <div class="card-meta">
+                  <span>Date : <%= loc.date %></span>
+                  <a href="/locations/<%= loc.id %>">Voir</a>
+                </div>
+              </article>
+            <% }); %>
+          <% } else { %>
+            <article class="location-card empty">
+              <p>Aucune location en attente.</p>
+            </article>
+          <% } %>
+        </div>
+      </section>
+
+      <!-- Ligne 2 : locations confirmées -->
+      <section class="locations-row locations-confirmed">
+        <h2 class="row-title">Locations confirmées</h2>
+
+        <div class="locations-grid">
+          <% if (typeof confirmedLocations !== 'undefined' && confirmedLocations.length) { %>
+            <% confirmedLocations.forEach(function(loc){ %>
+              <article class="location-card">
+                <h3><%= loc.title %></h3>
+                <p><%= loc.description %></p>
+                <div class="card-meta">
+                  <span>Date : <%= loc.date %></span>
+                  <a href="/locations/<%= loc.id %>">Détails</a>
+                </div>
+              </article>
+            <% }); %>
+          <% } else { %>
+            <article class="location-card empty">
+              <p>Aucune location confirmée.</p>
+            </article>
+          <% } %>
+        </div>
+      </section>
+    </main>
 
     <%- include('footer'); %>
   </body>
