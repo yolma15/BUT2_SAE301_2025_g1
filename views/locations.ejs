@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Vos Locations - LocFit</title>
-    <link rel="stylesheet" href="/css/locations.css" />
-  </head>
-  <body>
-    <%- include('headerclient') %>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Vos Locations - LocFit</title>
+  <link rel="stylesheet" href="/css/locations.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap"
+    rel="stylesheet" />
+</head>
+
+<body>
+  <%- include('headerclient') %>
 
     <main class="locations-container">
 
@@ -16,13 +23,13 @@
 
         <div class="locations-grid">
 
-                <div class="card">
+          <div class="card">
 
-                </div>
+          </div>
 
-                <article class="location-card empty">
-              <p>Aucune location en attente</p>
-            </article>
+          <article class="location-card empty">
+            <p>Aucune location en attente</p>
+          </article>
 
         </div>
       </section>
@@ -33,19 +40,20 @@
 
         <div class="locations-grid">
 
-                <div class="card">
+          <div class="card">
 
-                </div>
+          </div>
 
-            <article class="location-card empty">
-              <p>Aucune location confirmée</p>
-            </article>
+          <article class="location-card empty">
+            <p>Aucune location confirmée</p>
+          </article>
 
         </div>
       </section>
-      
+
     </main>
 
     <%- include('footer'); %>
-  </body>
+</body>
+
 </html>
