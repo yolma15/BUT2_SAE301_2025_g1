@@ -8,24 +8,52 @@
   </head>
 
   <body>
-    <header class="header">
-      <a href="/home" class="Logo">
-        <img src="/img/Logo blanc sur orange.png" alt="logo Locfit" />
-      </a>
+    <header class="site-header">
+  <a href="/home" class="Logo">
+      <img src="/img/Logo blanc sur orange.png" alt="logo Locfit" />
+  </a>
 
-      <nav class="nav">
-        <a href="/home">Accueil</a>
-        <a href="/catalogue">Produits</a>
-        <a href="/login">Locations</a>
-      </nav>
+  <nav class="main-nav">
+    <a href="/home">Accueil</a>
+    <a href="/catalogue">Catalogue</a>
 
-      <div class="user-info">
-        <img class="avatar" src="" alt="Avatar" />
-        <div>
-          <div class="user-role">Non défini</div>
-          <a href="/login" class="user-mail">Login</a>
+    <% if (isLoggedIn) { %>
+      <a href="/mes-locations">Mes locations</a>
+    <% } else { %>
+      <a href="/login">Mes locations</a>
+    <% } %>
+  </nav>
+
+  <div class="user-area">
+    <% if (!isLoggedIn) { %>
+      <a class="btn btn-login" href="/login">Se connecter</a>
+      <a class="btn btn-register" href="/register">S’inscrire</a>
+    <% } else { %>
+      <div class="user-menu">
+        <img class="avatar" src="/images/avatar-default.png" alt="profil">
+        <span class="username"><%= username %></span>
+
+        <div class="dropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">▾</button>
+          <div class="dropdown-menu" role="menu">
+            <% if (userRole === 'client') { %>
+              <a href="/profil" class="dropdown-item">Mes informations</a>
+              <form action="/logout" method="post">
+                <button type="submit" class="dropdown-item danger">Se déconnecter</button>
+              </form>
+            <% } else { %>
+              <form action="/logout" method="post">
+                <button type="submit" class="dropdown-item danger">Se déconnecter</button>
+              </form>
+            <% } %>
+          </div>
         </div>
       </div>
-    </header>
+    <% } %>
+  </div>
+</header>
   </body>
 </html>
+
+
+
