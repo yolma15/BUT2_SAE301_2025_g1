@@ -37,7 +37,7 @@ body {
 
 #searchBtn {
   padding: 8px 12px;
-  background-color: #fc593a;
+  background-color: #fd5035;
   color: white;
   border: none;
   cursor: pointer;
@@ -55,7 +55,7 @@ body {
   padding: 8px;
   font-size: 14px;
   border: none;
-  background-color: #fc593a;
+  background-color: #fd5035;
   color: white;
   margin-left: 5px;
   cursor: pointer;
@@ -64,7 +64,7 @@ body {
 
 /* Sidebar styling */
 .sidebar {
-  background-color: #fc593a;
+  background-color: #fd5035;
   width: 200px;
   height: 90vh;
   margin-top: 7%;

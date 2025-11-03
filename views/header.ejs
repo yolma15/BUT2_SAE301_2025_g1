@@ -14,14 +14,26 @@
       </a>
 
       <nav class="main-nav">
+        <% if (isLoggedIn) { %>
+          <% if (userRole === 'client') { %>
+          <a href="/home">Accueil</a>
+          <a href="/catalogue">Catalogue</a>
+          <a href="locations">Mes locations</a>
+          <% } else if (userRole === 'admin') { %>
+          <a href="/home">Accueil</a>
+          <a href="/admin/dashboard">Tableau de bord</a>
+          <% } else if (userRole === 'agent') { %>
+          <a href="/home">Accueil</a>
+          <a href="/agent/ajoutsproduits">Retours Produits </a>
+          <a href="/agent/retourproduits">Retours Produits </a>
+          <% } %>
+        <% } else { %>
         <a href="/home">Accueil</a>
         <a href="/catalogue">Catalogue</a>
-
-        <% if (isLoggedIn) { %>
-        <a href="locations">Mes locations</a>
-        <% } else { %>
         <a href="/login">Mes locations</a>
         <% } %>
+        
+
       </nav>
 
       <div class="user-area">
