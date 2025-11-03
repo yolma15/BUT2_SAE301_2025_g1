@@ -1,0 +1,165 @@
+body {
+  font-family: 'Lexend', sans-serif;
+  background-color: #f8f9fa;
+  color: #343a40;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+h1, h2 {
+  font-family: 'Lexend', sans-serif;
+  color: #343a40;
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+p {
+  margin: 0;
+}
+
+.profile-card {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.fa-pen {
+  border-radius: 20px;
+}
+main > div:first-child {
+  text-align: center;
+}
+
+main > div:first-child h1 {
+  margin-bottom: 1rem;
+  font-family: 'Medula One', cursive;
+  font-size: 3rem;
+}
+
+.profil-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid #FD5035;
+  margin-bottom: 1rem;
+}
+
+.supp {
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  margin: 0 0.5rem 1rem;
+  border: none;
+  border-radius: 20px;
+  font-weight: 600;
+  transition: background-color 0.3s, transform 0.1s;
+  background-color: #FD5035;
+  color: #ffffff;
+}
+.supp:hover {
+  background-color: white;
+  border: 2px solid #FD5035;
+  color: #FD5035;
+  transition: all 0.3s ease-in-out;
+}
+
+.info-section > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.info-section > div:last-of-type {
+  border-bottom: none;
+}
+
+.info-section p {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.info-section button {
+  background: transparent;
+  color: #FD5035;
+  padding: 0.5rem;
+  border: 1px solid #FD5035;
+  margin: 0;
+}
+
+.info-section button:hover {
+  background-color: #FD5035;
+  color: #ffffff;
+}
+
+main > div:last-of-type {
+    text-align: center;
+    padding: 1rem;
+}
+
+
+main > div:first-child {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+main > div:nth-child(2) {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+
+@media (max-width: 600px) {
+  main {
+    padding: 0 1rem;
+    gap: 1.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .info-section > div {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-bottom: 1rem;
+  }
+
+  .info-section button {
+    align-self: flex-end;
+    margin-top: -1.5rem;
+  }
+}

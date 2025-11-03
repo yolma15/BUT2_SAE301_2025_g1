@@ -1,57 +1,56 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ajout Produit</title>
-  <link rel="stylesheet" href="/css/ajout_produit.css">
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/profil.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
+
 <body>
-  <%- include('header'); %>
+    <%- include('header'); %>
 
-  <main>
-    <h1>Ajout Produit</h1>
+        <main>
+            <div class="profile-card">
+                <img class="profil-image" src="https://picsum.photos/300/300" alt="">
+                <h1>Nom d'utilisateur</h1>
+            </div>
+            <div class="profile-card info-section">
+                <h2>Modifier mes informations</h2>
+                <div>
+                    <p>Nom : Delacour</p>
+                    <button><i class="fa-solid fa-pen"></i></button>
+                </div>
+                <div>
+                    <p>Prénom : Hervé</p>
+                    <button><i class="fa-solid fa-pen"></i></button>
+                </div>
+                <div>
+                    <p>Identifiant : herve.delacour</p>
+                    <button><i class="fa-solid fa-pen"></i></button>
+                </div>
+                <div>
+                    <p>Anniversaire : 15/04/1990</p>
+                    <button><i class="fa-solid fa-pen"></i></button>
+                </div>
 
-    <form action="/ajout_produit" method="POST" enctype="multipart/form-data">
-      <div class="colonnes">
-        <div class="gauche">
-          <input type="text" id="nom" name="nom" placeholder="Nom" required>
-          <input type="number" id="prix" name="prix" step="0.01" placeholder="Prix" required>
-          <textarea id="description" name="description" placeholder="Détails" required></textarea>
-        </div>
 
-        <div class="droite">
-          <input type="file" id="image" name="image" accept="image/*">
-          <label for="image">Choisir un fichier</label>
-          <img id="preview" alt="Aperçu de l'image">
-        </div>
-      </div>
 
-      <input type="submit" value="Ajouter">
-    </form>
-  </main>
+            </div>
 
-  <%- include('footer'); %>
+            <div>
+                <button class="supp">Supprimer le compte</button>
+            </div>
 
-  <script>
-    const inputFile = document.getElementById('image');
-    const preview = document.getElementById('preview');
-
-    inputFile.addEventListener('change', function() {
-      const file = this.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-        }
-        reader.readAsDataURL(file);
-      } else {
-        preview.src = '';
-        preview.style.display = 'none';
-      }
-    });
-  </script>
+            <%- include('footer'); %>
 </body>
+
 </html>
