@@ -5,48 +5,11 @@ body {
     padding: 0;
 }
 
-.logo {
-    font-size: 2.2em;
-    color: #fff;
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-.nav {
-    display: flex;
-    gap: 35px;
-}
-
 .nav a {
     color: #fff;
     text-decoration: none;
     font-size: 1.15em;
     font-weight: 500;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.avatar {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #eee;
-}
-
-.user-name {
-    color: #fff;
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.user-account {
-    color: #ffe1db;
-    font-size: 0.9em;
 }
 
 .main-title {
@@ -57,93 +20,68 @@ body {
     margin: 28px 0 28px 0;
 }
 
-.section {
-    margin: 30px 0 0 90px;
-    max-width: 650px;
-}
-
-.section-title {
+.row-title {
     color: #fc593a;
-    font-size: 1.35em;
-    font-weight: bold;
-    margin-bottom: 10px;
-    text-decoration: underline;
-    display: inline-block;
+    font-size: 2.5em;
+    margin-bottom: 18px;
+    padding-left: 10%;
 }
 
-.pending,
-.confirmed {
-    margin-bottom: 30px;
-}
-
-.pending-text {
-    font-size: 1.3em;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.confirmed-list {
+.card {
     display: flex;
     align-items: center;
-    gap: 22px;
-    margin-top: 12px;
-    margin-bottom: 18px;
+    justify-content: space-between;
+    background: #fff;
+    border-radius: 12px;
+    padding-left: 10px 20px;
+    max-width: 700px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-family: "Poppins", sans-serif;
 }
 
-.item-img {
-    width: 75px;
-    height: 75px;
-    object-fit: contain;
-    border-radius: 60px;
-    background: #f6f6f6;
-    display: block;
+.card-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 20%;
+    margin-right: 15px;
 }
 
-.item-desc {
-    font-size: 1.1em;
+.card-content {
+    flex: 1;
+}
+
+.card-title {
+    font-size: 14px;
     font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
+    margin: 0;
+    font-family: "Special Elite", sans-serif;
+    /* style un peu vintage comme sur ton image */
 }
 
-.item-details {
-    font-size: 1em;
-    margin-bottom: 3px;
+.card-date,
+.card-price {
+    font-size: 14px;
+    margin: 3px 0;
 }
 
-.item-price {
-    font-size: 1.02em;
-    color: #333;
-}
-
-.actions {
+.card-buttons {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    margin-left: auto;
+    gap: 6px;
 }
 
-.action-btn {
-    background: #fc593a;
-    color: #fff;
+.btn {
     border: none;
-    padding: 11px 34px;
-    border-radius: 25px;
-    font-size: 1em;
-    font-weight: bold;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s;
-}
-
-.action-btn:hover {
-    background: #e54a26;
-}
-
-footer {
-    background: #fc593a;
+    transition: 0.2s;
+    background-color: #ff5630;
     color: #fff;
-    text-align: center;
-    padding: 15px 0 7px 0;
-    font-size: 0.96em;
-    margin-top: 50px;
+}
+
+.btn:hover {
+    transform: scale(1.03);
 }

@@ -17,39 +17,43 @@
 
     <main class="locations-container">
 
-      <!-- locations en attente -->
-      <section class="locations-row locations-pending">
-        <h2 class="row-title">Locations en attente</h2>
+      <h1 class="main-title">Vos Locations</h1>
 
-        <div class="locations-grid">
 
-          <div class="card">
 
+      <h2 class="row-title">Locations en attente</h2>
+
+      <div class="locations-grid">
+
+        <div class="location-card empty">
+          <p>Aucune location en attente</p>
+        </div>
+
+      </div>
+
+      <h2 class="row-title">Locations confirmées</h2>
+
+      <div class="locations-grid">
+
+        <div class="card">
+          <img src="img/TapisCourse1.jpeg" alt="Tapis de course" class="card-img">
+          <div class="card-content">
+            <h3 class="card-title">TAPIS DE COURSE CONNECTÉ RUN500 - pliage compact</h3>
+            <p class="card-date">Du 09/11 au 18/11</p>
+            <p class="card-price">Prix : <strong>50€</strong></p>
           </div>
 
-          <article class="location-card empty">
-            <p>Aucune location en attente</p>
-          </article>
-
-        </div>
-      </section>
-
-      <!-- locations confirmées -->
-      <section class="locations-row locations-confirmed">
-        <h2 class="row-title">Locations confirmées</h2>
-
-        <div class="locations-grid">
-
-          <div class="card">
-
+          <div class="card-buttons">
+            <button class="btn">Voir article</button>
+            <button class="btn">Annulation</button>
           </div>
-
-          <article class="location-card empty">
-            <p>Aucune location confirmée</p>
-          </article>
-
         </div>
-      </section>
+
+        <div class="location-card empty">
+          <p>Aucune location confirmée</p>
+        </div>
+
+      </div>
 
     </main>
 
