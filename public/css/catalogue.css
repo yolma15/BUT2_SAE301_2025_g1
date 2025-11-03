@@ -19,7 +19,7 @@ body {
   border-radius: 5px;
   width: 100%;
   max-width: 800px;
-  background-color: white;
+  background-color: #fd5035;
   margin-left: 27%;
   margin-top: 170px;
   position: relative;
@@ -55,8 +55,8 @@ body {
   padding: 8px;
   font-size: 14px;
   border: none;
-  background-color: #fd5035;
-  color: white;
+  background-color: white;
+  color: black;
   margin-left: 5px;
   cursor: pointer;
   border-radius: 3px;
