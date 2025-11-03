@@ -91,7 +91,6 @@ app.get('/mes-locations', (req, res) => {
 app.get('/profil', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');
   if (req.session.userRole !== 'client') return res.redirect('/');
-  // TODO: charger les infos depuis la BDD si besoin
   return res.render('profil', { /* infos: à passer si récupérées */ });
 });
 
