@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajout Produit</title>
+  <link rel="stylesheet" href="/css/ajout_produit.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <%- include('header'); %>
+
+  <main>
+    <h1>Ajout Produit</h1>
+
+    <form action="/ajout_produit" method="POST" enctype="multipart/form-data">
+      <div class="colonnes">
+        <div class="gauche">
+          <input type="text" id="nom" name="nom" placeholder="Nom" required>
+          <input type="number" id="prix" name="prix" step="0.01" placeholder="Prix" required>
+          <textarea id="description" name="description" placeholder="Détails" required></textarea>
+        </div>
+
+        <div class="droite">
+          <input type="file" id="image" name="image" accept="image/*">
+          <label for="image">Choisir un fichier</label>
+          <img id="preview" alt="Aperçu de l'image">
+        </div>
+      </div>
+
+      <input type="submit" value="Ajouter">
+    </form>
+  </main>
+
+  <%- include('footer'); %>
+
+  <script>
+    const inputFile = document.getElementById('image');
+    const preview = document.getElementById('preview');
+
+    inputFile.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      } else {
+        preview.src = '';
+        preview.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
