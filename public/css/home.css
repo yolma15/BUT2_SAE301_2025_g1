@@ -110,3 +110,7 @@ h1 {
     gap: 20px;
   }
 }
+
+a {
+  text-decoration: none;
+}
