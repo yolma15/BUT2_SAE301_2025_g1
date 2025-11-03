@@ -28,6 +28,10 @@ body {
   height: auto;
   max-width: 100%;
 }
+.Logo img:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s;
+}
 
 .nav {
   display: flex;
@@ -90,11 +94,24 @@ body {
 .main-nav a {
   color: #fff;
 }
+.main-nav a:hover {
+  color: #fff;
+  font-weight: bold;
+}
 
 .user-area {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+.btn-login:hover {
+  border: 2px solid #fff;
+
+}
+.btn-register:hover {
+  background: #fc593a;
+  color: #fff;
+  border: 2px solid #fff;
 }
 
 .user-menu {
