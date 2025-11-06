@@ -3,6 +3,7 @@ import path from "path";
 import ejs from "ejs";
 import session from "express-session";
 import bodyParser from "body-parser";
+import bcrypt from "bcrypt";
 import pool from "./db.js"; // Base de données
 //import produitModel from "./models/produitModel.js"; // Import d’un modèle dédié (à créer si manquant)
 
@@ -44,6 +45,11 @@ function authMiddleware(req, res, next) {
 // Middleware administrateur
 function isAdmin(req, res, next) {
   if (req.session?.userRole === "admin") return next();
+  return res.status(403).redirect("/home");
+}
+
+function isAgent(req, res, next) {
+  if (req.session?.userRole === "agent") return next();
   return res.status(403).redirect("/home");
 }
 
