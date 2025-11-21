@@ -105,9 +105,8 @@ app.get('/profil', async (req, res) => {
 
   try {
     // 1. Requête pour récupérer toutes les infos de l'utilisateur
-    // CORRECTION CRITIQUE: Utilisation de 'ddn' au lieu de 'date_naissance'
     const [results] = await pool.query(
-      "SELECT nom, prenom, login, ddn, photo_url, email FROM utilisateur WHERE id = ?",
+      "SELECT nom, prenom, login, ddn, email FROM utilisateur WHERE id = ?",
       [req.session.userId]
     );
 

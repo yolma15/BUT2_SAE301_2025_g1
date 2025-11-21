@@ -4,19 +4,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mon Profil</title>
+    <title>Mon Profil - <%= utilisateur.login %></title>
+    <!-- Assurez-vous que le chemin vers le CSS est correct -->
     <link rel="stylesheet" href="/css/profil.css" />
-    
+
+    <!-- Liens pour les polices -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
         rel="stylesheet" />
-        
+
+    <!-- Lien pour Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    
 </head>
 
 <body>
+    <!-- Inclusion de l'en-tête (assurez-vous que le fichier views/header.ejs existe) -->
     <%- include('header'); %>
 
     <main>
@@ -25,66 +30,161 @@
             function formatDate(dateString) {
                 if (!dateString) return '';
                 try {
-                    const date = new Date(dateString);
+                    const date = (dateString instanceof Date) ? dateString : new Date(dateString); 
                     if (isNaN(date.getTime())) return '';
-                    // Renvoie la date au format 'YYYY-MM-DD'
                     return date.toISOString().substring(0, 10);
                 } catch (e) {
                     return '';
                 }
             }
+            
+            // Affichage des messages (passé par la route POST du serveur)
+            const profilMessage = typeof message !== 'undefined' ? message : null;
         %>
-        
+
+        <!-- Bloc de profil -->
         <div class="profile-card profile-header">
+            <!-- Utilise 'photo_url' s'il existe, sinon image par défaut -->
             <img class="profil-image"
                 src="<%= utilisateur.photo_url || 'https://placehold.co/300x300/e0e0e0/333?text=Profil' %>"
                 alt="Image de profil">
+            <!-- Affiche le login de la BDD -->
             <h1>
                 <%= utilisateur.login %>
             </h1>
         </div>
 
-        <form action="/profil" method="POST" class="profile-card info-section">
-            <h2>Modifier mes informations</h2>
+        <!-- Affichage des messages de succès/erreur -->
+        <% if (profilMessage) { %>
+            <div class="message-box profile-card <%= profilMessage.type === 'success' ? 'success' : 'error' %>">
+                <%= profilMessage.text %>
+            </div>
+        <% } %>
+
+        <!-- Section de modification des informations personnelles -->
+        <form id="profile-form" action="/profil/informations" method="POST" class="profile-card info-section">
+            <h2>Mes informations</h2>
 
             <div class="field-group-container">
                 <div class="field-group">
                     <label for="nom">Nom :</label>
-                    <input type="text" id="nom" name="nom" value="<%= utilisateur.nom || '' %>" required>
+                    <input type="text" id="nom" name="nom" value="<%= utilisateur.nom || '' %>" required readonly>
                 </div>
             </div>
 
             <div class="field-group-container">
                 <div class="field-group">
                     <label for="prenom">Prénom :</label>
-                    <input type="text" id="prenom" name="prenom" value="<%= utilisateur.prenom || '' %>" required>
+                    <input type="text" id="prenom" name="prenom" value="<%= utilisateur.prenom || '' %>" required readonly>
                 </div>
             </div>
 
             <div class="field-group-container">
                 <div class="field-group">
                     <label for="email">Email :</label>
-                    <input type="email" id="email" name="email" value="<%= utilisateur.email || '' %>" required>
+                    <input type="email" id="email" name="email" value="<%= utilisateur.email || '' %>" required readonly>
                 </div>
             </div>
 
             <div class="field-group-container">
                 <div class="field-group">
                     <label for="ddn">Anniversaire :</label>
-                    <input type="date" id="ddn" name="ddn" value="<%= formatDate(utilisateur.ddn) %>">
+                    <input type="date" id="ddn" name="ddn" value="<%= formatDate(utilisateur.ddn) %>" readonly>
                 </div>
             </div>
+            
+            <div class="edit-controls">
+                <!-- Bouton "Modifier" affiché par défaut -->
+                <button type="button" id="edit-button" class="save-button" onclick="toggleEditMode()">
+                    <i class="fa-solid fa-pen"></i> Modifier
+                </button>
 
-            <button type="submit" class="save-button">Sauvegarder les modifications</button>
-
+                <!-- Bouton "Sauvegarder" masqué par défaut -->
+                <button type="submit" id="save-button" class="save-button" style="display: none;">
+                    <i class="fa-solid fa-save"></i> Sauvegarder les modifications
+                </button>
+            </div>
+        </form>
+        
+        <!-- NOUVELLE SECTION: Modification du mot de passe -->
+        <form id="password-form" action="/profil/password" method="POST" class="profile-card info-section">
+            <h2>Modifier mon mot de passe</h2>
+            
+            <div class="field-group-container">
+                <div class="field-group">
+                    <label for="ancien_mdp">Ancien mot de passe :</label>
+                    <input type="password" id="ancien_mdp" name="ancien_mdp" required>
+                </div>
+            </div>
+            
+            <div class="field-group-container">
+                <div class="field-group">
+                    <label for="nouveau_mdp">Nouveau mot de passe :</label>
+                    <input type="password" id="nouveau_mdp" name="nouveau_mdp" required>
+                </div>
+            </div>
+            
+            <div class="field-group-container">
+                <div class="field-group">
+                    <label for="confirmer_mdp">Confirmer mot de passe :</label>
+                    <input type="password" id="confirmer_mdp" name="confirmer_mdp" required>
+                </div>
+            </div>
+            
+            <div class="edit-controls">
+                <button type="submit" class="save-button">
+                    <i class="fa-solid fa-key"></i> Changer le mot de passe
+                </button>
+            </div>
         </form>
 
+
+        <!-- Bouton pour supprimer le compte -->
         <div class="profile-card delete-section">
             <button class="supp">Supprimer le compte</button>
         </div>
 
     </main>
+    
+    <script>
+        function toggleEditMode() {
+            const form = document.getElementById('profile-form');
+            const inputs = form.querySelectorAll('input');
+            const editButton = document.getElementById('edit-button');
+            const saveButton = document.getElementById('save-button');
+            
+            const isReadonly = inputs[0].readOnly;
 
+            if (isReadonly) {
+                // Passage en mode édition
+                inputs.forEach(input => {
+                    input.removeAttribute('readonly');
+                });
+                editButton.style.display = 'none';
+                saveButton.style.display = 'block';
+            } else {
+                // Revenir en mode lecture seule (annuler l'édition)
+                inputs.forEach(input => {
+                    input.setAttribute('readonly', true);
+                });
+                editButton.style.display = 'block';
+                saveButton.style.display = 'none';
+            }
+        }
+        
+        // Initialisation: S'assurer que les champs sont en lecture seule au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('profile-form');
+            const inputs = form.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.setAttribute('readonly', true);
+            });
+            document.getElementById('edit-button').style.display = 'block';
+            document.getElementById('save-button').style.display = 'none';
+        });
+    </script>
+
+    <!-- Inclusion du pied de page (assurez-vous que le fichier views/footer.ejs existe) -->
     <%- include('footer'); %>
 </body>
 
