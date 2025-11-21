@@ -3,8 +3,9 @@ import path from "path";
 import ejs from "ejs";
 import session from "express-session";
 import bodyParser from "body-parser";
-import bcrypt from "bcrypt";
+// import bcrypt from "bcrypt"; // Retire Bcrypt pour utiliser MD5 (compatible avec les données existantes)
 import pool from "./db.js"; // Base de données
+import crypto from "crypto"; 
 //import produitModel from "./models/produitModel.js"; // Import d’un modèle dédié (à créer si manquant)
 
 const app = express();
@@ -31,8 +32,8 @@ app.use(
 //Expose session data to EJS views
 app.use((req, res, next) => {
   res.locals.isLoggedIn = Boolean(req.session?.userId);
-  res.locals.userRole = req.session?.userRole || null;     // 'client' | 'agent' | 'admin' | null
-  res.locals.username = req.session?.username || null;     // affiché dans le header
+  res.locals.userRole = req.session?.userRole || null;    // 'client' | 'agent' | 'admin' | null
+  res.locals.username = req.session?.username || null;    // affiché dans le header
   next();
 });
 
@@ -99,26 +100,93 @@ app.get("/mes-locations", (req, res) => {
   return res.render("mes_locations"); // crée/ajuste la vue correspondante
 });
 
-// Profil client (GET: afficher, POST: modifier)
-app.get('/profil', (req, res) => {
+
+// Fonction pour récupérer les données utilisateur et rendre la page
+async function renderProfilPage(req, res, message = null) {
   if (!req.session?.userId) return res.redirect('/login');
   if (req.session.userRole !== 'client') return res.redirect('/');
-  return res.render('profil', { /* infos: à passer si récupérées */ });
+
+  try {
+    // Requête pour récupérer toutes les infos de l'utilisateur (utilisant 'ddn' et 'photo_url' s'il existe)
+    const [results] = await pool.query(
+      "SELECT nom, prenom, login, ddn, email FROM utilisateur WHERE id = ?",
+      [req.session.userId]
+    );
+
+    if (results.length === 0) {
+      return res.status(404).send("Profil utilisateur non trouvé.");
+    }
+
+    const user = results[0];
+    
+    // Rendu du template en passant l'objet 'utilisateur' et le message (s'il existe)
+    return res.render('profil', { utilisateur: user, message: message });
+
+  } catch (e) {
+    console.error('Erreur récupération profil:', e);
+    return res.status(500).send("Erreur interne du serveur lors du chargement du profil.");
+  }
+}
+
+// Profil client (GET: afficher avec gestion des messages)
+app.get('/profil', (req, res) => {
+    // Utilise une session flash pour stocker temporairement les messages
+    const message = req.session.message;
+    delete req.session.message;
+    renderProfilPage(req, res, message);
 });
 
-app.post("/profil", async (req, res) => {
-  if (!req.session?.userId || req.session.userRole !== "client")
-    return res.redirect("/");
+
+// POST: Modification des informations personnelles et du mot de passe
+app.post('/profil/informations', async (req, res) => {
+  if (!req.session?.userId || req.session.userRole !== 'client') return res.redirect('/');
+  
+  // Le champ 'password' est inclus s'il a été rempli
+  const { nom, prenom, email, ddn, password } = req.body;
+  
   try {
-    // Exemple d’update (à adapter à votre schéma)
-    // const { email, tel } = req.body;
-    // await pool.query('UPDATE utilisateur SET email=?, tel=? WHERE id=?', [email, tel, req.session.userId]);
+    // Base de la requête UPDATE pour les champs non-password
+    let updateQuery = 'UPDATE utilisateur SET nom=?, prenom=?, email=?, ddn=?';
+    let values = [nom, prenom, email, ddn];
+
+    if (password) {
+        // Si le champ mot de passe a été rempli (c'est-à-dire non vide)
+        if (password.length < 4) { // MD5 n'a pas de contrainte de longueur, mais on s'assure d'une saisie
+             req.session.message = { 
+                type: 'error', 
+                text: "Le nouveau mot de passe est trop court." 
+            };
+            return res.redirect('/profil');
+        }
+        
+        // Hashing du nouveau mot de passe avec MD5 (pour compatibilité)
+        // La fonction MD5 est appliquée directement dans la requête SQL pour l'update.
+        updateQuery += ', password=MD5(?)';
+        values.push(password); // On push le mot de passe en clair pour que MySQL le hache
+    }
+    
+    // Finalisation de la requête
+    updateQuery += ' WHERE id=?';
+    values.push(req.session.userId);
+
+    await pool.query(updateQuery, values);
+    
+    req.session.message = { 
+        type: 'success', 
+        text: 'Vos informations et/ou votre mot de passe ont été mis à jour avec succès.' 
+    };
     return res.redirect('/profil');
+    
   } catch (e) {
-    console.error('Erreur update profil:', e);
-    return res.status(500).render('profil', { message: 'Erreur interne lors de la mise à jour.' });
+    console.error('Erreur update informations profil:', e);
+    req.session.message = { 
+        type: 'error', 
+        text: "Erreur lors de la mise à jour des informations. Veuillez réessayer." 
+    };
+    return res.redirect('/profil');
   }
 });
+
 
 // route de déconnexion
 app.post("/logout", (req, res) => {
@@ -127,6 +195,7 @@ app.post("/logout", (req, res) => {
     res.redirect("/login");
   });
 });
+
 // Route d’inscription
 app.post("/register", async (req, res) => {
   const { login, password, nom, prenom, ddn, email } = req.body;
@@ -136,13 +205,13 @@ app.post("/register", async (req, res) => {
     return res.render("register", { message: "Tous les champs sont requis" });
   }
   
-  // Hash du mot de passe
-  const hashedPassword = await bcrypt.hash(password, 10);
+  // Hash du mot de passe (maintenant MD5 pour compatibilité)
+  // On utilise la fonction MD5(?) directement dans la requête
   
   try {
     await pool.query(
-      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, ?, ?, ?, ?, ?, 'client')",
-      [login, hashedPassword, nom, prenom, ddn, email]
+      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, MD5(?), ?, ?, ?, ?, 'client')",
+      [login, password, nom, prenom, ddn, email]
     );
     res.redirect('/login');
   } catch (error) {
@@ -164,28 +233,32 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    // Requête corrigée avec les vrais noms de champs
+    // 1. Récupérer l'utilisateur et vérifier le mot de passe (MD5)
+    // La vérification se fait directement dans la clause WHERE avec MD5(?)
     const [results] = await pool.query(
-      "SELECT id, login, nom, prenom, type_utilisateur, password FROM utilisateur WHERE login = ?",
-      [login]
+      "SELECT id, login, nom, prenom, type_utilisateur FROM utilisateur WHERE login = ? AND password = MD5(?)",
+      [login, password]
     );
 
     if (results.length > 0) {
       const user = results[0];
+      
+      // Connexion réussie
       req.session.userId = user.id;
-      req.session.userRole = user.type_utilisateur;  // 'client' / 'agent' / 'admin'
-      req.session.username = user.login;              // ou user.prenom si préféré
+      req.session.userRole = user.type_utilisateur;    // 'client' / 'agent' / 'admin'
+      req.session.username = user.login;             // ou user.prenom si préféré
       req.session.loggedin = true;
 
-        const nextUrl = req.session.postLoginRedirect || "/home";
-        delete req.session.postLoginRedirect;
-        return res.redirect(nextUrl);
-      }
-    } else {
-      return res.render("login", {
-        message: "Identifiant ou mot de passe incorrect !",
-      });
-    }
+      const nextUrl = req.session.postLoginRedirect || "/home";
+      delete req.session.postLoginRedirect;
+      return res.redirect(nextUrl);
+    } 
+    
+    // Si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
+    return res.render("login", {
+      message: "Identifiant ou mot de passe incorrect !",
+    });
+    
   } catch (error) {
     console.error("Erreur login :", error);
     return res
