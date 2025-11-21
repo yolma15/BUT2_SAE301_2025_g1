@@ -181,7 +181,7 @@ app.post("/login", async (req, res) => {
         delete req.session.postLoginRedirect;
         return res.redirect(nextUrl);
       }
-    } else {
+     else {
       return res.render("login", {
         message: "Identifiant ou mot de passe incorrect !",
       });
