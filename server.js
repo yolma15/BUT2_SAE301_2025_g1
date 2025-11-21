@@ -31,8 +31,8 @@ app.use(
 //Expose session data to EJS views
 app.use((req, res, next) => {
   res.locals.isLoggedIn = Boolean(req.session?.userId);
-  res.locals.userRole = req.session?.userRole || null;     // 'client' | 'agent' | 'admin' | null
-  res.locals.username = req.session?.username || null;     // affiché dans le header
+  res.locals.userRole = req.session?.userRole || null;    // 'client' | 'agent' | 'admin' | null
+  res.locals.username = req.session?.username || null;    // affiché dans le header
   next();
 });
 
@@ -105,8 +105,9 @@ app.get('/profil', async (req, res) => {
 
   try {
     // 1. Requête pour récupérer toutes les infos de l'utilisateur
+    // CORRECTION CRITIQUE: Utilisation de 'ddn' au lieu de 'date_naissance'
     const [results] = await pool.query(
-      "SELECT nom, prenom, login, date_naissance, photo_url, email FROM utilisateur WHERE id = ?",
+      "SELECT nom, prenom, login, ddn, photo_url, email FROM utilisateur WHERE id = ?",
       [req.session.userId]
     );
 
@@ -118,8 +119,8 @@ app.get('/profil', async (req, res) => {
     // 2. Récupération des données utilisateur
     const user = results[0];
 
-    // 3. Rendu du template en passant l'objet utilisateur
-    return res.render('profil', { user: user });
+    // 3. Rendu du template en passant l'objet sous le nom 'utilisateur' pour compatibilité EJS
+    return res.render('profil', { utilisateur: user });
 
   } catch (e) {
     console.error('Erreur récupération profil:', e);
@@ -131,13 +132,21 @@ app.get('/profil', async (req, res) => {
 app.post('/profil', async (req, res) => {
   if (!req.session?.userId || req.session.userRole !== 'client') return res.redirect('/');
   try {
-    // Exemple d’update (à adapter à votre schéma)
-    // const { email, tel } = req.body;
-    // await pool.query('UPDATE utilisateur SET email=?, tel=? WHERE id=?', [email, tel, req.session.userId]);
+    // Mise à jour des champs nom, prenom, email, ddn
+    const { nom, prenom, email, ddn } = req.body;
+    
+    // NOTE: Il manque la colonne photo_url pour la modification
+    await pool.query(
+      'UPDATE utilisateur SET nom=?, prenom=?, email=?, ddn=? WHERE id=?', 
+      [nom, prenom, email, ddn, req.session.userId]
+    );
+    
     return res.redirect('/profil');
   } catch (e) {
     console.error('Erreur update profil:', e);
-    return res.status(500).render('profil', { message: 'Erreur interne lors de la mise à jour.' });
+    // La vue 'profil' attend un objet 'utilisateur', si l'update échoue, on doit le fournir.
+    // Pour simplifier, on redirige, mais en cas d'erreur grave, il faudrait refaire le SELECT.
+    return res.status(500).send("Erreur interne lors de la mise à jour du profil.");
   }
 });
 
@@ -166,8 +175,8 @@ app.post("/login", async (req, res) => {
     if (results.length > 0) {
       const user = results[0];
       req.session.userId = user.id;
-      req.session.userRole = user.type_utilisateur;  // 'client' / 'agent' / 'admin'
-      req.session.username = user.login;              // ou user.prenom si préféré
+      req.session.userRole = user.type_utilisateur;    // 'client' / 'agent' / 'admin'
+      req.session.username = user.login;             // ou user.prenom si préféré
       req.session.loggedin = true;
 
       const nextUrl = req.session.postLoginRedirect || "/home";
