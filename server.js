@@ -249,16 +249,15 @@ app.post("/login", async (req, res) => {
       req.session.username = user.login;             // ou user.prenom si préféré
       req.session.loggedin = true;
 
-      const nextUrl = req.session.postLoginRedirect || "/home";
-      delete req.session.postLoginRedirect;
-      return res.redirect(nextUrl);
-    } 
-    
-    // Si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
-    return res.render("login", {
-      message: "Identifiant ou mot de passe incorrect !",
-    });
-    
+        const nextUrl = req.session.postLoginRedirect || "/home";
+        delete req.session.postLoginRedirect;
+        return res.redirect(nextUrl);
+      }
+     else {
+      return res.render("login", {
+        message: "Identifiant ou mot de passe incorrect !",
+      });
+    }
   } catch (error) {
     console.error("Erreur login :", error);
     return res

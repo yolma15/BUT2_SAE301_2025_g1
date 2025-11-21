@@ -186,7 +186,7 @@ body {
     height: auto;
     position: relative;
     margin: 20px 10px;
-    flex-direction: row;
+    
     gap: 10px;
     overflow-x: auto;
   }
