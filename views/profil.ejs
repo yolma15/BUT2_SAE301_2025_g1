@@ -4,53 +4,88 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mon Profil</title>
     <link rel="stylesheet" href="/css/profil.css" />
+    
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
         rel="stylesheet" />
+        
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
 <body>
     <%- include('header'); %>
 
-        <main>
-            <div class="profile-card">
-                <img class="profil-image" src="https://picsum.photos/300/300" alt="">
-                <h1>Nom d'utilisateur</h1>
+    <main>
+        <%
+            // Fonction utilitaire pour formater la date en YYYY-MM-DD, obligatoire pour input type="date"
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                try {
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return '';
+                    // Renvoie la date au format 'YYYY-MM-DD'
+                    return date.toISOString().substring(0, 10);
+                } catch (e) {
+                    return '';
+                }
+            }
+        %>
+        
+        <div class="profile-card profile-header">
+            <img class="profil-image"
+                src="<%= utilisateur.photo_url || 'https://placehold.co/300x300/e0e0e0/333?text=Profil' %>"
+                alt="Image de profil">
+            <h1>
+                <%= utilisateur.login %>
+            </h1>
+        </div>
+
+        <form action="/profil" method="POST" class="profile-card info-section">
+            <h2>Modifier mes informations</h2>
+
+            <div class="field-group-container">
+                <div class="field-group">
+                    <label for="nom">Nom :</label>
+                    <input type="text" id="nom" name="nom" value="<%= utilisateur.nom || '' %>" required>
+                </div>
             </div>
-            <div class="profile-card info-section">
-                <h2>Modifier mes informations</h2>
-                <div>
-                    <p>Nom : Delacour</p>
-                    <button><i class="fa-solid fa-pen"></i></button>
-                </div>
-                <div>
-                    <p>Prénom : Hervé</p>
-                    <button><i class="fa-solid fa-pen"></i></button>
-                </div>
-                <div>
-                    <p>Identifiant : herve.delacour</p>
-                    <button><i class="fa-solid fa-pen"></i></button>
-                </div>
-                <div>
-                    <p>Anniversaire : 15/04/1990</p>
-                    <button><i class="fa-solid fa-pen"></i></button>
-                </div>
 
-
-
+            <div class="field-group-container">
+                <div class="field-group">
+                    <label for="prenom">Prénom :</label>
+                    <input type="text" id="prenom" name="prenom" value="<%= utilisateur.prenom || '' %>" required>
+                </div>
             </div>
 
-            <div>
-                <button class="supp">Supprimer le compte</button>
+            <div class="field-group-container">
+                <div class="field-group">
+                    <label for="email">Email :</label>
+                    <input type="email" id="email" name="email" value="<%= utilisateur.email || '' %>" required>
+                </div>
             </div>
 
-            <%- include('footer'); %>
+            <div class="field-group-container">
+                <div class="field-group">
+                    <label for="ddn">Anniversaire :</label>
+                    <input type="date" id="ddn" name="ddn" value="<%= formatDate(utilisateur.ddn) %>">
+                </div>
+            </div>
+
+            <button type="submit" class="save-button">Sauvegarder les modifications</button>
+
+        </form>
+
+        <div class="profile-card delete-section">
+            <button class="supp">Supprimer le compte</button>
+        </div>
+
+    </main>
+
+    <%- include('footer'); %>
 </body>
 
 </html>

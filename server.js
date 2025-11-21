@@ -31,8 +31,8 @@ app.use(
 //Expose session data to EJS views
 app.use((req, res, next) => {
   res.locals.isLoggedIn = Boolean(req.session?.userId);
-  res.locals.userRole = req.session?.userRole || null;     // 'client' | 'agent' | 'admin' | null
-  res.locals.username = req.session?.username || null;     // affiché dans le header
+  res.locals.userRole = req.session?.userRole || null;     // 'client' | 'agent' | 'admin' | null
+  res.locals.username = req.session?.username || null;     // affiché dans le header
   next();
 });
 
@@ -86,50 +86,29 @@ app.get("/product", async (req, res) => {
 app.get("/ajout_produit", isAdmin, (req, res) => res.render("ajout_produit"));
 app.get("/locations", authMiddleware, (req, res) => res.render("locations"));
 app.get("/returnprod", authMiddleware, (req, res) => res.render("returnprod"));
-app.get("/inscription_agent", isAdmin, (req, res) => res.render("inscription_agent"));
+app.get("/inscription_agent", isAdmin, (req, res) =>
+  res.render("inscription_agent")
+);
 
 //Mes locations: redirige vers login si non connecté
-app.get('/mes-locations', (req, res) => {
+app.get("/mes-locations", (req, res) => {
   if (!req.session?.userId) {
-    req.session.postLoginRedirect = '/mes-locations';
-    return res.redirect('/login');
+    req.session.postLoginRedirect = "/mes-locations";
+    return res.redirect("/login");
   }
-  return res.render('mes_locations'); // crée/ajuste la vue correspondante
+  return res.render("mes_locations"); // crée/ajuste la vue correspondante
 });
 
 // Profil client (GET: afficher, POST: modifier)
-app.get('/profil', async (req, res) => {
-  // Vérification de l'authentification et du rôle
+app.get('/profil', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');
   if (req.session.userRole !== 'client') return res.redirect('/');
-
-  try {
-    // 1. Requête pour récupérer toutes les infos de l'utilisateur
-    const [results] = await pool.query(
-      "SELECT nom, prenom, login, date_naissance, photo_url, email FROM utilisateur WHERE id = ?",
-      [req.session.userId]
-    );
-
-    if (results.length === 0) {
-      // Ceci ne devrait pas arriver si l'ID de session est valide, mais par sécurité
-      return res.status(404).send("Profil utilisateur non trouvé.");
-    }
-
-    // 2. Récupération des données utilisateur
-    const user = results[0];
-
-    // 3. Rendu du template en passant l'objet utilisateur
-    return res.render('profil', { user: user });
-
-  } catch (e) {
-    console.error('Erreur récupération profil:', e);
-    // Afficher une erreur générique sans exposer le détail de l'erreur à l'utilisateur
-    return res.status(500).send("Erreur interne du serveur lors du chargement du profil.");
-  }
+  return res.render('profil', { /* infos: à passer si récupérées */ });
 });
 
-app.post('/profil', async (req, res) => {
-  if (!req.session?.userId || req.session.userRole !== 'client') return res.redirect('/');
+app.post("/profil", async (req, res) => {
+  if (!req.session?.userId || req.session.userRole !== "client")
+    return res.redirect("/");
   try {
     // Exemple d’update (à adapter à votre schéma)
     // const { email, tel } = req.body;
@@ -141,48 +120,79 @@ app.post('/profil', async (req, res) => {
   }
 });
 
-// === Logout commun ===
-app.post('/logout', (req, res) => {
+// route de déconnexion
+app.post("/logout", (req, res) => {
   req.session.destroy(() => {
-    res.clearCookie('connect.sid');
-    res.redirect('/login');
+    res.clearCookie("connect.sid");
+    res.redirect("/login");
   });
+});
+// Route d’inscription
+app.post("/register", async (req, res) => {
+  const { login, password, nom, prenom, ddn, email } = req.body;
+  
+  // VALIDATION
+  if (!login || !password || !nom || !prenom || !ddn || !email) {
+    return res.render("register", { message: "Tous les champs sont requis" });
+  }
+  
+  // Hash du mot de passe
+  const hashedPassword = await bcrypt.hash(password, 10);
+  
+  try {
+    await pool.query(
+      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, ?, ?, ?, ?, ?, 'client')",
+      [login, hashedPassword, nom, prenom, ddn, email]
+    );
+    res.redirect('/login');
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.render("register", { message: "Login ou email déjà utilisé" });
+    }
+    console.error(error);
+    res.status(500).render("register", { message: "Erreur serveur" });
+  }
 });
 
 // Route de connexion
 app.post("/login", async (req, res) => {
   const { login, password } = req.body;
   if (!login || !password) {
-    return res.render("login", { message: "Veuillez saisir vos identifiants." });
+    return res.render("login", {
+      message: "Veuillez saisir vos identifiants.",
+    });
   }
 
   try {
     // Requête corrigée avec les vrais noms de champs
     const [results] = await pool.query(
-      "SELECT id, login, nom, prenom, type_utilisateur FROM utilisateur WHERE login = ? AND password = MD5(?)",
-      [login, password]
+      "SELECT id, login, nom, prenom, type_utilisateur, password FROM utilisateur WHERE login = ?",
+      [login]
     );
 
     if (results.length > 0) {
       const user = results[0];
       req.session.userId = user.id;
-      req.session.userRole = user.type_utilisateur;  // 'client' / 'agent' / 'admin'
-      req.session.username = user.login;              // ou user.prenom si préféré
+      req.session.userRole = user.type_utilisateur;  // 'client' / 'agent' / 'admin'
+      req.session.username = user.login;              // ou user.prenom si préféré
       req.session.loggedin = true;
 
-      const nextUrl = req.session.postLoginRedirect || "/home";
-      delete req.session.postLoginRedirect;
-      return res.redirect(nextUrl);
+        const nextUrl = req.session.postLoginRedirect || "/home";
+        delete req.session.postLoginRedirect;
+        return res.redirect(nextUrl);
+      }
     } else {
-      return res.render("login", { message: "Identifiant ou mot de passe incorrect !" });
+      return res.render("login", {
+        message: "Identifiant ou mot de passe incorrect !",
+      });
     }
   } catch (error) {
     console.error("Erreur login :", error);
-    return res.status(500).render("login", { message: "Erreur interne du serveur." });
+    return res
+      .status(500)
+      .render("login", { message: "Erreur interne du serveur." });
   }
 });
-
-
 
 // Middleware 404
 app.use((req, res) => res.status(404).render("404"));
