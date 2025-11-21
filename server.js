@@ -176,8 +176,8 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     
     await pool.query(
-      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, ?, ?, ?, ?, ?, 'client')",
-      [login, hashedPassword, nom, prenom, ddn, email]
+      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, MD5(?), ?, ?, ?, ?, 'client')",
+      [login, password, nom, prenom, ddn, email]
     );
     
     res.render("login", { 
@@ -207,9 +207,11 @@ app.post("/login", async (req, res) => {
   }
 
   try {
+    // 1. Récupérer l'utilisateur et vérifier le mot de passe (MD5)
+    // La vérification se fait directement dans la clause WHERE avec MD5(?)
     const [results] = await pool.query(
-      "SELECT id, login, nom, prenom, type_utilisateur, password FROM utilisateur WHERE login = ?",
-      [login]
+      "SELECT id, login, nom, prenom, type_utilisateur FROM utilisateur WHERE login = ? AND password = MD5(?)",
+      [login, password]
     );
 
     if (results.length === 0) {
