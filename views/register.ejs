@@ -3,21 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="/css/register.css" />
-    <title>S'enregister</title>
+    <title>Inscription</title>
   </head>
 
   <body>
     <%- include('header') %>
     <div class="login-container">
-      <h2>S'enregistrer</h2>
+      <h2>S'inscrire</h2>
       <p><% if (this.message){ %> <%= message %> <% } %></p>
 
       <form class="login-form" action="/login" method="POST">
+        <label for="login"><b>Nom</b></label>
+        <input type="text" placeholder="Entrez Prenom" name="login" required />
+        <input type="text" placeholder="Entrez Nom de famille " name="login" required />
+        
         <label for="login"><b>Identifiant</b></label>
-        <input type="text" placeholder="Enter Username" name="login" required />
+        <input type="text" placeholder="Entrez l'Identifiant" name="login" />
 
         <label for="login"><b>Adresse mail</b></label>
-        <input type="text" placeholder="Enter adresse mail" name="login" required />
+        <input type="text" placeholder="Entrez votre adresse mail" name="login" required />
 
         <label for="password"><b>Mot de passe :</b></label>
         <input type="password" placeholder="Enter 1234" name="password" required />
