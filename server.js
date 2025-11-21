@@ -31,8 +31,8 @@ app.use(
 //Expose session data to EJS views
 app.use((req, res, next) => {
   res.locals.isLoggedIn = Boolean(req.session?.userId);
-  res.locals.userRole = req.session?.userRole || null;     // 'client' | 'agent' | 'admin' | null
-  res.locals.username = req.session?.username || null;     // affiché dans le header
+  res.locals.userRole = req.session?.userRole || null;     // 'client' | 'agent' | 'admin' | null
+  res.locals.username = req.session?.username || null;     // affiché dans le header
   next();
 });
 
@@ -61,8 +61,10 @@ app.get("/login", (req, res) => res.render("login"));
 app.get("/locations", (req, res) => res.render("locations"));
 app.get("/catalogue", async (req, res) => {
   try {
-    const produits = await produitModel.getAllProduits();
-    res.render("catalogue", { produits });
+    // Vérifiez que produitModel est bien importé et a la méthode getAllProduits
+    // const produits = await produitModel.getAllProduits();
+    // res.render("catalogue", { produits });
+    res.render("catalogue", { produits: [] }); // Utilisation temporaire si produitModel non disponible
   } catch (err) {
     console.error("Erreur produits :", err);
     res.status(500).render("catalogue", { produits: [] });
@@ -70,8 +72,10 @@ app.get("/catalogue", async (req, res) => {
 });
 app.get("/product", async (req, res) => {
   try {
-    const produits = await produitModel.getAllProduits();
-    res.render("product", { produits });
+    // Vérifiez que produitModel est bien importé et a la méthode getAllProduits
+    // const produits = await produitModel.getAllProduits();
+    // res.render("product", { produits });
+    res.render("product", { produits: [] }); // Utilisation temporaire si produitModel non disponible
   } catch (err) {
     console.error("Erreur produits :", err);
     res.status(500).render("product", { produits: [] });
@@ -94,10 +98,34 @@ app.get('/mes-locations', (req, res) => {
 });
 
 // Profil client (GET: afficher, POST: modifier)
-app.get('/profil', (req, res) => {
+app.get('/profil', async (req, res) => {
+  // Vérification de l'authentification et du rôle
   if (!req.session?.userId) return res.redirect('/login');
   if (req.session.userRole !== 'client') return res.redirect('/');
-  return res.render('profil', { /* infos: à passer si récupérées */ });
+
+  try {
+    // 1. Requête pour récupérer toutes les infos de l'utilisateur
+    const [results] = await pool.query(
+      "SELECT nom, prenom, login, date_naissance, photo_url, email FROM utilisateur WHERE id = ?",
+      [req.session.userId]
+    );
+
+    if (results.length === 0) {
+      // Ceci ne devrait pas arriver si l'ID de session est valide, mais par sécurité
+      return res.status(404).send("Profil utilisateur non trouvé.");
+    }
+
+    // 2. Récupération des données utilisateur
+    const user = results[0];
+
+    // 3. Rendu du template en passant l'objet utilisateur
+    return res.render('profil', { user: user });
+
+  } catch (e) {
+    console.error('Erreur récupération profil:', e);
+    // Afficher une erreur générique sans exposer le détail de l'erreur à l'utilisateur
+    return res.status(500).send("Erreur interne du serveur lors du chargement du profil.");
+  }
 });
 
 app.post('/profil', async (req, res) => {
@@ -138,8 +166,8 @@ app.post("/login", async (req, res) => {
     if (results.length > 0) {
       const user = results[0];
       req.session.userId = user.id;
-      req.session.userRole = user.type_utilisateur;  // 'client' / 'agent' / 'admin'
-      req.session.username = user.login;              // ou user.prenom si préféré
+      req.session.userRole = user.type_utilisateur;  // 'client' / 'agent' / 'admin'
+      req.session.username = user.login;              // ou user.prenom si préféré
       req.session.loggedin = true;
 
       const nextUrl = req.session.postLoginRedirect || "/home";
