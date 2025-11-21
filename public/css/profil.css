@@ -1,165 +1,214 @@
 body {
-  font-family: 'Lexend', sans-serif;
-  background-color: #f8f9fa;
-  color: #343a40;
-  margin: 0;
-  padding: 0;
-  line-height: 1.6;
+    font-family: 'Lexend', sans-serif;
+    background-color: #f8f9fa;
+    color: #343a40;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
 }
 
 main {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
 }
 
 h1, h2 {
-  font-family: 'Lexend', sans-serif;
-  color: #343a40;
-  margin-top: 0;
+    font-family: 'Lexend', sans-serif;
+    color: #343a40;
+    margin-top: 0;
 }
 
 h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
+    font-size: 2.5rem;
+    font-weight: 700;
 }
 
 h2 {
-  font-size: 1.8rem;
-  font-weight: 600;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #6c757d;
-  margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #6c757d;
+    margin-bottom: 1.5rem;
 }
 
-p {
-  margin: 0;
-}
-
+/* Styles généraux des cartes */
 .profile-card {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-.fa-pen {
-  border-radius: 20px;
-}
-main > div:first-child {
-  text-align: center;
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-main > div:first-child h1 {
-  margin-bottom: 1rem;
-  font-family: 'Medula One', cursive;
-  font-size: 3rem;
+/* Header de profil (Nom d'utilisateur et image) */
+.profile-header {
+    text-align: center;
+}
+
+.profile-header h1 {
+    margin-bottom: 1rem;
+    font-family: 'Medula One', cursive;
+    font-size: 3rem;
 }
 
 .profil-image {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 5px solid #FD5035;
-  margin-bottom: 1rem;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #FD5035;
+    margin-bottom: 1rem;
+}
+
+/* Section d'information et de modification */
+.info-section {
+    padding: 2rem;
+}
+
+.field-group-container {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Conteneur pour le label et l'input */
+.field-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.field-group label {
+    font-weight: 600;
+    width: 30%; /* Pour aligner visuellement les inputs */
+    color: #495057;
+}
+
+/* === Gestion de l'état des Inputs (Lecture Seule vs Édition) === */
+
+.info-section input {
+    /* Style de base pour un affichage propre */
+    flex-grow: 1;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    margin-left: 10px;
+    background: transparent;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    color: #343a40;
+}
+
+/* Style des champs en mode Lecture Seule (par défaut) */
+.info-section input[readonly] {
+    border: none;
+    cursor: default;
+    /* Cache l'indicateur de date/email quand readonly */
+    appearance: none; 
+    -moz-appearance: none;
+    -webkit-appearance: none;
+}
+
+/* Style des champs en mode Édition */
+.info-section input:not([readonly]) {
+    border: 1px solid #FD5035; /* Bordure rouge pour indiquer l'édition */
+    background-color: #fefefe;
+    cursor: text;
+    padding: 0.4rem; /* Légère réduction pour l'épaisseur de la bordure */
+}
+
+/* Contrôles d'édition (boutons Modifier/Sauvegarder) */
+.edit-controls {
+    display: flex;
+    justify-content: flex-end; /* Aligne les boutons à droite */
+    margin-top: 1.5rem;
+    gap: 10px; /* Espace entre les boutons */
+}
+
+/* Styles communs aux boutons de sauvegarde */
+.save-button {
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #FD5035;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+    background-color: #FD5035;
+    color: #ffffff;
+}
+
+.save-button:hover {
+    background-color: white;
+    color: #FD5035;
+    box-shadow: 0 2px 8px rgba(253, 80, 53, 0.4);
+}
+
+/* Bouton Supprimer le compte */
+.delete-section {
+    text-align: center;
+    padding: 1rem;
+    background: transparent; /* Pas de fond blanc pour le bouton seul */
+    box-shadow: none;
 }
 
 .supp {
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 0.75rem 1.5rem;
-  margin: 0 0.5rem 1rem;
-  border: none;
-  border-radius: 20px;
-  font-weight: 600;
-  transition: background-color 0.3s, transform 0.1s;
-  background-color: #FD5035;
-  color: #ffffff;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #FD5035;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+    background-color: #FD5035;
+    color: #ffffff;
 }
+
 .supp:hover {
-  background-color: white;
-  border: 2px solid #FD5035;
-  color: #FD5035;
-  transition: all 0.3s ease-in-out;
+    background-color: white;
+    color: #FD5035;
 }
-
-.info-section > div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.info-section > div:last-of-type {
-  border-bottom: none;
-}
-
-.info-section p {
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-.info-section button {
-  background: transparent;
-  color: #FD5035;
-  padding: 0.5rem;
-  border: 1px solid #FD5035;
-  margin: 0;
-}
-
-.info-section button:hover {
-  background-color: #FD5035;
-  color: #ffffff;
-}
-
-main > div:last-of-type {
-    text-align: center;
-    padding: 1rem;
-}
-
-
-main > div:first-child {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  text-align: center;
-}
-
-main > div:nth-child(2) {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
 
 @media (max-width: 600px) {
-  main {
-    padding: 0 1rem;
-    gap: 1.5rem;
-  }
+    main {
+        padding: 0 1rem;
+        gap: 1.5rem;
+    }
 
-  h1 {
-    font-size: 2rem;
-  }
+    h1 {
+        font-size: 2rem;
+    }
 
-  h2 {
-    font-size: 1.5rem;
-  }
+    h2 {
+        font-size: 1.5rem;
+    }
 
-  .info-section > div {
-    flex-direction: column;
-    align-items: flex-start;
-    padding-bottom: 1rem;
-  }
+    .field-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-  .info-section button {
-    align-self: flex-end;
-    margin-top: -1.5rem;
-  }
+    .field-group label {
+        width: 100%;
+        margin-bottom: 0.3rem;
+    }
+
+    .field-group input {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 5px;
+    }
+
+    .edit-controls {
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+
+    .save-button {
+        width: 100%;
+        margin: 5px 0;
+    }
 }

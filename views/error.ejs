@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Erreur <%= code %></title>
+  <link rel="stylesheet" href="/css/error.css">
+</head>
+<body>
+  <%- include('header') %>
+  <main>
+    <h1>Erreur <%= code %></h1>
+    <p><%= message %></p>
+    <a href="/home">Retour à l'accueil</a>
+  </main>
+  <%- include('footer') %>
+</body>
+</html>
