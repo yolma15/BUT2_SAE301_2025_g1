@@ -1,78 +1,96 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html lang="fr">
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Locfit</title>
     <link rel="stylesheet" href="/css/header.css" />
-  </head>
+</head>
 
-  <body>
+<body>
     <header class="site-header">
-      <a href="/home" class="Logo">
-        <img src="/img/Logo blanc sur orange.png" alt="logo Locfit" />
-      </a>
+        <a href="/home" class="Logo">
+            <img src="/img/Logo blanc sur orange.png" alt="logo Locfit" />
+        </a>
 
-      <nav class="main-nav">
-        <% if (isLoggedIn) { %>
-          <% if (userRole === 'client') { %>
-          <a href="/home">Accueil</a>
-          <a href="/catalogue">Catalogue</a>
-          <a href="locations">Mes locations</a>
-          <% } else if (userRole === 'admin') { %>
-          <a href="/home">Accueil</a>
-          <a href="/admin/dashboard">Tableau de bord</a>
-          <% } else if (userRole === 'agent') { %>
-          <a href="/home">Accueil</a>
-          <a href="/agent/ajout_produit">Ajouts Produits </a>
-          <a href="/agent/returnprod">Retours Produits </a>
-          <% } %>
-        <% } else { %>
-        <a href="/home">Accueil</a>
-        <a href="/catalogue">Catalogue</a>
-        <a href="/login">Mes locations</a>
-        <% } %>
-        
+        <nav class="main-nav">
+            <% if (typeof isLoggedIn !== 'undefined' && isLoggedIn) { %>
+                
+                <% if (userRole === 'client') { %>
+                    <a href="/home">Accueil</a>
+                    <a href="/catalogue">Catalogue</a>
+                    <a href="/mes-locations">Mes locations</a>
+                
+                <% } else if (userRole === 'admin') { %>
+                    <a href="/home">Accueil</a>
+                    <a href="/admin/dashboard">Tableau de bord</a>
+                
+                <% } else if (userRole === 'agent') { %>
+                    <a href="/home">Accueil</a>
+                    <a href="/agent/ajout_produit">Ajouts Produits</a>
+                    <a href="/agent/returnprod">Retours Produits</a>
+                <% } %>
 
-      </nav>
+            <% } else { %>
+                <a href="/home">Accueil</a>
+                <a href="/catalogue">Catalogue</a>
+                <a href="/login">Mes locations</a>
+            <% } %>
+        </nav>
 
-      <div class="user-area">
-        <% if (!isLoggedIn) { %>
-        <a class="btn btn-login" href="/login">Se connecter</a>
-        <a class="btn btn-register" href="/register">S’inscrire</a>
-        <% } else { %>
-        <div class="user-menu">
-          <img class="avatar" src="/images/avatar-default.png" alt="profil" />
-          <span class="username"><%= username %></span>
+        <div class="user-area">
+            <% if (typeof isLoggedIn === 'undefined' || !isLoggedIn) { %>
+                <a class="btn btn-login" href="/login">Se connecter</a>
+                <a class="btn btn-register" href="/register">S’inscrire</a>
+            <% } else { %>
+                <div class="user-menu">
+                    
+                    <% 
+                        // Logique de protection :
+                        // 1. On définit une image par défaut.
+                        let avatarSrc = '/img/avatar-default.png';
+                        
+                        // 2. On vérifie si la variable userImg existe ET n'est pas vide.
+                        // 'typeof' empêche le crash "ReferenceError" si la variable n'existe pas.
+                        if (typeof userImg !== 'undefined' && userImg) {
+                            avatarSrc = '/img/' + userImg;
+                        }
+                    %>
 
-          <div class="dropdown">
-            <button
-              class="dropdown-toggle"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              ▾
-            </button>
-            <div class="dropdown-menu" role="menu">
-              <% if (userRole === 'client') { %>
-              <a href="/profil" class="dropdown-item">Mes informations</a>
-              <form action="/logout" method="post">
-                <button type="submit" class="dropdown-item danger">
-                  Se déconnecter
-                </button>
-              </form>
-              <% } else { %>
-              <form action="/logout" method="post">
-                <button type="submit" class="dropdown-item danger">
-                  Se déconnecter
-                </button>
-              </form>
-              <% } %>
-            </div>
-          </div>
+                    <img class="avatar" 
+                         src="<%= avatarSrc %>" 
+                         alt="profil" 
+                         style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />
+
+                    <span class="username"><%= typeof username !== 'undefined' ? username : 'Utilisateur' %></span>
+
+                    <div class="dropdown">
+                        <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                            ▾
+                        </button>
+                        
+                        <div class="dropdown-menu" role="menu">
+                            <% if (typeof userRole !== 'undefined' && userRole === 'client') { %>
+                                <a href="/profil" class="dropdown-item">Mes informations</a>
+                                <form action="/logout" method="post">
+                                    <button type="submit" class="dropdown-item danger">
+                                        Se déconnecter
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <form action="/logout" method="post">
+                                    <button type="submit" class="dropdown-item danger">
+                                        Se déconnecter
+                                    </button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
         </div>
-        <% } %>
-      </div>
     </header>
-  </body>
+</body>
+
 </html>

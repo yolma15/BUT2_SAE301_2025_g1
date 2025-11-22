@@ -30,10 +30,16 @@ app.use(
 );
 
 // Expose session data to EJS views
+// C'est ici qu'on rend les variables accessibles à TOUTES les pages (header, footer, etc.)
 app.use((req, res, next) => {
   res.locals.isLoggedIn = Boolean(req.session?.userId);
   res.locals.userRole = req.session?.userRole || null;
   res.locals.username = req.session?.username || null;
+  
+  // --- MODIFICATION IMPORTANTE ---
+  // On rend l'image accessible partout. Si pas d'image, ça vaut null.
+  res.locals.userImg = req.session?.userImg || null; 
+  
   res.locals.message = null; // Évite les erreurs si message non défini
   next();
 });
@@ -207,8 +213,9 @@ app.post("/login", async (req, res) => {
 
   try {
     // Vérification du mot de passe avec MD5 directement dans la requête SQL
+    // --- MODIFICATION ICI : On sélectionne aussi la colonne 'img' ---
     const [results] = await pool.query(
-      "SELECT id, login, nom, prenom, type_utilisateur FROM utilisateur WHERE login = ? AND password = MD5(?)",
+      "SELECT id, login, nom, prenom, type_utilisateur, img FROM utilisateur WHERE login = ? AND password = MD5(?)",
       [login, password]
     );
 
@@ -224,6 +231,10 @@ app.post("/login", async (req, res) => {
     req.session.userId = user.id;
     req.session.userRole = user.type_utilisateur;
     req.session.username = user.prenom || user.login;
+    
+    // --- MODIFICATION ICI : On stocke l'image dans la session ---
+    req.session.userImg = user.img;
+    
     req.session.loggedin = true;
 
     const nextUrl = req.session.postLoginRedirect || "/home";
@@ -277,8 +288,9 @@ app.get("/mes-locations", authMiddleware, isClient, async (req, res) => {
 // Profil client (GET: Afficher)
 app.get("/profil", authMiddleware, isClient, async (req, res) => {
   try {
+    // On s'assure de récupérer l'img ici aussi
     const [users] = await pool.query(
-      "SELECT id, login, nom, prenom, ddn, email FROM utilisateur WHERE id = ?",
+      "SELECT id, login, nom, prenom, ddn, email, img FROM utilisateur WHERE id = ?",
       [req.session.userId]
     );
 
