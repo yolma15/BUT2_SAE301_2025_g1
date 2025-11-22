@@ -63,7 +63,50 @@ h2 {
     margin-bottom: 1rem;
 }
 
-/* Section d'information et de modification */
+/* ========================================== */
+/* MESSAGES DE SUCCÈS/ERREUR */
+/* ========================================== */
+
+/* Message global (bandeau de succès/erreur en haut) */
+.message-box {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.message-box.success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.message-box.error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+/* Messages d'erreur inline (au-dessus des champs) */
+.inline-error {
+    background-color: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    display: none;
+    font-size: 0.95rem;
+}
+
+.inline-error.show {
+    display: block;
+}
+
+/* ========================================== */
+/* SECTION D'INFORMATION ET DE MODIFICATION */
+/* ========================================== */
+
 .info-section {
     padding: 2rem;
 }
@@ -120,7 +163,19 @@ h2 {
     padding: 0.4rem; /* Légère réduction pour l'épaisseur de la bordure */
 }
 
-/* Contrôles d'édition (boutons Modifier/Sauvegarder) */
+/* ========================================== */
+/* GESTION DU MOT DE PASSE */
+/* ========================================== */
+
+/* Masquer les champs de mot de passe détaillés par défaut */
+.password-fields-hidden {
+    display: none;
+}
+
+/* ========================================== */
+/* CONTRÔLES D'ÉDITION (BOUTONS) */
+/* ========================================== */
+
 .edit-controls {
     display: flex;
     justify-content: flex-end; /* Aligne les boutons à droite */
@@ -147,7 +202,29 @@ h2 {
     box-shadow: 0 2px 8px rgba(253, 80, 53, 0.4);
 }
 
-/* Bouton Supprimer le compte */
+/* Bouton Annuler */
+.annuler-button {
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #6c757d;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+.annuler-button:hover {
+    background-color: white;
+    color: #6c757d;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.4);
+}
+
+/* ========================================== */
+/* BOUTON SUPPRIMER LE COMPTE */
+/* ========================================== */
+
 .delete-section {
     text-align: center;
     padding: 1rem;
@@ -171,6 +248,10 @@ h2 {
     background-color: white;
     color: #FD5035;
 }
+
+/* ========================================== */
+/* RESPONSIVE DESIGN */
+/* ========================================== */
 
 @media (max-width: 600px) {
     main {
@@ -207,7 +288,8 @@ h2 {
         flex-wrap: wrap;
     }
 
-    .save-button {
+    .save-button,
+    .annuler-button {
         width: 100%;
         margin: 5px 0;
     }

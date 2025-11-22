@@ -5,7 +5,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mon Profil - <%= utilisateur.login %></title>
-    <!-- Le style est géré par ce lien CSS externe -->
     <link rel="stylesheet" href="/css/profil.css" />
 
     <!-- Liens pour les polices -->
@@ -17,6 +16,7 @@
 
     <!-- Lien pour Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    
     
 </head>
 
@@ -40,9 +40,6 @@
             
             // Affichage des messages de session
             const profilMessage = typeof message !== 'undefined' ? message : null;
-            
-            // Valeur fixe d'astérisques pour le mode lecture seule
-            const SECURE_PASSWORD_DISPLAY = '********';
         %>
 
         <!-- Bloc de profil (Header) -->
@@ -62,10 +59,14 @@
             </div>
         <% } %>
 
-        <!-- Section de modification des informations personnelles -->
-        <!-- NOTE: Cette route POST doit gérer la mise à jour des champs ddn, nom, prenom, email, ET password -->
-        <form id="profile-form" action="/profil/informations" method="POST" class="profile-card info-section">
+        <!-- ========================================== -->
+        <!-- FORMULAIRE 1 : INFORMATIONS PERSONNELLES -->
+        <!-- ========================================== -->
+        <form id="profile-form" class="profile-card info-section">
             <h2>Mes informations</h2>
+
+            <!-- Message d'erreur inline -->
+            <div id="info-error" class="inline-error"></div>
 
             <div class="field-group-container">
                 <div class="field-group">
@@ -95,32 +96,74 @@
                 </div>
             </div>
             
-            <!-- LIGNE POUR LE MOT DE PASSE (format unifié) -->
-            <div class="field-group-container">
-                <div class="field-group">
-                    <label for="password">Mot de passe :</label>
-                    <!-- Affichage initial : Astérisques fixes. -->
-                    <input type="password" id="password" name="password" 
-                        value="<%= SECURE_PASSWORD_DISPLAY %>" 
-                        placeholder="Laisser vide pour ne pas changer" 
-                        readonly>
-                </div>
-            </div>
-            
             <!-- Boutons de contrôle du formulaire d'informations -->
             <div class="edit-controls">
-                <!-- Bouton "Modifier" affiché par défaut -->
                 <button type="button" id="edit-button" class="save-button" onclick="toggleEditMode()">
                     <i class="fa-solid fa-pen"></i> Modifier
                 </button>
 
-                <!-- Bouton "Sauvegarder" masqué par défaut -->
-                <button type="submit" id="save-button" class="save-button" style="display: none;">
+                <button type="button" id="save-button" class="save-button" onclick="saveProfileInfo()" style="display: none;">
                     <i class="fa-solid fa-save"></i> Sauvegarder les modifications
                 </button>
                 
-                <!-- Bouton Annuler (apparaît avec Sauvegarder) -->
                 <button type="button" id="cancel-button" class="annuler-button" onclick="toggleEditMode(true)" style="display: none;">
+                    Annuler
+                </button>
+            </div>
+        </form>
+
+        <!-- ========================================== -->
+        <!-- FORMULAIRE 2 : CHANGEMENT DE MOT DE PASSE -->
+        <!-- ========================================== -->
+        <form id="password-form" class="profile-card info-section">
+            <h2>Changer mon mot de passe</h2>
+
+            <!-- Message d'erreur inline -->
+            <div id="password-error" class="inline-error"></div>
+
+            <!-- Affichage initial : juste un champ avec des étoiles -->
+            <div id="password-display" class="field-group-container">
+                <div class="field-group">
+                    <label for="password-placeholder">Mot de passe :</label>
+                    <input type="password" id="password-placeholder" value="********" readonly>
+                </div>
+            </div>
+
+            <!-- Champs de modification (cachés par défaut) -->
+            <div id="password-fields" class="password-fields-hidden">
+                <div class="field-group-container">
+                    <div class="field-group">
+                        <label for="ancien_mdp">Ancien mot de passe :</label>
+                        <input type="password" id="ancien_mdp" name="ancien_mdp" placeholder="Entrez votre ancien mot de passe" required>
+                    </div>
+                </div>
+
+                <div class="field-group-container">
+                    <div class="field-group">
+                        <label for="nouveau_mdp">Nouveau mot de passe :</label>
+                        <input type="password" id="nouveau_mdp" name="nouveau_mdp" placeholder="Entrez votre nouveau mot de passe" minlength="4" required>
+                    </div>
+                </div>
+
+                <div class="field-group-container">
+                    <div class="field-group">
+                        <label for="confirmer_mdp">Confirmer le mot de passe :</label>
+                        <input type="password" id="confirmer_mdp" name="confirmer_mdp" placeholder="Confirmez votre nouveau mot de passe" minlength="4" required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Boutons de contrôle du formulaire de mot de passe -->
+            <div class="edit-controls">
+                <button type="button" id="edit-password-button" class="save-button" onclick="togglePasswordEditMode()">
+                    <i class="fa-solid fa-pen"></i> Modifier
+                </button>
+
+                <button type="button" id="save-password-button" class="save-button" onclick="savePassword()" style="display: none;">
+                    <i class="fa-solid fa-save"></i> Sauvegarder les modifications
+                </button>
+                
+                <button type="button" id="cancel-password-button" class="annuler-button" onclick="togglePasswordEditMode(true)" style="display: none;">
                     Annuler
                 </button>
             </div>
@@ -134,21 +177,18 @@
     </main>
     
     <script>
-        // Stocker les valeurs originales des inputs non-password
+        // ========================================
+        // GESTION DU FORMULAIRE D'INFORMATIONS
+        // ========================================
         let originalValues = {};
-        const SECURE_PASSWORD_DISPLAY = '********'; // Doit correspondre à la constante EJS
 
-        /**
-         * Bascule le mode lecture seule/édition pour le formulaire d'informations personnelles.
-         * @param {boolean} isCancel - Vrai si l'action est un annulation, Faux sinon.
-         */
         function toggleEditMode(isCancel = false) {
             const form = document.getElementById('profile-form');
             const inputs = form.querySelectorAll('input');
             const editButton = document.getElementById('edit-button');
             const saveButton = document.getElementById('save-button');
             const cancelButton = document.getElementById('cancel-button');
-            const passwordInput = document.getElementById('password');
+            const errorDiv = document.getElementById('info-error');
 
             const isReadonly = inputs[0].readOnly;
 
@@ -156,51 +196,204 @@
                 // Passage en mode édition
                 inputs.forEach(input => {
                     input.removeAttribute('readonly');
-                    if (input.id !== 'password') {
-                        // Stocker les valeurs actuelles (avant l'édition)
-                        originalValues[input.id] = input.value;
-                    }
+                    originalValues[input.id] = input.value;
                 });
-                
-                // Vider le champ mot de passe et utiliser le placeholder
-                passwordInput.value = '';
+
+                // Masquer le message d'erreur
+                errorDiv.classList.remove('show');
 
                 editButton.style.display = 'none';
                 saveButton.style.display = 'block';
                 cancelButton.style.display = 'block';
                 
             } else {
-                // Revenir en mode lecture seule (SAUVEGARDER OU ANNULER)
+                // Revenir en mode lecture seule
                 inputs.forEach(input => {
-                    if (isCancel && input.id !== 'password') {
-                        // Annuler: Restaurer les valeurs originales pour les champs non-password
+                    if (isCancel) {
                         input.value = originalValues[input.id] || '';
                     }
                     input.setAttribute('readonly', true);
                 });
                 
-                // Rétablir l'affichage sécurisé du mot de passe
-                passwordInput.value = SECURE_PASSWORD_DISPLAY;
-                
+                // Masquer le message d'erreur
+                errorDiv.classList.remove('show');
+
                 editButton.style.display = 'block';
                 saveButton.style.display = 'none';
                 cancelButton.style.display = 'none';
             }
         }
-        
-        // Initialisation: S'assurer que tout est en lecture seule au chargement
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('profile-form');
-            const inputs = form.querySelectorAll('input');
 
-            // 1. Initialiser le formulaire d'informations personnelles en lecture seule
-            inputs.forEach(input => {
-                input.setAttribute('readonly', true);
-            });
-            // Assurer le bon état initial des boutons
+        async function saveProfileInfo() {
+            const nom = document.getElementById('nom').value;
+            const prenom = document.getElementById('prenom').value;
+            const email = document.getElementById('email').value;
+            const ddn = document.getElementById('ddn').value;
+            const errorDiv = document.getElementById('info-error');
+
+            // Validation
+            if (!nom || !prenom || !email || !ddn) {
+                errorDiv.textContent = 'Tous les champs sont requis.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // Validation email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorDiv.textContent = 'Format d\'email invalide.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // Envoi des données
+            try {
+                const response = await fetch('/profil/informations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nom, prenom, email, ddn })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Recharger la page pour afficher le message de succès
+                    window.location.href = '/profil?message=success_info';
+                } else {
+                    errorDiv.textContent = data.error || 'Erreur lors de la mise à jour.';
+                    errorDiv.classList.add('show');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Erreur de connexion au serveur.';
+                errorDiv.classList.add('show');
+            }
+        }
+
+        // ========================================
+        // GESTION DU FORMULAIRE DE MOT DE PASSE
+        // ========================================
+        function togglePasswordEditMode(isCancel = false) {
+            const passwordDisplay = document.getElementById('password-display');
+            const passwordFields = document.getElementById('password-fields');
+            const editButton = document.getElementById('edit-password-button');
+            const saveButton = document.getElementById('save-password-button');
+            const cancelButton = document.getElementById('cancel-password-button');
+            const errorDiv = document.getElementById('password-error');
+
+            const isHidden = passwordFields.classList.contains('password-fields-hidden');
+
+            if (isHidden) {
+                // Passage en mode édition
+                passwordDisplay.style.display = 'none';
+                passwordFields.classList.remove('password-fields-hidden');
+
+                // Vider les champs
+                document.getElementById('ancien_mdp').value = '';
+                document.getElementById('nouveau_mdp').value = '';
+                document.getElementById('confirmer_mdp').value = '';
+
+                // Masquer le message d'erreur
+                errorDiv.classList.remove('show');
+
+                editButton.style.display = 'none';
+                saveButton.style.display = 'block';
+                cancelButton.style.display = 'block';
+                
+            } else {
+                // Revenir en mode lecture seule
+                passwordDisplay.style.display = 'block';
+                passwordFields.classList.add('password-fields-hidden');
+
+                // Vider les champs
+                document.getElementById('ancien_mdp').value = '';
+                document.getElementById('nouveau_mdp').value = '';
+                document.getElementById('confirmer_mdp').value = '';
+                
+                // Masquer le message d'erreur
+                errorDiv.classList.remove('show');
+
+                editButton.style.display = 'block';
+                saveButton.style.display = 'none';
+                cancelButton.style.display = 'none';
+            }
+        }
+
+        async function savePassword() {
+            const ancien_mdp = document.getElementById('ancien_mdp').value;
+            const nouveau_mdp = document.getElementById('nouveau_mdp').value;
+            const confirmer_mdp = document.getElementById('confirmer_mdp').value;
+            const errorDiv = document.getElementById('password-error');
+
+            // Validation
+            if (!ancien_mdp || !nouveau_mdp || !confirmer_mdp) {
+                errorDiv.textContent = 'Veuillez remplir tous les champs du mot de passe.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (nouveau_mdp !== confirmer_mdp) {
+                errorDiv.textContent = 'Les nouveaux mots de passe ne correspondent pas.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (ancien_mdp === nouveau_mdp) {
+                errorDiv.textContent = 'Le nouveau mot de passe doit être différent de l\'ancien.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (nouveau_mdp.length < 4) {
+                errorDiv.textContent = 'Le mot de passe doit contenir au moins 4 caractères.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // Envoi des données
+            try {
+                const response = await fetch('/profil/password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ancien_mdp, nouveau_mdp, confirmer_mdp })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Recharger la page pour afficher le message de succès
+                    window.location.href = '/profil?message=success_mdp';
+                } else {
+                    errorDiv.textContent = data.error || 'Erreur lors du changement de mot de passe.';
+                    errorDiv.classList.add('show');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Erreur de connexion au serveur.';
+                errorDiv.classList.add('show');
+            }
+        }
+        
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Formulaire d'informations en lecture seule
+            const profileForm = document.getElementById('profile-form');
+            const profileInputs = profileForm.querySelectorAll('input');
+            profileInputs.forEach(input => input.setAttribute('readonly', true));
+            
             document.getElementById('edit-button').style.display = 'block';
             document.getElementById('save-button').style.display = 'none';
             document.getElementById('cancel-button').style.display = 'none';
+
+            // 2. Formulaire de mot de passe : affichage simple par défaut
+            document.getElementById('password-display').style.display = 'block';
+            document.getElementById('password-fields').classList.add('password-fields-hidden');
+            
+            document.getElementById('edit-password-button').style.display = 'block';
+            document.getElementById('save-password-button').style.display = 'none';
+            document.getElementById('cancel-password-button').style.display = 'none';
         });
     </script>
 

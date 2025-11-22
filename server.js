@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import session from "express-session";
-import bcrypt from "bcrypt";
+import bcrypt from "bcrypt"; // Note: Inutilisé ici car on utilise MD5 via SQL, mais gardé pour l'import
 import pool from "./db.js";
 
 const app = express();
@@ -155,7 +155,7 @@ app.post("/register", async (req, res) => {
   }
 
   // Validation longueur mot de passe
-  if (password.length < 4) { // MD5 n'a pas besoin de la complexité de bcrypt, mais une longueur minimale est bonne
+  if (password.length < 4) { 
     return res.render("register", {
       message: "Le mot de passe doit contenir au moins 4 caractères"
     });
@@ -206,7 +206,7 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    // Vérification du mot de passe avec MD5 directement dans la requête SQL pour la compatibilité
+    // Vérification du mot de passe avec MD5 directement dans la requête SQL
     const [results] = await pool.query(
       "SELECT id, login, nom, prenom, type_utilisateur FROM utilisateur WHERE login = ? AND password = MD5(?)",
       [login, password]
@@ -256,11 +256,11 @@ app.post("/logout", (req, res) => {
 app.get("/mes-locations", authMiddleware, isClient, async (req, res) => {
   try {
     const [locations] = await pool.query(
-      `SELECT l.*, p.type, p.marque, p.modele, p.prix_location 
-       FROM location l
-       JOIN produit p ON l.produit_id = p.id
-       WHERE l.utilisateur_id = ?
-       ORDER BY l.date_debut DESC`,
+      `SELECT l.*, p.type, p.marque, p.modele, p.prix_location 
+       FROM location l
+       JOIN produit p ON l.produit_id = p.id
+       WHERE l.utilisateur_id = ?
+       ORDER BY l.date_debut DESC`,
       [req.session.userId]
     );
 
@@ -288,20 +288,25 @@ app.get("/profil", authMiddleware, isClient, async (req, res) => {
 
     // Récupération du message de succès/erreur depuis la query string
     let profilMessage = null;
-    if (req.query.message === 'success_info') {
-      profilMessage = { type: 'success', text: 'Informations mises à jour avec succès.' };
-    } else if (req.query.message === 'error_info') {
-      profilMessage = { type: 'error', text: 'Erreur lors de la mise à jour des informations.' };
-    } else if (req.query.message === 'success_mdp') {
-      profilMessage = { type: 'success', text: 'Mot de passe changé avec succès.' };
-    } else if (req.query.message === 'error_mdp') {
-      profilMessage = { type: 'error', text: 'Erreur lors du changement de mot de passe.' };
-    } else if (req.query.message === 'mdp_mismatch') {
-      profilMessage = { type: 'error', text: 'Ancien mot de passe incorrect.' };
-    } else if (req.query.message === 'new_mdp_mismatch') {
-      profilMessage = { type: 'error', text: 'Les nouveaux mots de passe ne correspondent pas.' };
-    }
+    const msgType = req.query.message;
 
+    if (msgType === 'success_info') {
+      profilMessage = { type: 'success', text: 'Informations mises à jour avec succès.' };
+    } else if (msgType === 'error_info') {
+      profilMessage = { type: 'error', text: 'Erreur lors de la mise à jour des informations.' };
+    } else if (msgType === 'success_mdp') {
+      profilMessage = { type: 'success', text: 'Mot de passe changé avec succès.' };
+    } else if (msgType === 'error_mdp') {
+      profilMessage = { type: 'error', text: 'Erreur lors du changement de mot de passe.' };
+    } else if (msgType === 'mdp_mismatch') {
+      profilMessage = { type: 'error', text: 'Ancien mot de passe incorrect.' };
+    } else if (msgType === 'new_mdp_mismatch') {
+      profilMessage = { type: 'error', text: 'Les nouveaux mots de passe ne correspondent pas.' };
+    } else if (msgType === 'missing_fields') {
+      profilMessage = { type: 'error', text: 'Veuillez remplir tous les champs du mot de passe.' };
+    } else if (msgType === 'same_password') {
+      profilMessage = { type: 'error', text: 'Le nouveau mot de passe doit être différent de l\'ancien.' };
+    }
 
     res.render("profil", { utilisateur: users[0], message: profilMessage });
   } catch (err) {
@@ -318,7 +323,13 @@ app.post("/profil/informations", authMiddleware, isClient, async (req, res) => {
   const { email, nom, prenom, ddn } = req.body;
 
   if (!email || !nom || !prenom || !ddn) {
-    return res.redirect('/profil?message=error_info');
+    return res.json({ success: false, error: 'Tous les champs sont requis.' });
+  }
+
+  // Validation format email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.json({ success: false, error: 'Format d\'email invalide.' });
   }
 
   try {
@@ -330,52 +341,66 @@ app.post("/profil/informations", authMiddleware, isClient, async (req, res) => {
     // Mise à jour du nom d'utilisateur en session si nécessaire
     req.session.username = prenom;
 
-    return res.redirect('/profil?message=success_info');
+    return res.json({ success: true });
   } catch (err) {
     console.error("Erreur update profil :", err);
-    return res.redirect('/profil?message=error_info');
+    return res.json({ success: false, error: 'Erreur lors de la mise à jour.' });
   }
 });
 
-// Profil client (POST - changement de mot de passe)
+// Changement de mot de passe
 app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
+  const userId = req.session.userId;
   const { ancien_mdp, nouveau_mdp, confirmer_mdp } = req.body;
 
+  // 1. Vérification des champs
   if (!ancien_mdp || !nouveau_mdp || !confirmer_mdp) {
-    return res.redirect('/profil?message=error_mdp');
+    return res.json({ success: false, error: 'Veuillez remplir tous les champs du mot de passe.' });
   }
 
+  // 2. Vérification que les nouveaux mots de passe correspondent
   if (nouveau_mdp !== confirmer_mdp) {
-    return res.redirect('/profil?message=new_mdp_mismatch');
+    return res.json({ success: false, error: 'Les nouveaux mots de passe ne correspondent pas.' });
+  }
+
+  // 3. Empêcher de mettre le même mot de passe
+  if (ancien_mdp === nouveau_mdp) {
+    return res.json({ success: false, error: 'Le nouveau mot de passe doit être différent de l\'ancien.' });
+  }
+
+  // 4. Validation longueur
+  if (nouveau_mdp.length < 4) {
+    return res.json({ success: false, error: 'Le mot de passe doit contenir au moins 4 caractères.' });
   }
 
   try {
-    // 1. Vérification de l'ancien mot de passe (via MD5)
-    // C'est cette requête qui vérifie si l'ancien mot de passe est correct
+    // 5. Vérification de l'ancien mot de passe
     const [matchResults] = await pool.query(
-      "SELECT 1 FROM utilisateur WHERE id = ? AND password = MD5(?)",
-      [req.session.userId, ancien_mdp]
+      "SELECT id FROM utilisateur WHERE id = ? AND password = MD5(?)",
+      [userId, ancien_mdp]
     );
 
     if (matchResults.length === 0) {
-      return res.redirect('/profil?message=mdp_mismatch');
+      return res.json({ success: false, error: 'Ancien mot de passe incorrect.' });
     }
 
-    // 2. Hachage et mise à jour du nouveau mot de passe (via MD5)
-    // Le nouveau mot de passe est enregistré en MD5 dans la BDD
-    await pool.query(
+    // 6. Mise à jour avec le nouveau mot de passe
+    const [updateResult] = await pool.query(
       "UPDATE utilisateur SET password = MD5(?) WHERE id = ?",
-      [nouveau_mdp, req.session.userId]
+      [nouveau_mdp, userId]
     );
 
-    return res.redirect('/profil?message=success_mdp');
+    if (updateResult.affectedRows === 0) {
+      return res.json({ success: false, error: 'Erreur lors de la mise à jour.' });
+    }
+
+    return res.json({ success: true });
 
   } catch (err) {
-    console.error("Erreur changement de mot de passe :", err);
-    return res.redirect('/profil?message=error_mdp');
+    console.error("Erreur changement mot de passe :", err);
+    return res.json({ success: false, error: 'Erreur lors du changement de mot de passe.' });
   }
 });
-
 
 // Créer une location
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
@@ -479,10 +504,10 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
   try {
     const [locations] = await pool.query(
       `SELECT l.*, u.nom, u.prenom, u.email, p.type, p.marque, p.modele
-       FROM location l
-       JOIN utilisateur u ON l.utilisateur_id = u.id
-       JOIN produit p ON l.produit_id = p.id
-       ORDER BY l.date_debut DESC`
+       FROM location l
+       JOIN utilisateur u ON l.utilisateur_id = u.id
+       JOIN produit p ON l.produit_id = p.id
+       ORDER BY l.date_debut DESC`
     );
 
     res.render("locations", { locations });
