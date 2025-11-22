@@ -7,21 +7,16 @@
     <title>Mon Profil - <%= utilisateur.login %></title>
     <link rel="stylesheet" href="/css/profil.css" />
 
-    <!-- Liens pour les polices -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
         rel="stylesheet" />
 
-    <!-- Lien pour Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    
-    
 </head>
 
 <body>
-    <!-- Inclusion de l'en-tête -->
     <%- include('header'); %>
 
     <main>
@@ -42,30 +37,24 @@
             const profilMessage = typeof message !== 'undefined' ? message : null;
         %>
 
-        <!-- Bloc de profil (Header) -->
         <div class="profile-card profile-header">
             <img class="profil-image"
-                src="<%= utilisateur.photo_url || 'https://placehold.co/300x300/e0e0e0/333?text=Profil' %>"
+                src="<%= utilisateur.img ? '/img/' + utilisateur.img : 'https://placehold.co/300x300/e0e0e0/333?text=Profil' %>"
                 alt="Image de profil">
             <h1>
                 <%= utilisateur.login %>
             </h1>
         </div>
 
-        <!-- Affichage des messages de succès/erreur -->
         <% if (profilMessage) { %>
             <div class="message-box profile-card <%= profilMessage.type === 'success' ? 'success' : 'error' %>">
                 <%= profilMessage.text %>
             </div>
         <% } %>
 
-        <!-- ========================================== -->
-        <!-- FORMULAIRE 1 : INFORMATIONS PERSONNELLES -->
-        <!-- ========================================== -->
         <form id="profile-form" class="profile-card info-section">
             <h2>Mes informations</h2>
 
-            <!-- Message d'erreur inline -->
             <div id="info-error" class="inline-error"></div>
 
             <div class="field-group-container">
@@ -96,7 +85,6 @@
                 </div>
             </div>
             
-            <!-- Boutons de contrôle du formulaire d'informations -->
             <div class="edit-controls">
                 <button type="button" id="edit-button" class="save-button" onclick="toggleEditMode()">
                     <i class="fa-solid fa-pen"></i> Modifier
@@ -112,16 +100,11 @@
             </div>
         </form>
 
-        <!-- ========================================== -->
-        <!-- FORMULAIRE 2 : CHANGEMENT DE MOT DE PASSE -->
-        <!-- ========================================== -->
         <form id="password-form" class="profile-card info-section">
             <h2>Changer mon mot de passe</h2>
 
-            <!-- Message d'erreur inline -->
             <div id="password-error" class="inline-error"></div>
 
-            <!-- Affichage initial : juste un champ avec des étoiles -->
             <div id="password-display" class="field-group-container">
                 <div class="field-group">
                     <label for="password-placeholder">Mot de passe :</label>
@@ -129,7 +112,6 @@
                 </div>
             </div>
 
-            <!-- Champs de modification (cachés par défaut) -->
             <div id="password-fields" class="password-fields-hidden">
                 <div class="field-group-container">
                     <div class="field-group">
@@ -153,7 +135,6 @@
                 </div>
             </div>
             
-            <!-- Boutons de contrôle du formulaire de mot de passe -->
             <div class="edit-controls">
                 <button type="button" id="edit-password-button" class="save-button" onclick="togglePasswordEditMode()">
                     <i class="fa-solid fa-pen"></i> Modifier
@@ -169,7 +150,6 @@
             </div>
         </form>
         
-        <!-- Bouton pour supprimer le compte -->
         <div class="profile-card delete-section">
             <button class="supp">Supprimer le compte</button>
         </div>
@@ -397,7 +377,6 @@
         });
     </script>
 
-    <!-- Inclusion du pied de page -->
     <%- include('footer'); %>
 </body>
 
