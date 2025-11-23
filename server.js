@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import session from "express-session";
-import bcrypt from "bcrypt"; // Note: Inutilisé ici car on utilise MD5 via SQL, mais gardé pour l'import
+import bcrypt from "bcrypt";
 import pool from "./db.js";
 
 const app = express();
@@ -30,17 +30,12 @@ app.use(
 );
 
 // Expose session data to EJS views
-// C'est ici qu'on rend les variables accessibles à TOUTES les pages (header, footer, etc.)
 app.use((req, res, next) => {
   res.locals.isLoggedIn = Boolean(req.session?.userId);
   res.locals.userRole = req.session?.userRole || null;
   res.locals.username = req.session?.username || null;
-  
-  // --- MODIFICATION IMPORTANTE ---
-  // On rend l'image accessible partout. Si pas d'image, ça vaut null.
-  res.locals.userImg = req.session?.userImg || null; 
-  
-  res.locals.message = null; // Évite les erreurs si message non défini
+  res.locals.userImg = req.session?.userImg || null;
+  res.locals.message = null;
   next();
 });
 
@@ -160,9 +155,9 @@ app.post("/register", async (req, res) => {
   }
 
   // Validation longueur mot de passe
-  if (password.length < 4) { 
+  if (password.length < 8) {
     return res.render("register", {
-      message: "Le mot de passe doit contenir au moins 4 caractères",
+      message: "Le mot de passe doit contenir au moins 8 caractères",
     });
   }
 
@@ -170,18 +165,25 @@ app.post("/register", async (req, res) => {
   const dateNaissance = new Date(ddn);
   const aujourdhui = new Date();
   const age = aujourdhui.getFullYear() - dateNaissance.getFullYear();
+  const moisDiff = aujourdhui.getMonth() - dateNaissance.getMonth();
+  const jourDiff = aujourdhui.getDate() - dateNaissance.getDate();
 
-  if (age < 18) {
+  // Ajustement si l'anniversaire n'est pas encore passé cette année
+  const ageAjuste = (moisDiff < 0 || (moisDiff === 0 && jourDiff < 0)) ? age - 1 : age;
+
+  if (ageAjuste < 18) {
     return res.render("register", {
       message: "Vous devez avoir au moins 18 ans pour vous inscrire",
     });
   }
 
   try {
-    // Insertion avec hachage MD5 pour compatibilité BDD
+    // Utilisation de bcrypt pour la sécurité (recommandé)
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     await pool.query(
-      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, MD5(?), ?, ?, ?, ?, 'client')",
-      [login, password, nom, prenom, ddn, email]
+      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, ?, ?, ?, ?, ?, 'client')",
+      [login, hashedPassword, nom, prenom, ddn, email]
     );
 
     res.render("login", {
@@ -211,11 +213,10 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    // Vérification du mot de passe avec MD5 directement dans la requête SQL
-    // --- MODIFICATION ICI : On sélectionne aussi la colonne 'img' ---
+    // Récupération de l'utilisateur avec l'image
     const [results] = await pool.query(
-      "SELECT id, login, nom, prenom, type_utilisateur, img FROM utilisateur WHERE login = ? AND password = MD5(?)",
-      [login, password]
+      "SELECT id, login, nom, prenom, type_utilisateur, password, img FROM utilisateur WHERE login = ?",
+      [login]
     );
 
     if (results.length === 0) {
@@ -226,14 +227,20 @@ app.post("/login", async (req, res) => {
 
     const user = results[0];
 
+    // Vérification du mot de passe avec bcrypt
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return res.render("login", {
+        message: "Identifiant ou mot de passe incorrect",
+      });
+    }
+
     // Création de la session
     req.session.userId = user.id;
     req.session.userRole = user.type_utilisateur;
     req.session.username = user.prenom || user.login;
-    
-    // --- MODIFICATION ICI : On stocke l'image dans la session ---
     req.session.userImg = user.img;
-    
     req.session.loggedin = true;
 
     const nextUrl = req.session.postLoginRedirect || "/home";
@@ -286,7 +293,6 @@ app.get("/mes-locations", authMiddleware, isClient, async (req, res) => {
 // Profil client (GET: Afficher)
 app.get("/profil", authMiddleware, isClient, async (req, res) => {
   try {
-    // On s'assure de récupérer l'img ici aussi
     const [users] = await pool.query(
       "SELECT id, login, nom, prenom, ddn, email, img FROM utilisateur WHERE id = ?",
       [req.session.userId]
@@ -300,22 +306,40 @@ app.get("/profil", authMiddleware, isClient, async (req, res) => {
     let profilMessage = null;
     const msgType = req.query.message;
 
-    if (msgType === 'success_info') {
-      profilMessage = { type: 'success', text: 'Informations mises à jour avec succès.' };
-    } else if (msgType === 'error_info') {
-      profilMessage = { type: 'error', text: 'Erreur lors de la mise à jour des informations.' };
-    } else if (msgType === 'success_mdp') {
-      profilMessage = { type: 'success', text: 'Mot de passe changé avec succès.' };
-    } else if (msgType === 'error_mdp') {
-      profilMessage = { type: 'error', text: 'Erreur lors du changement de mot de passe.' };
-    } else if (msgType === 'mdp_mismatch') {
-      profilMessage = { type: 'error', text: 'Ancien mot de passe incorrect.' };
-    } else if (msgType === 'new_mdp_mismatch') {
-      profilMessage = { type: 'error', text: 'Les nouveaux mots de passe ne correspondent pas.' };
-    } else if (msgType === 'missing_fields') {
-      profilMessage = { type: 'error', text: 'Veuillez remplir tous les champs du mot de passe.' };
-    } else if (msgType === 'same_password') {
-      profilMessage = { type: 'error', text: 'Le nouveau mot de passe doit être différent de l\'ancien.' };
+    if (msgType === "success_info") {
+      profilMessage = {
+        type: "success",
+        text: "Informations mises à jour avec succès.",
+      };
+    } else if (msgType === "error_info") {
+      profilMessage = {
+        type: "error",
+        text: "Erreur lors de la mise à jour des informations.",
+      };
+    } else if (msgType === "success_mdp") {
+      profilMessage = { type: "success", text: "Mot de passe changé avec succès." };
+    } else if (msgType === "error_mdp") {
+      profilMessage = {
+        type: "error",
+        text: "Erreur lors du changement de mot de passe.",
+      };
+    } else if (msgType === "mdp_mismatch") {
+      profilMessage = { type: "error", text: "Ancien mot de passe incorrect." };
+    } else if (msgType === "new_mdp_mismatch") {
+      profilMessage = {
+        type: "error",
+        text: "Les nouveaux mots de passe ne correspondent pas.",
+      };
+    } else if (msgType === "missing_fields") {
+      profilMessage = {
+        type: "error",
+        text: "Veuillez remplir tous les champs du mot de passe.",
+      };
+    } else if (msgType === "same_password") {
+      profilMessage = {
+        type: "error",
+        text: "Le nouveau mot de passe doit être différent de l'ancien.",
+      };
     }
 
     res.render("profil", { utilisateur: users[0], message: profilMessage });
@@ -333,13 +357,13 @@ app.post("/profil/informations", authMiddleware, isClient, async (req, res) => {
   const { email, nom, prenom, ddn } = req.body;
 
   if (!email || !nom || !prenom || !ddn) {
-    return res.json({ success: false, error: 'Tous les champs sont requis.' });
+    return res.json({ success: false, error: "Tous les champs sont requis." });
   }
 
   // Validation format email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    return res.json({ success: false, error: 'Format d\'email invalide.' });
+    return res.json({ success: false, error: "Format d'email invalide." });
   }
 
   try {
@@ -348,13 +372,17 @@ app.post("/profil/informations", authMiddleware, isClient, async (req, res) => {
       [email, nom, prenom, ddn, req.session.userId]
     );
 
-    // Mise à jour du nom d'utilisateur en session si nécessaire
+    // Mise à jour du nom d'utilisateur en session
     req.session.username = prenom;
 
     return res.json({ success: true });
   } catch (err) {
     console.error("Erreur update profil :", err);
-    return res.json({ success: false, error: 'Erreur lors de la mise à jour.' });
+    // Vérification si l'email existe déjà
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.json({ success: false, error: "Cet email est déjà utilisé." });
+    }
+    return res.json({ success: false, error: "Erreur lors de la mise à jour." });
   }
 });
 
@@ -365,51 +393,74 @@ app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
 
   // 1. Vérification des champs
   if (!ancien_mdp || !nouveau_mdp || !confirmer_mdp) {
-    return res.json({ success: false, error: 'Veuillez remplir tous les champs du mot de passe.' });
+    return res.json({
+      success: false,
+      error: "Veuillez remplir tous les champs du mot de passe.",
+    });
   }
 
   // 2. Vérification que les nouveaux mots de passe correspondent
   if (nouveau_mdp !== confirmer_mdp) {
-    return res.json({ success: false, error: 'Les nouveaux mots de passe ne correspondent pas.' });
+    return res.json({
+      success: false,
+      error: "Les nouveaux mots de passe ne correspondent pas.",
+    });
   }
 
   // 3. Empêcher de mettre le même mot de passe
   if (ancien_mdp === nouveau_mdp) {
-    return res.json({ success: false, error: 'Le nouveau mot de passe doit être différent de l\'ancien.' });
+    return res.json({
+      success: false,
+      error: "Le nouveau mot de passe doit être différent de l'ancien.",
+    });
   }
 
   // 4. Validation longueur
-  if (nouveau_mdp.length < 4) {
-    return res.json({ success: false, error: 'Le mot de passe doit contenir au moins 4 caractères.' });
+  if (nouveau_mdp.length < 8) {
+    return res.json({
+      success: false,
+      error: "Le mot de passe doit contenir au moins 8 caractères.",
+    });
   }
 
   try {
-    // 5. Vérification de l'ancien mot de passe
-    const [matchResults] = await pool.query(
-      "SELECT id FROM utilisateur WHERE id = ? AND password = MD5(?)",
-      [userId, ancien_mdp]
+    // 5. Récupération du hash actuel
+    const [users] = await pool.query(
+      "SELECT password FROM utilisateur WHERE id = ?",
+      [userId]
     );
 
-    if (matchResults.length === 0) {
-      return res.json({ success: false, error: 'Ancien mot de passe incorrect.' });
+    if (users.length === 0) {
+      return res.json({ success: false, error: "Utilisateur introuvable." });
     }
 
-    // 6. Mise à jour avec le nouveau mot de passe
+    // 6. Vérification de l'ancien mot de passe
+    const passwordMatch = await bcrypt.compare(ancien_mdp, users[0].password);
+
+    if (!passwordMatch) {
+      return res.json({ success: false, error: "Ancien mot de passe incorrect." });
+    }
+
+    // 7. Hashage du nouveau mot de passe
+    const newHashedPassword = await bcrypt.hash(nouveau_mdp, 10);
+
+    // 8. Mise à jour avec le nouveau mot de passe
     const [updateResult] = await pool.query(
-      "UPDATE utilisateur SET password = MD5(?) WHERE id = ?",
-      [nouveau_mdp, userId]
+      "UPDATE utilisateur SET password = ? WHERE id = ?",
+      [newHashedPassword, userId]
     );
 
     if (updateResult.affectedRows === 0) {
-      return res.json({ success: false, error: 'Erreur lors de la mise à jour.' });
+      return res.json({ success: false, error: "Erreur lors de la mise à jour." });
     }
 
     return res.json({ success: true });
-
-    return res.redirect("/profil?message=success_mdp");
   } catch (err) {
     console.error("Erreur changement mot de passe :", err);
-    return res.json({ success: false, error: 'Erreur lors du changement de mot de passe.' });
+    return res.json({
+      success: false,
+      error: "Erreur lors du changement de mot de passe.",
+    });
   }
 });
 
@@ -420,6 +471,24 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   if (!produit_id || !date_debut || !date_retour_prevue) {
     return res.status(400).json({
       error: "Tous les champs sont requis",
+    });
+  }
+
+  // Validation des dates
+  const debut = new Date(date_debut);
+  const fin = new Date(date_retour_prevue);
+  const aujourdhui = new Date();
+  aujourdhui.setHours(0, 0, 0, 0);
+
+  if (debut < aujourdhui) {
+    return res.status(400).json({
+      error: "La date de début ne peut pas être dans le passé",
+    });
+  }
+
+  if (fin <= debut) {
+    return res.status(400).json({
+      error: "La date de retour doit être après la date de début",
     });
   }
 
@@ -439,34 +508,22 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
     const produit = produits[0];
 
     // Calculer le prix total
-    const debut = new Date(date_debut);
-    const fin = new Date(date_retour_prevue);
     const nbJours = Math.ceil((fin - debut) / (1000 * 60 * 60 * 24));
     const prix_total = nbJours * produit.prix_location;
 
     // Créer la location
     await pool.query(
       "INSERT INTO location (date_debut, date_retour_prevue, prix_total, utilisateur_id, produit_id) VALUES (?, ?, ?, ?, ?)",
-      [
-        date_debut,
-        date_retour_prevue,
-        prix_total,
-        req.session.userId,
-        produit_id,
-      ]
+      [date_debut, date_retour_prevue, prix_total, req.session.userId, produit_id]
     );
 
     // Mettre à jour l'état du produit
-    await pool.query("UPDATE produit SET etat = 'loué' WHERE id = ?", [
-      produit_id,
-    ]);
+    await pool.query("UPDATE produit SET etat = 'loué' WHERE id = ?", [produit_id]);
 
     res.json({ success: true, message: "Location créée avec succès" });
   } catch (err) {
     console.error("Erreur création location :", err);
-    res
-      .status(500)
-      .json({ error: "Erreur lors de la création de la location" });
+    res.status(500).json({ error: "Erreur lors de la création de la location" });
   }
 });
 
@@ -495,6 +552,11 @@ app.post("/returnprod", authMiddleware, isClient, async (req, res) => {
 
     const location = locations[0];
 
+    // Vérifier que la location n'a pas déjà été retournée
+    if (location.date_retour_effective) {
+      return res.status(400).json({ error: "Ce produit a déjà été retourné" });
+    }
+
     // Mettre à jour la location
     await pool.query(
       "UPDATE location SET date_retour_effective = NOW() WHERE id = ?",
@@ -506,7 +568,7 @@ app.post("/returnprod", authMiddleware, isClient, async (req, res) => {
       location.produit_id,
     ]);
 
-    res.json({ success: true, message: "Retour enregistré" });
+    res.json({ success: true, message: "Retour enregistré avec succès" });
   } catch (err) {
     console.error("Erreur retour produit :", err);
     res.status(500).json({ error: "Erreur lors du retour" });
@@ -542,12 +604,12 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
 // ============================================
 
 // Page d'ajout de produit
-app.get("/ajout_produit", isAdmin, (req, res) => {
+app.get("/ajout_produit", authMiddleware, isAdmin, (req, res) => {
   res.render("ajout_produit", { message: null });
 });
 
 // Ajout de produit
-app.post("/ajout_produit", isAdmin, async (req, res) => {
+app.post("/ajout_produit", authMiddleware, isAdmin, async (req, res) => {
   const { type, marque, modele, prix_location, description, etat } = req.body;
 
   if (!type || !marque || !modele || !prix_location || !etat) {
@@ -556,10 +618,17 @@ app.post("/ajout_produit", isAdmin, async (req, res) => {
     });
   }
 
+  // Validation du prix
+  if (isNaN(prix_location) || parseFloat(prix_location) <= 0) {
+    return res.render("ajout_produit", {
+      message: "Le prix de location doit être un nombre positif",
+    });
+  }
+
   try {
     await pool.query(
       "INSERT INTO produit (type, description, marque, modele, prix_location, etat) VALUES (?, ?, ?, ?, ?, ?)",
-      [type, description || "", marque, modele, prix_location, etat]
+      [type, description || "", marque, modele, parseFloat(prix_location), etat]
     );
 
     res.render("ajout_produit", {
@@ -574,11 +643,11 @@ app.post("/ajout_produit", isAdmin, async (req, res) => {
 });
 
 // Inscription d'un agent
-app.get("/inscription_agent", isAdmin, (req, res) => {
+app.get("/inscription_agent", authMiddleware, isAdmin, (req, res) => {
   res.render("inscription_agent", { message: null });
 });
 
-app.post("/inscription_agent", isAdmin, async (req, res) => {
+app.post("/inscription_agent", authMiddleware, isAdmin, async (req, res) => {
   const { login, password, nom, prenom, email } = req.body;
 
   if (!login || !password || !nom || !prenom || !email) {
@@ -587,11 +656,20 @@ app.post("/inscription_agent", isAdmin, async (req, res) => {
     });
   }
 
+  // Validation du mot de passe
+  if (password.length < 8) {
+    return res.render("inscription_agent", {
+      message: "Le mot de passe doit contenir au moins 8 caractères",
+    });
+  }
+
   try {
-    // Utilisation de MD5 pour cohérence avec le reste de l'application
+    // Utilisation de bcrypt pour la sécurité
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     await pool.query(
-      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, MD5(?), ?, ?, ?, ?, 'agent')",
-      [login, password, nom, prenom, "2000-01-01", email]
+      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, ?, ?, ?, ?, ?, 'agent')",
+      [login, hashedPassword, nom, prenom, "2000-01-01", email]
     );
 
     res.render("inscription_agent", {
