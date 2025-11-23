@@ -22,35 +22,39 @@
       <h2 class="row-title">Locations en attente</h2>
 
       <div class="product-list">
-
-        <div class="location-card empty">
-          <p>Aucune location en attente</p>
-        </div>
-
+        <% if (pendingLocations && pendingLocations.length) { %>
+          <% pendingLocations.forEach(function(loc) { %>
+            <div class="product-card">
+              <h3 class="product-title"><%= loc.type %></h3>
+              <div class="product-price"><%= loc.prix_total %> €</div>
+              <img src="<%= loc.imageUrl %>" alt="<%= loc.type %>" class="product-image">
+              <button class="product-button">Voir détails</button>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="location-card empty">
+            <p>Aucune location en attente</p>
+          </div>
+        <% } %>
       </div>
 
       <h2 class="row-title">Locations confirmées</h2>
 
       <div class="product-list">
-
-        <div class="product-card">
-          <h3 class="product-title">Rameur ram 500</h3>
-          <div class="product-price">99.9 €...</div>
-          <img src="img/TapisCourse1.jpeg" alt="Rameur ram 500" class="product-image">
-          <button class="product-button">Voir détails</button>
-        </div>
-
-        <div class="product-card">
-          <h3 class="product-title">Rameur ram 500</h3>
-          <div class="product-price">99.9 €...</div>
-          <img src="img/TapisCourse1.jpeg" alt="Rameur ram 500" class="product-image">
-          <button class="product-button">Voir détails</button>
-        </div>
-
-        <div class="location-card empty">
-          <p>Aucune location confirmée</p>
-        </div>
-
+        <% if (confirmedLocations && confirmedLocations.length) { %>
+          <% confirmedLocations.forEach(function(loc) { %>
+            <div class="product-card">
+              <h3 class="product-title"><%= loc.type %></h3>
+              <div class="product-price"><%= loc.prix_total %> €</div>
+              <img src="<%= loc.imageUrl %>" alt="<%= loc.type %>" class="product-image">
+              <button class="product-button">Voir détails</button>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="location-card empty">
+            <p>Aucune location confirmée</p>
+          </div>
+        <% } %>
       </div>
 
     </main>
