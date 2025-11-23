@@ -58,7 +58,6 @@ app.get("/", (req, res) => res.render("home"));
 app.get("/home", (req, res) => res.render("home"));
 app.get("/register", (req, res) => res.render("register"));
 app.get("/login", (req, res) => res.render("login"));
-app.get("/locations", (req, res) => res.render("locations"));
 app.get("/catalogue", async (req, res) => {
   try {
     // Vérifiez que produitModel est bien importé et a la méthode getAllProduits
@@ -68,8 +67,28 @@ app.get("/catalogue", async (req, res) => {
   } catch (err) {
     console.error("Erreur produits :", err);
     res.status(500).render("catalogue", { produits: [] });
-  }
+  }  
 });
+
+
+app.get("/locations", (req, res) => {
+
+
+  let data = {
+    pendingLocations: [
+      {type: "Vélo électrique", prix_total: 120}
+    ],
+    confirmedLocations: [
+      {type: "Vélo électrique", prix_total: 120}
+    ],
+  };
+
+
+  res.render("locations", data);
+
+});
+
+
 app.get("/product", async (req, res) => {
   try {
     // Vérifiez que produitModel est bien importé et a la méthode getAllProduits
@@ -84,7 +103,6 @@ app.get("/product", async (req, res) => {
 
 // Pages secondaires
 app.get("/ajout_produit", isAdmin, (req, res) => res.render("ajout_produit"));
-app.get("/locations", authMiddleware, (req, res) => res.render("locations"));
 app.get("/returnprod", authMiddleware, (req, res) => res.render("returnprod"));
 app.get("/inscription_agent", isAdmin, (req, res) => res.render("inscription_agent"));
 
