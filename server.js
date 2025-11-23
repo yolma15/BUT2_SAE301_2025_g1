@@ -201,9 +201,9 @@ app.post("/register", async (req, res) => {
   }
 
   // Validation longueur mot de passe
-  if (password.length < 8) {
+  if (password.length < 4) {
     return res.render("register", {
-      message: "Le mot de passe doit contenir au moins 8 caractères",
+      message: "Le mot de passe doit contenir au moins 4 caractères",
     });
   }
 
@@ -468,10 +468,10 @@ app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
   }
 
   // 4. Validation longueur
-  if (nouveau_mdp.length < 8) {
+  if (nouveau_mdp.length < 4) {
     return res.json({
       success: false,
-      error: "Le mot de passe doit contenir au moins 8 caractères.",
+      error: "Le mot de passe doit contenir au moins 4 caractères.",
     });
   }
 
@@ -709,9 +709,9 @@ app.post("/inscription_agent", authMiddleware, isAdmin, async (req, res) => {
   }
 
   // Validation du mot de passe
-  if (password.length < 8) {
+  if (password.length < 4) {
     return res.render("inscription_agent", {
-      message: "Le mot de passe doit contenir au moins 8 caractères",
+      message: "Le mot de passe doit contenir au moins 4 caractères",
     });
   }
 
