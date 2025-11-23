@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import session from "express-session";
 import bcrypt from "bcrypt";
+import crypto from "crypto"; // Pour supporter MD5 temporairement
 import pool from "./db.js";
 
 const app = express();
@@ -38,6 +39,51 @@ app.use((req, res, next) => {
   res.locals.message = null;
   next();
 });
+
+// ============================================
+// FONCTION UTILITAIRE - VÉRIFICATION MOT DE PASSE
+// ============================================
+
+/**
+ * Vérifie le mot de passe en supportant bcrypt ET MD5 (migration progressive)
+ * @param {string} plainPassword - Mot de passe en clair
+ * @param {string} hashedPassword - Hash stocké en BDD
+ * @returns {Promise<boolean>}
+ */
+async function verifyPassword(plainPassword, hashedPassword) {
+  try {
+    // 1. Tenter avec bcrypt d'abord (format moderne)
+    if (hashedPassword.startsWith('$2b$') || hashedPassword.startsWith('$2a$')) {
+      return await bcrypt.compare(plainPassword, hashedPassword);
+    }
+    
+    // 2. Fallback MD5 (ancien format - à supprimer après migration)
+    const md5Hash = crypto.createHash('md5').update(plainPassword).digest('hex');
+    return md5Hash === hashedPassword;
+    
+  } catch (error) {
+    console.error('Erreur vérification mot de passe:', error);
+    return false;
+  }
+}
+
+/**
+ * Migre automatiquement un mot de passe MD5 vers bcrypt lors de la connexion
+ * @param {number} userId
+ * @param {string} plainPassword
+ */
+async function migratePasswordToBcrypt(userId, plainPassword) {
+  try {
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+    await pool.query(
+      'UPDATE utilisateur SET password = ? WHERE id = ?',
+      [hashedPassword, userId]
+    );
+    console.log(`✅ Mot de passe migré vers bcrypt pour l'utilisateur ${userId}`);
+  } catch (error) {
+    console.error('Erreur migration mot de passe:', error);
+  }
+}
 
 // ============================================
 // MIDDLEWARES D'AUTHENTIFICATION
@@ -202,7 +248,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Connexion
+// Connexion (AVEC SUPPORT MD5 + MIGRATION AUTOMATIQUE)
 app.post("/login", async (req, res) => {
   const { login, password } = req.body;
 
@@ -227,13 +273,19 @@ app.post("/login", async (req, res) => {
 
     const user = results[0];
 
-    // Vérification du mot de passe avec bcrypt
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    // Vérification du mot de passe (bcrypt OU MD5)
+    const passwordMatch = await verifyPassword(password, user.password);
 
     if (!passwordMatch) {
       return res.render("login", {
         message: "Identifiant ou mot de passe incorrect",
       });
+    }
+
+    // ✅ MIGRATION AUTOMATIQUE : Si mot de passe MD5, migrer vers bcrypt
+    if (!user.password.startsWith('$2b$') && !user.password.startsWith('$2a$')) {
+      console.log(`🔄 Migration automatique du mot de passe pour ${user.login}`);
+      await migratePasswordToBcrypt(user.id, password);
     }
 
     // Création de la session
@@ -386,7 +438,7 @@ app.post("/profil/informations", authMiddleware, isClient, async (req, res) => {
   }
 });
 
-// Changement de mot de passe
+// Changement de mot de passe (AVEC SUPPORT MD5)
 app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
   const userId = req.session.userId;
   const { ancien_mdp, nouveau_mdp, confirmer_mdp } = req.body;
@@ -434,14 +486,14 @@ app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
       return res.json({ success: false, error: "Utilisateur introuvable." });
     }
 
-    // 6. Vérification de l'ancien mot de passe
-    const passwordMatch = await bcrypt.compare(ancien_mdp, users[0].password);
+    // 6. Vérification de l'ancien mot de passe (bcrypt OU MD5)
+    const passwordMatch = await verifyPassword(ancien_mdp, users[0].password);
 
     if (!passwordMatch) {
       return res.json({ success: false, error: "Ancien mot de passe incorrect." });
     }
 
-    // 7. Hashage du nouveau mot de passe
+    // 7. Hashage du nouveau mot de passe avec bcrypt
     const newHashedPassword = await bcrypt.hash(nouveau_mdp, 10);
 
     // 8. Mise à jour avec le nouveau mot de passe
@@ -715,4 +767,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Serveur démarré sur http://localhost:${PORT}`);
   console.log(`📝 Environnement: ${process.env.NODE_ENV || "development"}`);
+  console.log(`🔄 Mode de migration: Les mots de passe MD5 seront automatiquement migrés vers bcrypt`);
 });
