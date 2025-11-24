@@ -33,9 +33,9 @@ app.use(
 // Expose session data to EJS views
 app.use((req, res, next) => {
   res.locals.isLoggedIn = Boolean(req.session?.userId);
-  res.locals.userRole = req.session?.userRole || null;
-  res.locals.username = req.session?.username || null;
-  res.locals.userImg = req.session?.userImg || null;
+  res.locals.userRole = req.session?.userRole ;
+  res.locals.username = req.session?.username ;
+  res.locals.userImg = req.session?.userImg ;
   res.locals.message = null;
   next();
 });
@@ -404,6 +404,18 @@ app.get("/profil", authMiddleware, isClient, async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
 // Profil client (POST - modification des informations)
 app.post("/profil/informations", authMiddleware, isClient, async (req, res) => {
   const { email, nom, prenom, ddn } = req.body;
@@ -515,6 +527,23 @@ app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
     });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Créer une location
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
