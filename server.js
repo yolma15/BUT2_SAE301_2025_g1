@@ -33,9 +33,9 @@ app.use(
 // Expose session data to EJS views
 app.use((req, res, next) => {
   res.locals.isLoggedIn = Boolean(req.session?.userId);
-  res.locals.userRole = req.session?.userRole || null;
-  res.locals.username = req.session?.username || null;
-  res.locals.userImg = req.session?.userImg || null;
+  res.locals.userRole = req.session?.userRole ;
+  res.locals.username = req.session?.username ;
+  res.locals.userImg = req.session?.userImg ;
   res.locals.message = null;
   next();
 });
