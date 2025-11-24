@@ -278,7 +278,7 @@ app.post("/login", async (req, res) => {
 
     if (!passwordMatch) {
       return res.render("login", {
-        message: "Identifiant ou mot de passe incorrect",
+        message: "Identifiant ou mot de passe incorrect", 
       });
     }
 
