@@ -11,4 +11,3 @@ VALUES
 -- Ajout de la colonne img à la table utilisateur
 ALTER TABLE utilisateur 
 ADD COLUMN img VARCHAR(255) DEFAULT NULL AFTER email;
-
