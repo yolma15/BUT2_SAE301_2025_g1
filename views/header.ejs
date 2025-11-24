@@ -15,7 +15,7 @@
         </a>
 
         <nav class="main-nav">
-            <% if (typeof isLoggedIn !== 'undefined' && isLoggedIn) { %>
+            <% if (isLoggedIn) { %>
                 
                 <% if (userRole === 'client') { %>
                     <a href="/home">Accueil</a>
@@ -40,7 +40,7 @@
         </nav>
 
         <div class="user-area">
-            <% if (typeof isLoggedIn === 'undefined' || !isLoggedIn) { %>
+            <% if (!isLoggedIn) { %>
                 <a class="btn btn-login" href="/login">Se connecter</a>
                 <a class="btn btn-register" href="/register">S’inscrire</a>
             <% } else { %>
@@ -71,7 +71,7 @@
                         </button>
                         
                         <div class="dropdown-menu" role="menu">
-                            <% if (typeof userRole !== 'undefined' && userRole === 'client') { %>
+                            <% if (userRole === 'client') { %>
                                 <a href="/profil" class="dropdown-item">Mes informations</a>
                                 <form action="/logout" method="post">
                                     <button type="submit" class="dropdown-item danger">
