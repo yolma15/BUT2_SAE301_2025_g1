@@ -404,6 +404,18 @@ app.get("/profil", authMiddleware, isClient, async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
 // Profil client (POST - modification des informations)
 app.post("/profil/informations", authMiddleware, isClient, async (req, res) => {
   const { email, nom, prenom, ddn } = req.body;
@@ -515,6 +527,23 @@ app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
     });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Créer une location
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
