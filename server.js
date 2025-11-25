@@ -4,29 +4,11 @@ import session from "express-session";
 import bcrypt from "bcrypt";
 import crypto from "crypto"; // Pour supporter MD5 temporairement
 import pool from "./db.js";
-import multer from "multer"; // --- AJOUT MULTER ---
 
 const app = express();
 
 // ============================================
-// CONFIGURATION MULTER (UPLOAD IMAGES)
-// ============================================
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // Les images seront stockées dans public/uploads
-    cb(null, 'public/uploads/') 
-  },
-  filename: function (req, file, cb) {
-    // Renommage unique : timestamp + extension originale
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage: storage });
-
-// ============================================
-// CONFIGURATION EXPRESS
+// CONFIGURATION
 // ============================================
 
 app.set("view engine", "ejs");
@@ -449,33 +431,25 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
   }
 });
 
-// Route Affichage Formulaire
+// --- MODIFICATION ICI : Route alignée avec le header (/agent/ajout_produit) ---
+// Utilisation de isAgent pour autoriser agents et admins
 app.get("/agent/ajout_produit", authMiddleware, isAgent, (req, res) => {
     res.render("ajout_produit", { message: null });
 });
 
-// --- MODIFICATION ICI : Traitement Formulaire avec Image ---
-app.post("/agent/ajout_produit", authMiddleware, isAgent, upload.single('image'), async (req, res) => {
-  // Grâce à multer, req.body contient maintenant les champs textes
+app.post("/agent/ajout_produit", authMiddleware, isAgent, async (req, res) => {
   const { type, marque, modele, prix_location, description, etat } = req.body;
-  // Et req.file contient le fichier image
-  const imageFilename = req.file ? req.file.filename : null; 
   
-  if (!type || !marque || !modele || !prix_location) {
-      return res.render("ajout_produit", { message: "Champs requis" });
-  }
+  if (!type || !marque || !modele || !prix_location) return res.render("ajout_produit", { message: "Champs requis" });
 
   try {
-    // J'ajoute l'image dans la requête INSERT
-    // Assurez-vous que votre table 'produit' a bien une colonne 'img' ou 'image'
     await pool.query(
-      "INSERT INTO produit (type, description, marque, modele, prix_location, etat, img) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [type, description || "", marque, modele, parseFloat(prix_location), etat, imageFilename]
+      "INSERT INTO produit (type, description, marque, modele, prix_location, etat) VALUES (?, ?, ?, ?, ?, ?)",
+      [type, description || "", marque, modele, parseFloat(prix_location), etat]
     );
-    res.render("ajout_produit", { message: "Produit ajouté avec succès !" });
+    res.render("ajout_produit", { message: "Produit ajouté" });
   } catch (err) {
-    console.error("Erreur ajout produit:", err);
-    res.status(500).render("ajout_produit", { message: "Erreur ajout dans la base de données" });
+    res.status(500).render("ajout_produit", { message: "Erreur ajout" });
   }
 });
 

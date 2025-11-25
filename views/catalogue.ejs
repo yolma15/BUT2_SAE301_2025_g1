@@ -11,80 +11,87 @@
 <body>
     <%- include('header') %>
 
-        <div class="content-wrapper">
-            <form class="search-container" action="/catalogue" method="GET">
-                <input type="text" name="search" id="searchBar" placeholder="Rechercher un produit..."
-                    value="<%= typeof currentSearch !== 'undefined' ? currentSearch : '' %>">
+    <div class="content-wrapper">
+        <form class="search-container" action="/catalogue" method="GET">
+            <input type="text" name="search" id="searchBar" placeholder="Rechercher un produit..."
+                value="<%= typeof currentSearch !== 'undefined' ? currentSearch : '' %>">
 
-                <% if (typeof currentCategory !=='undefined' && currentCategory) { %>
-                    <input type="hidden" name="category" value="<%= currentCategory %>">
-                    <% } %>
+            <% if (typeof currentCategory !=='undefined' && currentCategory) { %>
+                <input type="hidden" name="category" value="<%= currentCategory %>">
+            <% } %>
 
-                        <select name="sort" class="sort-dropdown" id="sortMenu">
-                            <option value="default" <%=typeof currentSort==='undefined' || currentSort==='default'
-                                ? 'selected' : '' %>>Trier par...</option>
-                            <option value="priceAsc" <%=typeof currentSort !=='undefined' && currentSort==='priceAsc'
-                                ? 'selected' : '' %>>Prix : croissant</option>
-                            <option value="priceDesc" <%=typeof currentSort !=='undefined' && currentSort==='priceDesc'
-                                ? 'selected' : '' %>>Prix : décroissant</option>
-                            <option value="popularity" <%=typeof currentSort !=='undefined' &&
-                                currentSort==='popularity' ? 'selected' : '' %>>Popularité</option>
-                            <option value="rating" <%=typeof currentSort !=='undefined' && currentSort==='rating'
-                                ? 'selected' : '' %>>Meilleures notes</option>
-                        </select>
+            <select name="sort" class="sort-dropdown" id="sortMenu">
+                <option value="default" <%=typeof currentSort==='undefined' || currentSort==='default' ? 'selected' : '' %>>Trier par...</option>
+                <option value="priceAsc" <%=typeof currentSort !=='undefined' && currentSort==='priceAsc' ? 'selected' : '' %>>Prix : croissant</option>
+                <option value="priceDesc" <%=typeof currentSort !=='undefined' && currentSort==='priceDesc' ? 'selected' : '' %>>Prix : décroissant</option>
+                <option value="popularity" <%=typeof currentSort !=='undefined' && currentSort==='popularity' ? 'selected' : '' %>>Popularité</option>
+                <option value="rating" <%=typeof currentSort !=='undefined' && currentSort==='rating' ? 'selected' : '' %>>Meilleures notes</option>
+            </select>
 
-                        <button type="submit" id="searchBtn">🔍</button>
-            </form>
+            <button type="submit" id="searchBtn">🔍</button>
+        </form>
 
-            <div class="main-content-area">
+        <div class="main-content-area">
 
-                <div class="sidebar">
-                    <a href="/catalogue?sort=<%= currentSort || '' %>&search=<%= currentSearch || '' %>"
-                        class="category-link <%= typeof currentCategory === 'undefined' || !currentCategory ? 'active' : '' %>">
-                        <button class="category-button">Toutes Catégories</button>
-                    </a>
+            <div class="sidebar">
+                <a href="/catalogue?sort=<%= currentSort || '' %>&search=<%= currentSearch || '' %>"
+                    class="category-link <%= typeof currentCategory === 'undefined' || !currentCategory ? 'active' : '' %>">
+                    <button class="category-button">Toutes Catégories</button>
+                </a>
 
-                    <% if (typeof categories !=='undefined' && categories.length> 0) { %>
-                        <% categories.forEach(function(category) { %>
-                            <% const
-                                categoryLink=`/catalogue?category=${encodeURIComponent(category)}&sort=${currentSort
-                                || '' }&search=${currentSearch || '' }`; %>
-                                <a href="<%= categoryLink %>"
-                                    class="category-link <%= typeof currentCategory !== 'undefined' && currentCategory === category ? 'active' : '' %>">
-                                    <button class="category-button">
-                                        <%= category %>
-                                    </button>
-                                </a>
-                                <% }) %>
-                                    <% } %>
-                </div>
+                <% if (typeof categories !=='undefined' && categories.length> 0) { %>
+                    <% categories.forEach(function(category) { %>
+                        <% const categoryLink=`/catalogue?category=${encodeURIComponent(category)}&sort=${currentSort || '' }&search=${currentSearch || '' }`; %>
+                        <a href="<%= categoryLink %>"
+                            class="category-link <%= typeof currentCategory !== 'undefined' && currentCategory === category ? 'active' : '' %>">
+                            <button class="category-button">
+                                <%= category %>
+                            </button>
+                        </a>
+                    <% }) %>
+                <% } %>
+            </div>
 
-                <div class="product-list">
-                    <% if (typeof produits !=='undefined' && produits.length> 0) { %>
-                        <% produits.forEach(function(produit) { %>
-                            <div class="product-card">
-                                <h3 class="product-title">
-                                    <%= produit.modele %>
-                                </h3>
-                                <div class="product-price">
-                                    <%= produit.prix_location %> € / jour
-                                </div>
-
-                                <img src="/img/<%= produit.modele.replace(/\s+/g, '') %>.jpeg"
-                                    alt="<%= produit.modele %>" class="product-image">
-
-                                <a href="/product/<%= produit.id %>" class="product-button">Voir détails</a>
+            <div class="product-list">
+                <% if (typeof produits !=='undefined' && produits.length> 0) { %>
+                    <% produits.forEach(function(produit) { %>
+                        <div class="product-card">
+                            <h3 class="product-title">
+                                <%= produit.modele %>
+                            </h3>
+                            <div class="product-price">
+                                <%= produit.prix_location %> € / jour
                             </div>
-                            <% }) %>
+
+                            <% if (produit.img) { %>
+                                <% if (produit.img.startsWith('img/') || produit.img.startsWith('http')) { %>
+                                    <img src="/<%= produit.img %>" 
+                                         alt="<%= produit.modele %>" 
+                                         class="product-image"
+                                         onerror="this.onerror=null; this.src='https://placehold.co/300x200?text=Image+Manquante';">
                                 <% } else { %>
-                                    <p class="no-results">Aucun produit ne correspond à vos critères de recherche ou de
-                                        filtre.</p>
-                                    <% } %>
-                </div>
+                                    <img src="/uploads/<%= produit.img %>" 
+                                         alt="<%= produit.modele %>" 
+                                         class="product-image"
+                                         onerror="this.onerror=null; this.src='https://placehold.co/300x200?text=Image+Manquante';">
+                                <% } %>
+                            <% } else { %>
+                                <img src="https://placehold.co/300x200?text=Pas+d'image" 
+                                     alt="Image par défaut" 
+                                     class="product-image">
+                            <% } %>
+
+                            <a href="/product/<%= produit.id %>" class="product-button">Voir détails</a>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p class="no-results">Aucun produit ne correspond à vos critères de recherche ou de filtre.</p>
+                <% } %>
             </div>
         </div>
+    </div>
 
-        <%- include('footer') %>
+    <%- include('footer') %>
 </body>
 
 </html>
