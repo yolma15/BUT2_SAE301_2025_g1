@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Catalogue</title>
     <link rel="stylesheet" href="/css/Catalogue.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -55,37 +56,38 @@
             <div class="product-list">
                 <% if (typeof produits !=='undefined' && produits.length> 0) { %>
                     <% produits.forEach(function(produit) { %>
+                        
                         <div class="product-card">
                             <h3 class="product-title">
                                 <%= produit.modele %>
                             </h3>
-                            <div class="product-price">
-                                <%= produit.prix_location %> € / jour
-                            </div>
 
-                            <% if (produit.img) { %>
-                                <% if (produit.img.startsWith('img/') || produit.img.startsWith('http')) { %>
-                                    <img src="/<%= produit.img %>" 
-                                         alt="<%= produit.modele %>" 
-                                         class="product-image"
-                                         onerror="this.onerror=null; this.src='https://placehold.co/300x200?text=Image+Manquante';">
-                                <% } else { %>
-                                    <img src="/uploads/<%= produit.img %>" 
-                                         alt="<%= produit.modele %>" 
-                                         class="product-image"
-                                         onerror="this.onerror=null; this.src='https://placehold.co/300x200?text=Image+Manquante';">
-                                <% } %>
-                            <% } else { %>
-                                <img src="https://placehold.co/300x200?text=Pas+d'image" 
-                                     alt="Image par défaut" 
-                                     class="product-image">
-                            <% } %>
+                            <div class="card-content-row">
+                                
+                                <div class="product-price">
+                                    <span class="price-val"><%= produit.prix_location %> €</span>
+                                    <span class="price-unit">/jour</span>
+                                </div>
+
+                                <div class="image-wrapper">
+                                    <% if (produit.img) { %>
+                                        <% if (produit.img.startsWith('img/') || produit.img.startsWith('http')) { %>
+                                            <img src="/<%= produit.img %>" alt="<%= produit.modele %>" class="product-image">
+                                        <% } else { %>
+                                            <img src="/uploads/<%= produit.img %>" alt="<%= produit.modele %>" class="product-image">
+                                        <% } %>
+                                    <% } else { %>
+                                        <img src="https://placehold.co/150x150?text=No+Img" alt="Image par défaut" class="product-image">
+                                    <% } %>
+                                </div>
+                            </div>
 
                             <a href="/product/<%= produit.id %>" class="product-button">Voir détails</a>
                         </div>
+
                     <% }) %>
                 <% } else { %>
-                    <p class="no-results">Aucun produit ne correspond à vos critères de recherche ou de filtre.</p>
+                    <p class="no-results">Aucun produit ne correspond à vos critères.</p>
                 <% } %>
             </div>
         </div>
@@ -93,5 +95,4 @@
 
     <%- include('footer') %>
 </body>
-
 </html>
