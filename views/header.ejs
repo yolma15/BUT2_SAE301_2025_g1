@@ -47,13 +47,8 @@
                 <div class="user-menu">
                     
                     <% 
-                        // Logique de protection :
-                        // 1. On définit une image par défaut.
-                        let avatarSrc = '/img/avatar-default.png';
-                        
-                        // 2. On vérifie si la variable userImg existe ET n'est pas vide.
-                        // 'typeof' empêche le crash "ReferenceError" si la variable n'existe pas.
-                        if (typeof userImg !== 'undefined' && userImg) {
+                        let avatarSrc = '/img/default-avatar.png';
+                        if (typeof userImg) {
                             avatarSrc = '/img/' + userImg;
                         }
                     %>
