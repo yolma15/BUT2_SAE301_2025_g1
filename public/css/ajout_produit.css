@@ -1,6 +1,3 @@
-/* =========================================
-   RESET & GLOBAL
-   ========================================= */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -9,171 +6,167 @@
 
 body {
     font-family: 'Lexend', sans-serif;
-    background-color: #f8f9fa; /* Gris très clair pour le fond */
-    color: #333;
+    background-color: #f8f9fa;
+    color: #343a40;
     line-height: 1.6;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-/* =========================================
-   LAYOUT PRINCIPAL
-   ========================================= */
 main {
-    flex: 1; /* Pousse le footer vers le bas */
+    width: 90%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    flex: 1;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Aligné en haut avec un peu de marge */
-    padding: 40px 20px;
+    align-items: flex-start;
 }
 
-/* =========================================
-   CONTENEUR DU FORMULAIRE (CARTE)
-   ========================================= */
+h1 {
+    font-family: 'Lexend', sans-serif;
+    color: #343a40;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
 .form-wrapper {
-    background-color: #ffffff;
+    background: #ffffff;
     width: 100%;
-    max-width: 700px; /* Largeur maximale pour ne pas être trop étiré */
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* Ombre douce */
+    max-width: 800px;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid #eee;
 }
 
-/* Titre */
-.form-wrapper h1 {
-    text-align: center;
-    font-family: 'Lexend', sans-serif;
-    color: #333;
-    font-size: 1.8rem;
-    margin-bottom: 30px;
-    font-weight: 700;
-}
-
-/* =========================================
-   MESSAGES D'ALERTE
-   ========================================= */
 .alert-message {
-    padding: 15px;
+    padding: 1rem 1.5rem;
     border-radius: 8px;
-    margin-bottom: 25px;
+    margin-bottom: 2rem;
     text-align: center;
     font-weight: 500;
-    font-size: 0.95rem;
-    background-color: #e3f2fd; /* Bleu clair par défaut */
-    color: #0d47a1;
-    border: 1px solid #bbdefb;
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
 }
 
-/* =========================================
-   STYLES DU FORMULAIRE
-   ========================================= */
-
-/* Groupe de champ (Label + Input) */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
     display: flex;
     flex-direction: column;
 }
 
-/* Ligne pour mettre deux champs côte à côte */
 .form-row {
     display: flex;
-    gap: 20px; /* Espace entre les colonnes */
+    gap: 20px;
 }
 
 .form-row .form-group {
-    flex: 1; /* Chaque champ prend 50% de l'espace */
+    flex: 1;
 }
 
-/* Labels */
 label {
     font-weight: 600;
-    margin-bottom: 8px;
-    color: #555;
-    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    color: #495057;
+    font-size: 1rem;
 }
 
-/* Champs de saisie (Input, Select, Textarea) */
+/* --- MODIFICATION 1 : Bordures rouges par défaut --- */
 input[type="text"],
 input[type="number"],
 select,
 textarea {
     width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #e0e0e0;
+    padding: 0.75rem;
+    border: 1px solid #FD5035; /* Rouge par défaut */
     border-radius: 8px;
     font-family: 'Lexend', sans-serif;
     font-size: 1rem;
-    color: #333;
+    color: #495057;
     background-color: #fff;
-    transition: all 0.3s ease;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
 }
 
-/* État focus (quand on clique dedans) */
+/* --- MODIFICATION 2 : Drop Shadow au clic (Focus) --- */
 input:focus,
 select:focus,
 textarea:focus {
-    border-color: #FD5035; /* Votre couleur orange */
+    border-color: #FD5035;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(253, 80, 53, 0.1); /* Légère lueur orange */
+    /* Ombre portée pour effet de profondeur */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.10);
+    /* Optionnel : Légère translation vers le haut pour accentuer l'effet */
+    transform: translateY(-2px);
 }
 
-/* Placeholder */
-::placeholder {
-    color: #aaa;
-}
-
-/* Zone de texte (Textarea) */
 textarea {
-    resize: vertical; /* Permet de redimensionner uniquement en hauteur */
-    min-height: 100px;
+    resize: vertical;
+    min-height: 120px;
 }
 
-/* =========================================
-   BOUTON DE SOUMISSION
-   ========================================= */
+input[type="file"] {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da; /* Je laisse le dashed gris pour le fichier, ou mettre #FD5035 si tu préfères */
+    cursor: pointer;
+}
+
+input[type="file"]:hover {
+    background-color: #e9ecef;
+}
+
 .btn-submit {
     display: block;
     width: 100%;
-    padding: 14px;
-    margin-top: 20px;
-    background-color: #FD5035;
-    color: white;
-    border: none;
-    border-radius: 50px; /* Bouton arrondi */
+    max-width: 300px;
+    margin: 2rem auto 0;
+    padding: 0.75rem 1.5rem;
     font-size: 1.1rem;
     font-weight: 600;
+    border-radius: 20px;
     cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.3s ease;
-    box-shadow: 0 4px 10px rgba(253, 80, 53, 0.3);
+    transition: background-color 0.3s, color 0.3s, transform 0.2s;
+    background-color: #FD5035;
+    color: #ffffff;
+    border: 2px solid #FD5035;
 }
 
 .btn-submit:hover {
-    background-color: #e0432b; /* Orange un peu plus foncé */
-    transform: translateY(-2px); /* Léger effet de soulèvement */
+    background-color: #ffffff;
+    color: #FD5035;
+    box-shadow: 0 4px 12px rgba(253, 80, 53, 0.2);
 }
 
 .btn-submit:active {
     transform: translateY(0);
 }
 
-/* =========================================
-   RESPONSIVE (MOBILES)
-   ========================================= */
-@media (max-width: 600px) {
-    .form-wrapper {
-        padding: 25px 20px;
+@media (max-width: 768px) {
+    main {
+        width: 100%;
+        padding: 0 1rem;
     }
 
-    /* Empiler les champs qui sont sur une ligne */
+    .form-wrapper {
+        padding: 1.5rem;
+    }
+
     .form-row {
         flex-direction: column;
         gap: 0;
     }
 
     h1 {
-        font-size: 1.5rem;
+        font-size: 2rem;
+    }
+
+    .btn-submit {
+        max-width: 100%;
     }
 }
