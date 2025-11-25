@@ -8,7 +8,8 @@ body {
 }
 
 main {
-    max-width: 900px;
+    width: 90%; /* Modifié pour prendre une grande partie de la largeur */
+    max-width: 1200px; /* Nouvelle limite maximale pour les très grands écrans */
     margin: 2rem auto;
     padding: 0 1.5rem;
     display: flex;
@@ -127,7 +128,7 @@ h2 {
 
 .field-group label {
     font-weight: 600;
-    width: 30%; /* Pour aligner visuellement les inputs */
+    width: 20%; 
     color: #495057;
 }
 
@@ -135,7 +136,7 @@ h2 {
 
 .info-section input {
     /* Style de base pour un affichage propre */
-    flex-grow: 1;
+    flex-grow: 1; 
     font-size: 1.1rem;
     padding: 0.5rem;
     margin-left: 10px;
@@ -143,6 +144,7 @@ h2 {
     transition: all 0.3s ease;
     border-radius: 4px;
     color: #343a40;
+    width: 100%; 
 }
 
 /* Style des champs en mode Lecture Seule (par défaut) */
@@ -257,6 +259,7 @@ h2 {
     main {
         padding: 0 1rem;
         gap: 1.5rem;
+        width: 100%; /* S'assure que main prend toute la largeur disponible */
     }
 
     h1 {
