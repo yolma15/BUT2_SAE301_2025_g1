@@ -1,172 +1,123 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
+/* =========================================
+   1. RESET & BASES
+   ========================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: 'Lexend', sans-serif;
-    background-color: #f8f9fa;
-    color: #343a40;
-    line-height: 1.6;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    background-color: #ffffff; color: #343a40; line-height: 1.6;
+    display: flex; flex-direction: column; min-height: 100vh;
 }
-
 main {
-    width: 90%;
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1.5rem;
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    width: 90%; max-width: 1000px; margin: 3rem auto; padding: 0 1.5rem; flex: 1;
 }
 
+/* =========================================
+   2. TITRE & ALERTES
+   ========================================= */
 h1 {
-    font-family: 'Lexend', sans-serif;
-    color: #343a40;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 1.5rem;
+    font-family: 'Lexend', sans-serif; color: #FD5035; font-size: 3rem;
+    font-weight: 700; text-align: center; margin-bottom: 3rem;
 }
-
-.form-wrapper {
-    background: #ffffff;
-    width: 100%;
-    max-width: 800px;
-    padding: 2.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border: 1px solid #eee;
-}
-
 .alert-message {
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    text-align: center;
-    font-weight: 500;
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
+    padding: 1rem 1.5rem; border-radius: 50px; margin-bottom: 2rem;
+    text-align: center; font-weight: 500; background-color: #ffffff;
+    color: #c0392b; border: 1px solid #fadbd8; max-width: 600px;
+    margin-left: auto; margin-right: auto;
+}
+.form-wrapper { width: 100%; background: transparent; }
+
+/* =========================================
+   3. LAYOUT GRILLE
+   ========================================= */
+.form-grid-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 3rem;
 }
 
-.form-group {
-    margin-bottom: 1.5rem;
+/* =========================================
+   4. STYLE DES CHAMPS (GAUCHE)
+   ========================================= */
+.input-wrapper { margin-bottom: 1.5rem; }
+input[type="text"], input[type="number"], select, textarea {
+    width: 100%; padding: 1rem 1.5rem; border: 1px solid #FD5035;
+    border-radius: 50px; font-family: 'Lexend', sans-serif; font-size: 1rem;
+    color: #555; background-color: #fff; outline: none;
+    transition: box-shadow 0.3s, transform 0.2s;
+}
+textarea { border-radius: 25px; resize: none; min-height: 140px; }
+::placeholder { color: #aaa; }
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 8px 20px rgba(253, 80, 53, 0.15); transform: translateY(-2px);
+}
+
+/* =========================================
+   5. STYLE ZONE IMAGE (DROITE) - MODIFIÉ
+   ========================================= */
+.right-image-area { display: flex; flex-direction: column; }
+
+.image-box {
+    flex: 1;
+    min-height: 350px; /* Un peu plus haut pour accueillir l'image */
+    border: 1px solid #FD5035;
+    border-radius: 30px;
+    background-color: #fff;
     display: flex;
     flex-direction: column;
+    /* MODIFICATION ICI : sépare l'image (haut) des contrôles (bas) */
+    justify-content: space-between; 
+    align-items: center;
+    padding: 25px;
+    position: relative;
+    overflow: hidden; /* Empêche l'image de dépasser si bug */
 }
 
-.form-row {
-    display: flex;
-    gap: 20px;
+/* Style de l'image d'aperçu */
+#image-preview-tag {
+    max-width: 100%;
+    max-height: 250px; /* Hauteur max pour ne pas écraser le bouton */
+    object-fit: contain; /* L'image garde ses proportions */
+    border-radius: 15px;
+    margin-bottom: 20px;
+    flex-grow: 1; /* Prend l'espace disponible */
 }
 
-.form-row .form-group {
-    flex: 1;
-}
-
-label {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #495057;
-    font-size: 1rem;
-}
-
-/* --- MODIFICATION 1 : Bordures rouges par défaut --- */
-input[type="text"],
-input[type="number"],
-select,
-textarea {
+/* Conteneur pour le bouton et le texte en bas */
+.upload-controls {
+    text-align: center;
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #FD5035; /* Rouge par défaut */
-    border-radius: 8px;
-    font-family: 'Lexend', sans-serif;
-    font-size: 1rem;
-    color: #495057;
-    background-color: #fff;
-    transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
 }
 
-/* --- MODIFICATION 2 : Drop Shadow au clic (Focus) --- */
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: #FD5035;
-    outline: none;
-    /* Ombre portée pour effet de profondeur */
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.10);
-    /* Optionnel : Légère translation vers le haut pour accentuer l'effet */
-    transform: translateY(-2px);
-}
+#real-file { display: none; }
 
-textarea {
-    resize: vertical;
-    min-height: 120px;
+.btn-image {
+    display: inline-block; background-color: #FD5035; color: white;
+    padding: 10px 30px; border-radius: 50px; font-weight: 500;
+    cursor: pointer; font-size: 1rem; margin-bottom: 5px;
+    transition: background-color 0.3s, transform 0.2s;
 }
+.btn-image:hover { background-color: #e03e25; transform: scale(1.05); }
+#file-chosen { font-size: 0.9rem; color: #888; display: block; }
 
-input[type="file"] {
-    padding: 10px;
-    background-color: #f8f9fa;
-    border: 1px dashed #ced4da; /* Je laisse le dashed gris pour le fichier, ou mettre #FD5035 si tu préfères */
-    cursor: pointer;
-}
-
-input[type="file"]:hover {
-    background-color: #e9ecef;
-}
-
+/* =========================================
+   6. BOUTON SOUMETTRE (BAS)
+   ========================================= */
 .btn-submit {
-    display: block;
-    width: 100%;
-    max-width: 300px;
-    margin: 2rem auto 0;
-    padding: 0.75rem 1.5rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s, transform 0.2s;
-    background-color: #FD5035;
-    color: #ffffff;
-    border: 2px solid #FD5035;
+    display: block; margin: 0 auto; padding: 1rem 4rem; font-size: 1.5rem;
+    font-weight: 600; border-radius: 50px; cursor: pointer;
+    background-color: #FD5035; color: #ffffff; border: none;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
 }
-
 .btn-submit:hover {
-    background-color: #ffffff;
-    color: #FD5035;
-    box-shadow: 0 4px 12px rgba(253, 80, 53, 0.2);
+    background-color: #e03e25; transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(253, 80, 53, 0.3);
 }
 
-.btn-submit:active {
-    transform: translateY(0);
-}
-
+/* =========================================
+   7. RESPONSIVE (MOBILE)
+   ========================================= */
 @media (max-width: 768px) {
-    main {
-        width: 100%;
-        padding: 0 1rem;
-    }
-
-    .form-wrapper {
-        padding: 1.5rem;
-    }
-
-    .form-row {
-        flex-direction: column;
-        gap: 0;
-    }
-
-    h1 {
-        font-size: 2rem;
-    }
-
-    .btn-submit {
-        max-width: 100%;
-    }
+    main { width: 100%; padding: 0 1rem; margin: 2rem auto; }
+    h1 { font-size: 2rem; }
+    .form-grid-layout { grid-template-columns: 1fr; gap: 20px; }
+    .image-box { min-height: 300px; }
+    .btn-submit { width: 100%; font-size: 1.2rem; }
 }

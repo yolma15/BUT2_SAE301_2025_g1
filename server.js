@@ -4,11 +4,36 @@ import session from "express-session";
 import bcrypt from "bcrypt";
 import crypto from "crypto"; // Pour supporter MD5 temporairement
 import pool from "./db.js";
+import multer from "multer"; // IMPORT INDISPENSABLE
+import fs from "fs";         // IMPORT INDISPENSABLE
 
 const app = express();
 
 // ============================================
-// CONFIGURATION
+// CONFIGURATION MULTER (UPLOAD IMAGES)
+// ============================================
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dir = 'public/uploads/';
+    // Vérifie si le dossier existe, sinon le crée automatiquement
+    if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    // Génère un nom unique : timestamp + extension originale
+    // Nettoie le nom pour éviter les caractères spéciaux
+    const cleanName = file.originalname.replace(/[^a-zA-Z0-9.]/g, "_");
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + cleanName);
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// ============================================
+// CONFIGURATION EXPRESS
 // ============================================
 
 app.set("view engine", "ejs");
@@ -46,29 +71,19 @@ app.use((req, res, next) => {
 // FONCTIONS UTILITAIRES
 // ============================================
 
-/**
- * Vérifie le mot de passe en supportant bcrypt ET MD5 (migration progressive)
- */
 async function verifyPassword(plainPassword, hashedPassword) {
   try {
-    // 1. Tenter avec bcrypt (format moderne)
     if (hashedPassword.startsWith('$2b$') || hashedPassword.startsWith('$2a$')) {
       return await bcrypt.compare(plainPassword, hashedPassword);
     }
-    
-    // 2. Fallback MD5 (ancien format)
     const md5Hash = crypto.createHash('md5').update(plainPassword).digest('hex');
     return md5Hash === hashedPassword;
-    
   } catch (error) {
     console.error('Erreur vérification mot de passe:', error);
     return false;
   }
 }
 
-/**
- * Migre automatiquement un mot de passe MD5 vers bcrypt
- */
 async function migratePasswordToBcrypt(userId, plainPassword) {
   try {
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
@@ -98,7 +113,6 @@ function isAdmin(req, res, next) {
 }
 
 function isAgent(req, res, next) {
-  // Permet l'accès aux agents ET aux admins
   if (req.session?.userRole === "agent" || req.session?.userRole === "admin") return next();
   return res.status(403).render("error", { message: "Accès réservé aux agents", code: 403 });
 }
@@ -190,7 +204,6 @@ app.post("/register", async (req, res) => {
 
   if (password.length < 4) return res.render("register", { message: "Mot de passe trop court" });
 
-  // Validation âge (18 ans)
   const dateNaissance = new Date(ddn);
   const age = new Date().getFullYear() - dateNaissance.getFullYear();
   if (age < 18) return res.render("register", { message: "Vous devez avoir au moins 18 ans" });
@@ -220,12 +233,10 @@ app.post("/login", async (req, res) => {
     const match = await verifyPassword(password, user.password);
     if (!match) return res.render("login", { message: "Identifiants incorrects" });
 
-    // Migration MD5 -> Bcrypt
     if (!user.password.startsWith('$2b$') && !user.password.startsWith('$2a$')) {
       await migratePasswordToBcrypt(user.id, password);
     }
 
-    // Session
     req.session.userId = user.id;
     req.session.userRole = user.type_utilisateur;
     req.session.username = user.prenom || user.login;
@@ -267,7 +278,6 @@ app.get("/mes-locations", authMiddleware, isClient, async (req, res) => {
   }
 });
 
-// Affichage du profil
 app.get("/profil", authMiddleware, isClient, async (req, res) => {
   try {
     const [users] = await pool.query(
@@ -277,7 +287,6 @@ app.get("/profil", authMiddleware, isClient, async (req, res) => {
 
     if (users.length === 0) return res.redirect("/logout");
 
-    // Gestion des messages de succès/erreur via query params
     let profilMessage = null;
     const msg = req.query.message;
     const msgMap = {
@@ -358,7 +367,6 @@ app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
   }
 });
 
-// Création Location
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const { produit_id, date_debut, date_retour_prevue } = req.body;
   if (!produit_id || !date_debut || !date_retour_prevue) return res.status(400).json({ error: "Champs requis" });
@@ -388,7 +396,6 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   }
 });
 
-// Retour Produit
 app.get("/returnprod", authMiddleware, isClient, (req, res) => res.render("returnprod"));
 
 app.post("/returnprod", authMiddleware, isClient, async (req, res) => {
@@ -431,25 +438,34 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
   }
 });
 
-// --- MODIFICATION ICI : Route alignée avec le header (/agent/ajout_produit) ---
-// Utilisation de isAgent pour autoriser agents et admins
+// Route Affichage Formulaire
 app.get("/agent/ajout_produit", authMiddleware, isAgent, (req, res) => {
     res.render("ajout_produit", { message: null });
 });
 
-app.post("/agent/ajout_produit", authMiddleware, isAgent, async (req, res) => {
+// --- MODIFICATION ICI : Traitement Formulaire avec Image ---
+// On utilise upload.single('image') pour gérer le fichier envoyé
+app.post("/agent/ajout_produit", authMiddleware, isAgent, upload.single('image'), async (req, res) => {
+  // Grâce à multer, req.body contient maintenant les champs textes
   const { type, marque, modele, prix_location, description, etat } = req.body;
   
-  if (!type || !marque || !modele || !prix_location) return res.render("ajout_produit", { message: "Champs requis" });
+  // Et req.file contient le fichier image
+  const imageFilename = req.file ? req.file.filename : null; 
+  
+  if (!type || !marque || !modele || !prix_location) {
+      return res.render("ajout_produit", { message: "❌ Champs requis manquants" });
+  }
 
   try {
+    // Insertion dans la BDD avec le nom de l'image
     await pool.query(
-      "INSERT INTO produit (type, description, marque, modele, prix_location, etat) VALUES (?, ?, ?, ?, ?, ?)",
-      [type, description || "", marque, modele, parseFloat(prix_location), etat]
+      "INSERT INTO produit (type, description, marque, modele, prix_location, etat, img) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [type, description || "", marque, modele, parseFloat(prix_location), etat, imageFilename]
     );
-    res.render("ajout_produit", { message: "Produit ajouté" });
+    res.render("ajout_produit", { message: "✅ Produit ajouté avec succès !" });
   } catch (err) {
-    res.status(500).render("ajout_produit", { message: "Erreur ajout" });
+    console.error("Erreur ajout produit:", err);
+    res.status(500).render("ajout_produit", { message: "❌ Erreur ajout dans la base de données" });
   }
 });
 
