@@ -1,159 +1,123 @@
+/* =========================================
+   1. RESET & BASES
+   ========================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: 'Lexend', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #fff;
-  color: #FD5035;
+    font-family: 'Lexend', sans-serif;
+    background-color: #ffffff; color: #343a40; line-height: 1.6;
+    display: flex; flex-direction: column; min-height: 100vh;
 }
-
 main {
-  padding: 20px;
-  max-width: 900px;
-  margin: auto;
+    width: 90%; max-width: 1000px; margin: 3rem auto; padding: 0 1.5rem; flex: 1;
 }
 
+/* =========================================
+   2. TITRE & ALERTES
+   ========================================= */
 h1 {
-  text-align: center;
-  font-weight: 400;
-  font-size: 3rem;
-  margin-bottom: 5%;
+    font-family: 'Lexend', sans-serif; color: #FD5035; font-size: 3rem;
+    font-weight: 700; text-align: center; margin-bottom: 3rem;
+}
+.alert-message {
+    padding: 1rem 1.5rem; border-radius: 50px; margin-bottom: 2rem;
+    text-align: center; font-weight: 500; background-color: #ffffff;
+    color: #c0392b; border: 1px solid #fadbd8; max-width: 600px;
+    margin-left: auto; margin-right: auto;
+}
+.form-wrapper { width: 100%; background: transparent; }
+
+/* =========================================
+   3. LAYOUT GRILLE
+   ========================================= */
+.form-grid-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 3rem;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 30px;
+/* =========================================
+   4. STYLE DES CHAMPS (GAUCHE)
+   ========================================= */
+.input-wrapper { margin-bottom: 1.5rem; }
+input[type="text"], input[type="number"], select, textarea {
+    width: 100%; padding: 1rem 1.5rem; border: 1px solid #FD5035;
+    border-radius: 50px; font-family: 'Lexend', sans-serif; font-size: 1rem;
+    color: #555; background-color: #fff; outline: none;
+    transition: box-shadow 0.3s, transform 0.2s;
+}
+textarea { border-radius: 25px; resize: none; min-height: 140px; }
+::placeholder { color: #aaa; }
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 8px 20px rgba(253, 80, 53, 0.15); transform: translateY(-2px);
 }
 
-.colonnes {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 30px;
-  width: 100%;
-}
+/* =========================================
+   5. STYLE ZONE IMAGE (DROITE) - MODIFIÉ
+   ========================================= */
+.right-image-area { display: flex; flex-direction: column; }
 
-.gauche,
-.droite {
-  flex: 1;
-  min-width: 280px;
-  display: flex;
-  flex-direction: column;
-}
-
-.gauche input,
-.gauche textarea {
-  margin-bottom: 20px;
-}
-
-input[type="text"],
-input[type="number"],
-textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #FD5035;
-  border-radius: 25px;
-  font-size: 16px;
-  text-align: center;
-  outline: none;
-  box-sizing: border-box;
-}
-
-textarea {
-  resize: none;
-  height: 145px;
-  
-}
-
-input::placeholder,
-textarea::placeholder {
-  text-align: center;
-}
-
-input:focus,
-textarea:focus {
-  border: 2px solid #FD5035;
-}
-
-.droite {
-  border: 1px solid #FD5035;
-  border-radius: 25px;
-  padding: 10px;
-  position: relative;
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  overflow: hidden;
-  height: 250px;
-}
-
-.droite input[type="file"] {
-  display: none;
-}
-
-.droite label {
-  cursor: pointer;
-  padding: 10px 18px;
-  background-color: #FD5035;
-  color: #fff;
-  border-radius: 25px;
-  font-size: 1.2rem;
-  font-weight: 400;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-  z-index: 2;
-}
-
-.droite label:hover {
-  background-color: #fff;
-  color: #FD5035;
-  border: 2px solid #FD5035;
-}
-
-.droite img {
-  position: absolute;
-  object-fit: cover;
-  display: none;
-  border-radius: 15px;
-  height: 100%;
-  max-height: 230px;
-  width: auto;
-
-}
-
-input[type="submit"] {
-  padding: 10px 28px;
-  background-color: #FD5035;
-  color: #fff;
-  border: none;
-  border-radius: 30px;
-  font-size: 1.7rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 10px;
-  font-weight: 500;
-}
-
-input[type="submit"]:hover {
-  background-color: #fff;
-  color: #FD5035;
-  border: 2px solid #FD5035;
-}
-
-@media (max-width: 700px) {
-  .colonnes {
+.image-box {
+    flex: 1;
+    min-height: 350px; /* Un peu plus haut pour accueillir l'image */
+    border: 1px solid #FD5035;
+    border-radius: 30px;
+    background-color: #fff;
+    display: flex;
     flex-direction: column;
+    /* MODIFICATION ICI : sépare l'image (haut) des contrôles (bas) */
+    justify-content: space-between; 
     align-items: center;
-  }
+    padding: 25px;
+    position: relative;
+    overflow: hidden; /* Empêche l'image de dépasser si bug */
+}
 
-  .droite {
-    height: auto;
-  }
+/* Style de l'image d'aperçu */
+#image-preview-tag {
+    max-width: 100%;
+    max-height: 250px; /* Hauteur max pour ne pas écraser le bouton */
+    object-fit: contain; /* L'image garde ses proportions */
+    border-radius: 15px;
+    margin-bottom: 20px;
+    flex-grow: 1; /* Prend l'espace disponible */
+}
 
-  textarea {
-    height: auto;
-  }
+/* Conteneur pour le bouton et le texte en bas */
+.upload-controls {
+    text-align: center;
+    width: 100%;
+}
+
+#real-file { display: none; }
+
+.btn-image {
+    display: inline-block; background-color: #FD5035; color: white;
+    padding: 10px 30px; border-radius: 50px; font-weight: 500;
+    cursor: pointer; font-size: 1rem; margin-bottom: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+.btn-image:hover { background-color: #e03e25; transform: scale(1.05); }
+#file-chosen { font-size: 0.9rem; color: #888; display: block; }
+
+/* =========================================
+   6. BOUTON SOUMETTRE (BAS)
+   ========================================= */
+.btn-submit {
+    display: block; margin: 0 auto; padding: 1rem 4rem; font-size: 1.5rem;
+    font-weight: 600; border-radius: 50px; cursor: pointer;
+    background-color: #FD5035; color: #ffffff; border: none;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+.btn-submit:hover {
+    background-color: #e03e25; transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(253, 80, 53, 0.3);
+}
+
+/* =========================================
+   7. RESPONSIVE (MOBILE)
+   ========================================= */
+@media (max-width: 768px) {
+    main { width: 100%; padding: 0 1rem; margin: 2rem auto; }
+    h1 { font-size: 2rem; }
+    .form-grid-layout { grid-template-columns: 1fr; gap: 20px; }
+    .image-box { min-height: 300px; }
+    .btn-submit { width: 100%; font-size: 1.2rem; }
 }
