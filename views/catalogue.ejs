@@ -1,103 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html lang="fr">
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Catalogue</title>
     <link rel="stylesheet" href="/css/Catalogue.css" />
-  </head>
+</head>
 
-  <body>
+<body>
     <%- include('header') %>
 
-  
-    <div class="container">
-        <div class="search-container">
-            <input type="text" id="searchBar" placeholder="Rechercher un produit...">
-            <select class="sort-dropdown" id="sortMenu">
-                <option value="default">Trier par...</option>
-                <option value="priceAsc">Prix : croissant</option>
-                <option value="priceDesc">Prix : décroissant</option>
-                <option value="popularity">Popularité</option>
-                <option value="rating">Meilleures notes</option>
-            </select>
-            <button id="searchBtn">🔍</button>
-        </div>
-        <div class="sidebar">
-            <button id="homeBtn">Fitness</button>
-            <button id="productsBtn">Cardio</button>
-            <button id="servicesBtn">Musculation</button>
-            <button id="contactBtn">Etirement</button>
-            <button id="aboutBtn">Relaxation</button>
-            <button id="aboutBtn">Equipement de mesure</button>
-        </div>
-        <div class="product-list">
-            <!-- Product 1 -->
-            <div class="product-card">
-                <h3 class="product-title">Rameur ram 500</h3>
-                <div class="product-price">99.9 €...</div>
-                <img src="img/TapisCourse1.jpeg" alt="Rameur ram 500" class="product-image">
-                <button class="product-button" href="/product.ejs">Voir détails</button>
-            </div>
+        <div class="content-wrapper">
+            <form class="search-container" action="/catalogue" method="GET">
+                <input type="text" name="search" id="searchBar" placeholder="Rechercher un produit..."
+                    value="<%= typeof currentSearch !== 'undefined' ? currentSearch : '' %>">
 
-            <!-- Product 2 -->
-            <div class="product-card">
-                <h3 class="product-title">Tapis de course run 500</h3>
-                <div class="product-price">99.9 €...</div>
-                <img src="img/TapisCourse2.jpeg" alt="Tapis de course" class="product-image">
-                <button class="product-button">Voir détails</button>
-            </div>
+                <% if (typeof currentCategory !=='undefined' && currentCategory) { %>
+                    <input type="hidden" name="category" value="<%= currentCategory %>">
+                    <% } %>
 
-            <!-- Product 3 -->
-            <div class="product-card">
-                <h3 class="product-title">Vélo elliptique sans guidon walk 500</h3>
-                <div class="product-price">99.9 €...</div>
-                <img src="img/TapisCourse3.jpeg" alt="Vélo elliptique" class="product-image">
-                <button class="product-button">Voir détails</button>
-            </div>
+                        <select name="sort" class="sort-dropdown" id="sortMenu">
+                            <option value="default" <%=typeof currentSort==='undefined' || currentSort==='default'
+                                ? 'selected' : '' %>>Trier par...</option>
+                            <option value="priceAsc" <%=typeof currentSort !=='undefined' && currentSort==='priceAsc'
+                                ? 'selected' : '' %>>Prix : croissant</option>
+                            <option value="priceDesc" <%=typeof currentSort !=='undefined' && currentSort==='priceDesc'
+                                ? 'selected' : '' %>>Prix : décroissant</option>
+                            <option value="popularity" <%=typeof currentSort !=='undefined' &&
+                                currentSort==='popularity' ? 'selected' : '' %>>Popularité</option>
+                            <option value="rating" <%=typeof currentSort !=='undefined' && currentSort==='rating'
+                                ? 'selected' : '' %>>Meilleures notes</option>
+                        </select>
 
-            <!-- Product 4 -->
-            <div class="product-card">
-                <h3 class="product-title">Vélo d'appartement bike 500</h3>
-                <div class="product-price">99.9 €...</div>
-                <img src="img/TapisCourse4.jpeg" alt="Vélo d'appartement" class="product-image">
-                <button class="product-button">Voir détails</button>
-            </div>
+                        <button type="submit" id="searchBtn">🔍</button>
+            </form>
 
-            <!-- Product 5 -->
-            <div class="product-card">
-                <h3 class="product-title">Bracket connecter samsung</h3>
-                <div class="product-price">99.9 €...</div>
-                <img src="img/TapisCourse5.jpeg" alt="Bracket connecter" class="product-image">
-                <button class="product-button">Voir détails</button>
-            </div>
+            <div class="main-content-area">
 
-            <!-- Product 6 -->
-            <div class="product-card">
-                <h3 class="product-title">Marcheur walk 500</h3>
-                <div class="product-price">99.9 €...</div>
-                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Marcheur" alt="Marcheur" class="product-image">
-                <button class="product-button"href="/product">Voir détails</button>
-            </div>
+                <div class="sidebar">
+                    <a href="/catalogue?sort=<%= currentSort || '' %>&search=<%= currentSearch || '' %>"
+                        class="category-link <%= typeof currentCategory === 'undefined' || !currentCategory ? 'active' : '' %>">
+                        <button class="category-button">Toutes Catégories</button>
+                    </a>
 
-            <!-- Product 7 -->
-            <div class="product-card">
-                <h3 class="product-title">Vélo elliptique avec guidon walk 300</h3>
-                <div class="product-price">99.9 €...</div>
-                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Velo+Guidon" alt="Vélo elliptique avec guidon" class="product-image">
-                <button class="product-button">Voir détails</button>
-            </div>
+                    <% if (typeof categories !=='undefined' && categories.length> 0) { %>
+                        <% categories.forEach(function(category) { %>
+                            <% const
+                                categoryLink=`/catalogue?category=${encodeURIComponent(category)}&sort=${currentSort
+                                || '' }&search=${currentSearch || '' }`; %>
+                                <a href="<%= categoryLink %>"
+                                    class="category-link <%= typeof currentCategory !== 'undefined' && currentCategory === category ? 'active' : '' %>">
+                                    <button class="category-button">
+                                        <%= category %>
+                                    </button>
+                                </a>
+                                <% }) %>
+                                    <% } %>
+                </div>
 
-            <!-- Product 8 -->
-            <div class="product-card">
-                <h3 class="product-title">Rammeur ultralight machine</h3>
-                <div class="product-price">99.9 €...</div>
-                <img src="https://via.placeholder.com/200x150/f0f0f0/333?text=Ultralight" alt="Rammeur ultralight" class="product-image">
-                <button class="product-button">Voir détails</button>
+                <div class="product-list">
+                    <% if (typeof produits !=='undefined' && produits.length> 0) { %>
+                        <% produits.forEach(function(produit) { %>
+                            <div class="product-card">
+                                <h3 class="product-title">
+                                    <%= produit.modele %>
+                                </h3>
+                                <div class="product-price">
+                                    <%= produit.prix_location %> € / jour
+                                </div>
+
+                                <img src="/img/<%= produit.modele.replace(/\s+/g, '') %>.jpeg"
+                                    alt="<%= produit.modele %>" class="product-image">
+
+                                <a href="/product/<%= produit.id %>" class="product-button">Voir détails</a>
+                            </div>
+                            <% }) %>
+                                <% } else { %>
+                                    <p class="no-results">Aucun produit ne correspond à vos critères de recherche ou de
+                                        filtre.</p>
+                                    <% } %>
+                </div>
             </div>
         </div>
-    </div>
 
-    <%- include('footer') %>
-  </body>
+        <%- include('footer') %>
+</body>
+
 </html>
