@@ -1,3 +1,6 @@
+/* ============================================================
+   1. BASES & LAYOUT
+   ============================================================ */
 * {
   box-sizing: border-box;
   max-width: 100%;
@@ -7,7 +10,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: #fff;
+  background-color: #ffffff;
   color: #000;
   font-family: 'Lexend', sans-serif;
 }
@@ -18,9 +21,12 @@ main {
   flex-wrap: wrap;
   gap: 60px;
   justify-content: center;
-  align-items: stretch;
+  align-items: flex-start; /* Aligné en haut pour éviter d'étirer */
 }
 
+/* ============================================================
+   2. COLONNE GAUCHE (Images)
+   ============================================================ */
 .gauche {
   display: flex;
   flex-direction: column;
@@ -49,6 +55,7 @@ main {
   object-fit: cover;
   transition: all 0.3s ease-in-out;
   display: block;
+  background-color: #ffffff;
 }
 
 .fa-chevron-left,
@@ -88,22 +95,34 @@ main {
   object-fit: cover;
   cursor: pointer;
   transition: transform 0.2s;
+  border-radius: 5px;
+  background-color: #ffffff;
 }
 
 .P_img img:hover { transform: scale(1.1); }
+.P_img img.active {
+    outline: #FD5035 solid 3px;
+    transform: scale(1.05);
+}
 
+/* ============================================================
+   3. COLONNE DROITE (Détails & Formulaire) - MODIFIÉE
+   ============================================================ */
 .droite {
   flex: 1;
   min-width: 280px;
-  max-width: 700px;
+  /* MODIFIÉ : Réduit de 700px à 550px */
+  max-width: 550px; 
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 5%;
+  /* MODIFIÉ : Réduit de 5% à 30px pour être plus compact */
+  padding: 30px;
   outline: #FD5035 solid 4px;
   border-radius: 30px;
   box-sizing: border-box;
   margin-left: 40px;
+  background-color: #ffffff;
 }
 
 .droite h1 {
@@ -129,7 +148,7 @@ main {
 .droite button {
   width: clamp(110px, 30vw, 160px);
   height: clamp(40px, 10vw, 50px);
-  background-color: #fff;
+  background-color: #ffffff;
   color: #FD5035;
   border: 3px solid #FD5035;
   border-radius: 25px;
@@ -137,6 +156,9 @@ main {
   cursor: pointer;
   transition: all 0.3s;
   align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .droite button:hover {
@@ -144,6 +166,80 @@ main {
   color: #fff;
   transform: scale(1.05);
 }
+
+/* ============================================================
+   4. FORMULAIRE DATES
+   ============================================================ */
+
+.rental-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.date-inputs {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.date-inputs > div {
+    flex: 1;
+}
+
+.droite label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: #333;
+}
+
+/* Champs Date */
+input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #FD5035;
+    border-radius: 15px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: box-shadow 0.3s ease-in-out;
+    background-color: #ffffff;
+    color: #333;
+}
+
+input[type="date"]:focus {
+    box-shadow: 0 0 10px rgba(253, 80, 53, 0.5);
+}
+
+/* Boutons désactivés */
+.droite button:disabled {
+    border-color: #ccc;
+    color: #999;
+    cursor: not-allowed;
+    background-color: #ffffff;
+}
+.droite button:disabled:hover {
+    transform: none;
+}
+
+/* Lien de connexion */
+.login-link {
+    text-align: center;
+    display: block;
+    margin-top: 10px;
+    color: #333;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+/* ============================================================
+   5. MEDIA QUERIES
+   ============================================================ */
 
 @media (max-width: 900px) {
   main {
@@ -160,7 +256,7 @@ main {
   .droite {
     width: 90%;
     max-width: 90%;
-    padding: 7%;
+    padding: 30px;
     margin-left: 0;
   }
 }
@@ -194,8 +290,17 @@ main {
     width: 95%;
     max-width: 95%;
     outline-width: 2px;
-    padding: 6%;
+    padding: 20px;
     border-radius: 20px;
+  }
+  
+  .date-inputs {
+      flex-direction: column;
+      gap: 10px;
+  }
+  
+  .droite button {
+      width: 100%;
   }
 }
 

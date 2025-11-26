@@ -4,8 +4,8 @@ import session from "express-session";
 import bcrypt from "bcrypt";
 import crypto from "crypto"; // Pour supporter MD5 temporairement
 import pool from "./db.js";
-import multer from "multer"; // IMPORT INDISPENSABLE
-import fs from "fs";         // IMPORT INDISPENSABLE
+import multer from "multer";
+import fs from "fs";
 
 const app = express();
 
@@ -15,15 +15,12 @@ const app = express();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dir = 'public/uploads/';
-    // Vérifie si le dossier existe, sinon le crée automatiquement
     if (!fs.existsSync(dir)){
         fs.mkdirSync(dir, { recursive: true });
     }
     cb(null, dir);
   },
   filename: function (req, file, cb) {
-    // Génère un nom unique : timestamp + extension originale
-    // Nettoie le nom pour éviter les caractères spéciaux
     const cleanName = file.originalname.replace(/[^a-zA-Z0-9.]/g, "_");
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, uniqueSuffix + '-' + cleanName);
@@ -182,7 +179,11 @@ app.get("/product/:id", async (req, res) => {
   try {
     const [produits] = await pool.query("SELECT * FROM produit WHERE id = ?", [req.params.id]);
     if (produits.length === 0) return res.status(404).render("404");
-    res.render("product", { produit: produits[0] });
+    
+    res.render("product", { 
+        produit: produits[0], 
+        message: req.query.message || null 
+    });
   } catch (err) {
     res.status(500).render("error", { message: "Erreur chargement produit", code: 500 });
   }
@@ -390,9 +391,11 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
     );
     await pool.query("UPDATE produit SET etat = 'loué' WHERE id = ?", [produit_id]);
 
-    res.json({ success: true });
+    res.redirect('/mes-locations'); 
+
   } catch (err) {
-    res.status(500).json({ error: "Erreur création location" });
+    console.error(err);
+    res.status(500).send("Erreur lors de la création de la location");
   }
 });
 
@@ -437,16 +440,12 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
     res.status(500).render("locations", { locations: [], message: "Erreur" });
   }
 });
-// ============================================
-// NOUVELLES ROUTES AGENT
-// ============================================
 
-// 1️⃣ Suppression d'un produit (agent uniquement)
+// 1. Suppression d'un produit (agent uniquement)
 app.post("/agent/supprimer_produit/:id", authMiddleware, isAgent, async (req, res) => {
   const produitId = req.params.id;
 
   try {
-    // Vérifier si le produit est en location
     const [locations] = await pool.query(
       "SELECT COUNT(*) as count FROM location WHERE produit_id = ? AND date_retour_effective IS NULL",
       [produitId]
@@ -458,7 +457,6 @@ app.post("/agent/supprimer_produit/:id", authMiddleware, isAgent, async (req, re
       });
     }
 
-    // Supprimer le produit
     await pool.query("DELETE FROM produit WHERE id = ?", [produitId]);
     
     res.json({ success: true, message: "Produit supprimé avec succès" });
@@ -468,28 +466,18 @@ app.post("/agent/supprimer_produit/:id", authMiddleware, isAgent, async (req, re
   }
 });
 
-// 2️⃣ Finaliser une location (agent uniquement)
+// 2. Finaliser une location (agent uniquement)
 app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, res) => {
   const locationId = req.params.id;
 
   try {
-    // Récupérer la location
-    const [locations] = await pool.query(
-      "SELECT * FROM location WHERE id = ?",
-      [locationId]
-    );
+    const [locations] = await pool.query("SELECT * FROM location WHERE id = ?", [locationId]);
 
-    if (locations.length === 0) {
-      return res.status(404).json({ error: "Location introuvable" });
-    }
+    if (locations.length === 0) return res.status(404).json({ error: "Location introuvable" });
 
     const location = locations[0];
+    if (location.date_retour_effective) return res.status(400).json({ error: "Cette location est déjà finalisée" });
 
-    if (location.date_retour_effective) {
-      return res.status(400).json({ error: "Cette location est déjà finalisée" });
-    }
-
-    // Calculer le surcoût si retour en retard ou > 60 jours
     const dateDebut = new Date(location.date_debut);
     const dateRetourPrevue = new Date(location.date_retour_prevue);
     const dateRetourEffective = new Date();
@@ -499,25 +487,19 @@ app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, r
     
     let prixFinal = parseFloat(location.prix_total);
     
-    // Surcoût si > 60 jours OU retard
     if (dureeReelle > dureeMax || dateRetourEffective > dateRetourPrevue) {
       const [produits] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [location.produit_id]);
       const prixBase = parseFloat(produits[0].prix_location);
-      const surcoutCalcule = prixBase * 0.20; // 20% du prix de base
+      const surcoutCalcule = prixBase * 0.20; 
       prixFinal += surcoutCalcule;
     }
 
-    // Finaliser la location
     await pool.query(
       "UPDATE location SET date_retour_effective = NOW(), prix_total = ? WHERE id = ?",
       [prixFinal, locationId]
     );
 
-    // Remettre le produit disponible
-    await pool.query(
-      "UPDATE produit SET etat = 'disponible' WHERE id = ?",
-      [location.produit_id]
-    );
+    await pool.query("UPDATE produit SET etat = 'disponible' WHERE id = ?", [location.produit_id]);
 
     res.json({ 
       success: true, 
@@ -530,7 +512,7 @@ app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, r
   }
 });
 
-// 3️⃣ Afficher formulaire modification produit
+// 3. Afficher formulaire modification produit
 app.get("/agent/modifier_produit/:id", authMiddleware, isAgent, async (req, res) => {
   try {
     const [produits] = await pool.query("SELECT * FROM produit WHERE id = ?", [req.params.id]);
@@ -542,12 +524,11 @@ app.get("/agent/modifier_produit/:id", authMiddleware, isAgent, async (req, res)
   }
 });
 
-// 4️⃣ Traiter modification produit
+// 4. Traiter modification produit
 app.post("/agent/modifier_produit/:id", authMiddleware, isAgent, upload.single('image'), async (req, res) => {
   const { type, marque, modele, prix_location, description, etat } = req.body;
   const produitId = req.params.id;
   
-  // Si nouvelle image uploadée, utiliser le nouveau nom
   const imageFilename = req.file ? req.file.filename : req.body.current_image;
   
   try {
@@ -567,18 +548,14 @@ app.post("/agent/modifier_produit/:id", authMiddleware, isAgent, upload.single('
   }
 });
 
-// Route Affichage Formulaire
+// Route Affichage Formulaire Ajout
 app.get("/agent/ajout_produit", authMiddleware, isAgent, (req, res) => {
     res.render("ajout_produit", { message: null });
 });
 
-// --- MODIFICATION ICI : Traitement Formulaire avec Image ---
-// On utilise upload.single('image') pour gérer le fichier envoyé
+// Traitement Formulaire Ajout avec Image
 app.post("/agent/ajout_produit", authMiddleware, isAgent, upload.single('image'), async (req, res) => {
-  // Grâce à multer, req.body contient maintenant les champs textes
   const { type, marque, modele, prix_location, description, etat } = req.body;
-  
-  // Et req.file contient le fichier image
   const imageFilename = req.file ? req.file.filename : null; 
   
   if (!type || !marque || !modele || !prix_location) {
@@ -586,7 +563,6 @@ app.post("/agent/ajout_produit", authMiddleware, isAgent, upload.single('image')
   }
 
   try {
-    // Insertion dans la BDD avec le nom de l'image
     await pool.query(
       "INSERT INTO produit (type, description, marque, modele, prix_location, etat, img) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [type, description || "", marque, modele, parseFloat(prix_location), etat, imageFilename]
