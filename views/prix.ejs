@@ -2,47 +2,44 @@
 <html lang="fr">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="prix.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mon Profil - <%= utilisateur.login %></title>
+    <link rel="stylesheet" href="/css/profil.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="prix.css" />
   <title>Paiement</title>
 </head>
 
 <body>
-
+  
   <%- include('header'); %>
 
   <main>
     <div class="gauche">
       <div class="recap-commande">
         <h2>Récapitulatif de commande</h2>
-        
         <div class="produit-recap">
           <img src="https://picsum.photos/300/300" alt="Produit" />
           <div class="info-produit">
-            <h3>Nom du produit</h3>
-            <p>Période de location: 7 jours</p>
-            <p>Date de début: 15/05/2023</p>
-            <p>Date de fin: 22/05/2023</p>
+            <h3>Blunt Colt S4</h3>
+            <p>Période de location : 7 jours</p>
+            <p>Date de début : 15/05/2023</p>
+            <p>Date de fin : 22/05/2023</p>
           </div>
         </div>
-        
         <div class="details-prix">
           <div class="ligne-prix">
             <span>Prix de location</span>
-            <span>45,00 €</span>
+            <span>63,00 €</span>
           </div>
           <div class="ligne-prix">
             <span>Frais de service</span>
-            <span>5,00 €</span>
+            <span>7,00 €</span>
           </div>
           <div class="ligne-prix">
             <span>Caution</span>
@@ -50,39 +47,34 @@
           </div>
           <div class="ligne-prix total">
             <span>Total</span>
-            <span>150,00 €</span>
+            <span>170,00 €</span>
           </div>
         </div>
       </div>
     </div>
-    
+
     <div class="droite">
       <h1>Paiement</h1>
       <h2>Informations de paiement</h2>
-      
       <form id="payment-form">
         <div class="form-group">
           <label for="card-name">Nom sur la carte</label>
           <input type="text" id="card-name" placeholder="Jean Dupont" required>
         </div>
-        
         <div class="form-group">
           <label for="card-number">Numéro de carte</label>
           <input type="text" id="card-number" placeholder="1234 5678 9012 3456" required>
         </div>
-        
         <div class="form-row">
           <div class="form-group">
             <label for="expiry-date">Date d'expiration</label>
             <input type="text" id="expiry-date" placeholder="MM/AA" required>
           </div>
-          
           <div class="form-group">
             <label for="cvv">CVV</label>
             <input type="text" id="cvv" placeholder="123" required>
           </div>
         </div>
-        
         <div class="form-group">
           <label for="country">Pays</label>
           <select id="country" required>
@@ -93,22 +85,20 @@
             <option value="lu">Luxembourg</option>
           </select>
         </div>
-        
         <button type="submit" class="btn-payer">Payer maintenant</button>
       </form>
     </div>
   </main>
 
-  <%- include('footer'); %>
+  <footer>
+    <div class="copyright">© 2025 Locfit. Tous droits réservés.</div>
+  </footer>
 
   <script>
     document.getElementById('payment-form').addEventListener('submit', function(e) {
       e.preventDefault();
       alert('Paiement effectué avec succès!');
-      // Ici, vous ajouteriez normalement le code pour traiter le paiement
     });
   </script>
-
 </body>
-
 </html>

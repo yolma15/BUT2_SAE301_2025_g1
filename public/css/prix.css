@@ -1,95 +1,122 @@
 * {
   box-sizing: border-box;
-  max-width: 100%;
 }
 
 html, body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
-  background-color: #fff;
-  color: #000;
   font-family: 'Lexend', sans-serif;
+  background: #fafafa;
+  color: #000;
 }
 
+/* Header */
 header {
-  padding: 20px 5%;
+  background-color: #FD5035;
+  color: #fff;
+  padding: 15px 5%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #FD5035;
+  justify-content: space-between;
+  border-radius: 25px;
 }
 
 .logo {
   font-family: 'Medula One', cursive;
   font-size: 2.5em;
-  color: #FD5035;
+  color: #fff;
+  font-weight: 400;
 }
 
 nav ul {
   display: flex;
   list-style: none;
-  gap: 30px;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
 }
 
 nav a {
   text-decoration: none;
-  color: #000;
+  color: #fff;
   font-weight: 500;
+  font-size: 1em;
   transition: color 0.3s;
 }
 
 nav a:hover {
+  color: #FFDCD3;
+}
+
+.header-buttons button {
+  margin-left: 10px;
+  padding: 7px 22px;
+  border-radius: 20px;
+  border: 2px solid #fff;
+  background: #FD5035;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.header-buttons .inscription {
+  background: #fff;
   color: #FD5035;
 }
 
+/* Main layout */
 main {
-  margin: 5%;
+  margin: 45px 0;
   display: flex;
   flex-wrap: wrap;
   gap: 60px;
   justify-content: center;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
+/* Bloc gauche */
 .gauche {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
   min-width: 280px;
-  max-width: 650px;
+  max-width: 470px;
   position: relative;
 }
 
 .recap-commande {
   width: 100%;
-  max-width: 75%;
-  padding: 20px;
+  padding: 28px 22px;
   border: 2px solid #FD5035;
   border-radius: 30px;
+  background: #fff;
 }
 
 .recap-commande h2 {
   font-family: 'Medula One', cursive;
   font-size: 2em;
-  margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+  color: #FD5035;
 }
 
 .produit-recap {
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding-bottom: 17px;
   border-bottom: 1px solid #eee;
 }
 
 .produit-recap img {
-  width: 100px;
-  height: 100px;
+  width: 92px;
+  height: 92px;
   object-fit: cover;
-  border-radius: 15px;
+  border-radius: 16px;
+  box-shadow: 0 1px 10px #efefef;
 }
 
 .info-produit h3 {
@@ -98,64 +125,74 @@ main {
 }
 
 .info-produit p {
-  margin: 5px 0;
+  margin: 6px 0;
   color: #666;
+  font-size: 1em;
 }
 
+/* Prix Details */
 .details-prix {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .ligne-prix {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 9px;
+  font-size: 1.07em;
 }
 
 .total {
   font-weight: bold;
-  font-size: 1.2em;
-  margin-top: 15px;
-  padding-top: 15px;
+  font-size: 1.19em;
+  margin-top: 13px;
+  padding-top: 12px;
   border-top: 2px solid #FD5035;
 }
 
+/* Bloc droite */
 .droite {
   flex: 1;
   min-width: 280px;
-  max-width: 700px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 5%;
-  outline: #FD5035 solid 4px;
+  max-width: 530px;
+  background: #fff;
+  outline: 4px solid #FD5035;
   border-radius: 30px;
   box-sizing: border-box;
-  margin-left: 40px;
+  padding: 3.2em 2.2em;
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 9px;
 }
 
 .droite h1 {
   font-family: 'Medula One', cursive;
-  font-size: clamp(1.8em, 5vw, 3em);
-  font-weight: 100;
+  color: #000;
+  font-size: clamp(2em, 5vw, 2.7em);
+  font-weight: 400;
   margin: 0 0 10px 0;
 }
 
 .droite h2 {
-  font-size: clamp(1.4em, 3.5vw, 2em);
   color: #FD5035;
-  margin-bottom: 3%;
+  font-size: 1.28em;
   font-weight: bold;
+  margin-bottom: 16px;
 }
 
+/* Formulaire paiement */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
   font-weight: 500;
+  font-size: 1em;
+  color: #222;
 }
 
 .form-group input, .form-group select {
@@ -166,6 +203,7 @@ main {
   font-family: 'Lexend', sans-serif;
   font-size: 1em;
   transition: border-color 0.3s;
+  background: #fcfcfc;
 }
 
 .form-group input:focus, .form-group select:focus {
@@ -175,25 +213,26 @@ main {
 
 .form-row {
   display: flex;
-  gap: 15px;
+  gap: 13px;
 }
 
 .form-row .form-group {
   flex: 1;
 }
 
+/* Bouton */
 .btn-payer {
   width: 100%;
-  height: clamp(40px, 10vw, 50px);
+  height: 48px;
   background-color: #fff;
   color: #FD5035;
   border: 3px solid #FD5035;
   border-radius: 25px;
-  font-size: clamp(1em, 3vw, 1.5em);
+  font-size: 1.1em;
   cursor: pointer;
-  transition: all 0.3s;
-  margin-top: 20px;
   font-weight: bold;
+  margin-top: 18px;
+  transition: all 0.3s;
 }
 
 .btn-payer:hover {
@@ -202,141 +241,66 @@ main {
   transform: scale(1.02);
 }
 
+/* Footer */
 footer {
   background-color: #f8f8f8;
-  padding: 40px 5%;
+  padding: 35px 5%;
   text-align: center;
   border-top: 2px solid #FD5035;
-}
-
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 30px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.footer-section {
-  flex: 1;
-  min-width: 200px;
-}
-
-.footer-section h3 {
-  font-family: 'Medula One', cursive;
-  font-size: 1.5em;
-  margin-bottom: 15px;
-  color: #FD5035;
-}
-
-.footer-section ul {
-  list-style: none;
-  padding: 0;
-}
-
-.footer-section ul li {
-  margin-bottom: 10px;
-}
-
-.footer-section a {
-  text-decoration: none;
-  color: #000;
-  transition: color 0.3s;
-}
-
-.footer-section a:hover {
-  color: #FD5035;
-}
-
-.social-icons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.social-icons a {
-  color: #000;
-  font-size: 1.5em;
-  transition: color 0.3s;
-}
-
-.social-icons a:hover {
-  color: #FD5035;
+  border-radius: 15px;
 }
 
 .copyright {
-  margin-top: 30px;
   color: #666;
-  font-size: 0.9em;
+  font-size: 0.97em;
 }
 
+/* Responsive tweaks */
 @media (max-width: 900px) {
   main {
     flex-direction: column;
     align-items: center;
-    gap: 50px;
+    gap: 40px;
     margin: 5% 3%;
   }
-
-  .recap-commande {
-    max-width: 90%;
+  .recap-commande, .droite {
+    max-width: 98vw;
   }
-
   .droite {
-    width: 90%;
-    max-width: 90%;
-    padding: 7%;
     margin-left: 0;
+    padding: 6%;
+    outline-width: 2px;
   }
 }
 
 @media (max-width: 600px) {
   header {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
+    border-radius: 0;
   }
-
-  nav ul {
-    gap: 15px;
-  }
-
   .recap-commande {
-    border-radius: 20px;
+    border-radius: 18px;
+    padding: 19px 7px;
   }
-
   .produit-recap {
     flex-direction: column;
     text-align: center;
   }
-
-  .produit-recap img {
-    align-self: center;
-  }
-
   .droite {
-    outline-width: 2px;
-    padding: 6%;
-    border-radius: 20px;
+    border-radius: 18px;
+    padding: 16px;
   }
-
   .form-row {
     flex-direction: column;
     gap: 0;
   }
-
-  .footer-content {
-    flex-direction: column;
-    text-align: center;
-  }
 }
 
 @media (max-width: 400px) {
-  main { gap: 30px; }
   .droite, .gauche { min-width: unset; width: 100%; }
   .recap-commande { max-width: 100%; }
-  .droite h1 { font-size: 1.8em; }
-  .droite h2 { font-size: 1.3em; }
+  .droite h1 { font-size: 1.3em; }
+  .droite h2 { font-size: 1em; }
   .btn-payer { font-size: 1em; }
 }
