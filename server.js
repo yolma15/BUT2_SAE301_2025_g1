@@ -22,8 +22,6 @@ const storage = multer.diskStorage({
     cb(null, dir);
   },
   filename: function (req, file, cb) {
-    // Génère un nom unique : timestamp + extension originale
-    // Nettoie le nom pour éviter les caractères spéciaux
     const cleanName = file.originalname.replace(/[^a-zA-Z0-9.]/g, "_");
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + "-" + cleanName);
@@ -212,7 +210,11 @@ app.get("/product/:id", async (req, res) => {
       req.params.id,
     ]);
     if (produits.length === 0) return res.status(404).render("404");
-    res.render("product", { produit: produits[0] });
+    
+    res.render("product", { 
+        produit: produits[0], 
+        message: req.query.message || null 
+    });
   } catch (err) {
     res
       .status(500)
@@ -473,9 +475,11 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
       produit_id,
     ]);
 
-    res.json({ success: true });
+    res.redirect('/mes-locations'); 
+
   } catch (err) {
-    res.status(500).json({ error: "Erreur création location" });
+    console.error(err);
+    res.status(500).send("Erreur lors de la création de la location");
   }
 });
 
@@ -532,9 +536,6 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
     res.status(500).render("locations", { locations: [], message: "Erreur" });
   }
 });
-// ============================================
-// NOUVELLES ROUTES AGENT
-// ============================================
 
 // 1️⃣ Suppression d'un produit (agent uniquement)
 app.post(
@@ -707,7 +708,7 @@ app.post(
   }
 );
 
-// Route Affichage Formulaire
+// Route Affichage Formulaire Ajout
 app.get("/agent/ajout_produit", authMiddleware, isAgent, (req, res) => {
   res.render("ajout_produit", { message: null });
 });

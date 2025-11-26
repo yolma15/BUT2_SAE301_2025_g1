@@ -8,92 +8,171 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <title>Document</title>
+  <title><%= produit.marque %> <%= produit.modele %></title>
 </head>
 
 <body>
 
   <%- include('header'); %>
 
-    <main>
-      <div class="gauche">
-        <div class="G_img">
-          <span><i class="fa-solid fa-chevron-left"></i></span>
-          <img src="https://picsum.photos/300/300" alt="" />
-          <span><i class="fa-solid fa-chevron-right"></i></span>
-        </div>
+  <% 
+    let imagePath = "https://placehold.co/600x600?text=No+Image"; // Image par défaut
+    if (produit.img) {
+        // Si commence par 'img/' ou 'http', c'est une image manuelle/externe
+        if (produit.img.startsWith('img/') || produit.img.startsWith('http')) {
+            imagePath = "/" + produit.img;
+        } else {
+            // Sinon c'est un upload Multer
+            imagePath = "/uploads/" + produit.img;
+        }
+    }
+  %>
 
-        <div class="P_img">
-          <img src="https://picsum.photos/300/300" alt="" />
-          <img src="https://picsum.photos/300/300" alt="" />
-          <img src="https://picsum.photos/300/300" alt="" />
-          <img src="https://picsum.photos/300/300" alt="" />
-          <img src="https://picsum.photos/300/300" alt="" />
-        </div>
+  <main>
+    <div class="gauche">
+      <div class="G_img">
+        <span><i class="fa-solid fa-chevron-left"></i></span>
+        <img src="<%= imagePath %>" alt="<%= produit.modele %>" id="mainDisplayImg" />
+        <span><i class="fa-solid fa-chevron-right"></i></span>
       </div>
-      <div class="droite">
-        <h1>Nom du produit</h1>
-        <h2 class="prix">Prix</h2>
-        <p class="description">Description</p>
-        <button>Louer</button>
-      </div>
-    </main>
 
-    <%- include('footer'); %>
+      <div class="P_img">
+        <img src="<%= imagePath %>" class="thumb-img active" alt="Vue 1" />
+        <img src="<%= imagePath %>" class="thumb-img" alt="Vue 2" />
+        <img src="<%= imagePath %>" class="thumb-img" alt="Vue 3" />
+      </div>
+    </div>
+
+    <div class="droite">
+      <h1><%= produit.marque %> <%= produit.modele %></h1>
+      
+      <p style="color: #888; margin-bottom: 10px; font-weight: 500; text-transform: uppercase;"><%= produit.type %></p>
+      
+      <h2 class="prix"><%= produit.prix_location %> € <span style="font-size: 0.6em; color: #666;">/ jour</span></h2>
+      
+      <p class="description">
+        <%= produit.description || "Aucune description disponible pour ce produit." %>
+      </p>
+
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+      <form action="/locations/create" method="POST" class="rental-form">
+          <input type="hidden" name="produit_id" value="<%= produit.id %>">
+          
+          <div class="date-inputs">
+              <div style="flex: 1;">
+                  <label for="start">Début</label>
+                  <input type="date" name="date_debut" id="start" required>
+              </div>
+              <div style="flex: 1;">
+                  <label for="end">Fin</label>
+                  <input type="date" name="date_retour_prevue" id="end" required>
+              </div>
+          </div>
+
+          <% if (isLoggedIn) { %>
+              <% if (produit.etat === 'disponible') { %>
+                  <button type="submit">
+                      Louer ce produit
+                  </button>
+              <% } else { %>
+                  <button type="button" disabled>
+                      Actuellement indisponible
+                  </button>
+              <% } %>
+          <% } else { %>
+              <a href="/login" class="login-link">
+                  Connectez-vous pour louer
+              </a>
+          <% } %>
+      </form>
+
+    </div>
+  </main>
+
+  <%- include('footer'); %>
 
 </body>
+
 <script>
-  const mainImage = document.querySelector('.G_img img');
+  // --- 1. GESTION DU CARROUSEL D'IMAGES ---
+  const mainImage = document.getElementById('mainDisplayImg');
   const thumbnails = document.querySelectorAll('.P_img img');
   const leftArrow = document.querySelector('.fa-chevron-left');
   const rightArrow = document.querySelector('.fa-chevron-right');
 
+  // On récupère le chemin généré par EJS
+  const dbImage = "<%= imagePath %>";
+  const images = [dbImage, dbImage, dbImage]; 
   let currentIndex = 0;
 
-  const images = [
-    'https://picsum.photos/600/600?1',
-    'https://picsum.photos/600/600?2',
-    'https://picsum.photos/600/600?3',
-    'https://picsum.photos/600/600?4',
-    'https://picsum.photos/600/600?5'
-  ];
-
-  // Mettre à jour l'image principale
   function updateMainImage(index) {
     currentIndex = index;
     mainImage.src = images[currentIndex];
-    // Optionnel : mettre un style sur la miniature active
+    
+    // Gestion du style "active" (bordure rouge)
     thumbnails.forEach((thumb, i) => {
-      thumb.style.border = i === currentIndex ? '2px solid #FD5035' : '1px solid #FD5035';
+      if (i === currentIndex) {
+          thumb.classList.add('active');
+          thumb.style.opacity = '1';
+      } else {
+          thumb.classList.remove('active');
+          thumb.style.opacity = '0.7';
+      }
     });
   }
 
-  // Cliquer sur les flèches
-  leftArrow.addEventListener('click', () => {
-    const nextIndex = (currentIndex - 1 + images.length) % images.length;
-    updateMainImage(nextIndex);
-  });
+  if(leftArrow) {
+      leftArrow.addEventListener('click', () => {
+        const nextIndex = (currentIndex - 1 + images.length) % images.length;
+        updateMainImage(nextIndex);
+      });
+  }
 
-  rightArrow.addEventListener('click', () => {
-    const nextIndex = (currentIndex + 1) % images.length;
-    updateMainImage(nextIndex);
-  });
+  if(rightArrow) {
+      rightArrow.addEventListener('click', () => {
+        const nextIndex = (currentIndex + 1) % images.length;
+        updateMainImage(nextIndex);
+      });
+  }
 
-  // Cliquer sur une miniature
   thumbnails.forEach((thumb, i) => {
-    thumb.addEventListener('click', () => {
-      updateMainImage(i);
-    });
+    thumb.addEventListener('click', () => updateMainImage(i));
   });
 
-  // Initialiser
+  // Initialisation
   updateMainImage(0);
+
+
+  // --- 2. GESTION INTELLIGENTE DES DATES ---
+  const startInput = document.getElementById('start');
+  const endInput = document.getElementById('end');
+
+  if (startInput && endInput) {
+      // Obtenir la date d'aujourd'hui format YYYY-MM-DD
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Empêcher de sélectionner une date passée
+      startInput.setAttribute('min', today);
+      endInput.setAttribute('min', today);
+
+      // Écouter le changement de la date de DÉBUT
+      startInput.addEventListener('change', function() {
+          const startDate = this.value;
+          
+          // La date de FIN ne peut pas être avant la date de DÉBUT
+          endInput.setAttribute('min', startDate);
+
+          // Si une date de fin était déjà choisie et qu'elle devient invalide (avant le début), on la reset
+          if(endInput.value && endInput.value < startDate) {
+              endInput.value = ""; 
+              // Optionnel : endInput.value = startDate; (pour mettre la même date par défaut)
+          }
+      });
+  }
 </script>
 
 </html>
