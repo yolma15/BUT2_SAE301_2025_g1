@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/css/product.css" /> <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="/css/product.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap" rel="stylesheet" />
@@ -20,9 +21,11 @@
   <% 
     let imagePath = "https://placehold.co/600x600?text=No+Image"; // Image par défaut
     if (produit.img) {
+        // Si commence par 'img/' ou 'http', c'est une image manuelle/externe
         if (produit.img.startsWith('img/') || produit.img.startsWith('http')) {
             imagePath = "/" + produit.img;
         } else {
+            // Sinon c'est un upload Multer
             imagePath = "/uploads/" + produit.img;
         }
     }
@@ -46,7 +49,7 @@
     <div class="droite">
       <h1><%= produit.marque %> <%= produit.modele %></h1>
       
-      <p style="color: #888; margin-bottom: 10px; font-weight: 500;"><%= produit.type %></p>
+      <p style="color: #888; margin-bottom: 10px; font-weight: 500; text-transform: uppercase;"><%= produit.type %></p>
       
       <h2 class="prix"><%= produit.prix_location %> € <span style="font-size: 0.6em; color: #666;">/ jour</span></h2>
       
@@ -59,29 +62,29 @@
       <form action="/locations/create" method="POST" class="rental-form">
           <input type="hidden" name="produit_id" value="<%= produit.id %>">
           
-          <div class="date-inputs" style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <div class="date-inputs">
               <div style="flex: 1;">
-                  <label for="start" style="display: block; font-size: 0.9em; margin-bottom: 5px;">Début</label>
-                  <input type="date" name="date_debut" id="start" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                  <label for="start">Début</label>
+                  <input type="date" name="date_debut" id="start" required>
               </div>
               <div style="flex: 1;">
-                  <label for="end" style="display: block; font-size: 0.9em; margin-bottom: 5px;">Fin</label>
-                  <input type="date" name="date_retour_prevue" id="end" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                  <label for="end">Fin</label>
+                  <input type="date" name="date_retour_prevue" id="end" required>
               </div>
           </div>
 
           <% if (isLoggedIn) { %>
               <% if (produit.etat === 'disponible') { %>
-                  <button type="submit" style="width: 100%; background: #FD5035; color: white; border: none; padding: 15px; border-radius: 30px; font-size: 1.2rem; cursor: pointer; font-family: 'Lexend';">
+                  <button type="submit">
                       Louer ce produit
                   </button>
               <% } else { %>
-                  <button type="button" disabled style="width: 100%; background: #ccc; color: #666; border: none; padding: 15px; border-radius: 30px; font-size: 1.2rem; cursor: not-allowed; font-family: 'Lexend';">
+                  <button type="button" disabled>
                       Actuellement indisponible
                   </button>
               <% } %>
           <% } else { %>
-              <a href="/login" style="display: block; text-align: center; width: 100%; background: #333; color: white; text-decoration: none; padding: 15px; border-radius: 30px; font-size: 1.1rem; font-family: 'Lexend';">
+              <a href="/login" class="login-link">
                   Connectez-vous pour louer
               </a>
           <% } %>
@@ -95,70 +98,79 @@
 </body>
 
 <script>
+  // --- 1. GESTION DU CARROUSEL D'IMAGES ---
   const mainImage = document.getElementById('mainDisplayImg');
   const thumbnails = document.querySelectorAll('.P_img img');
   const leftArrow = document.querySelector('.fa-chevron-left');
   const rightArrow = document.querySelector('.fa-chevron-right');
 
-  // On récupère l'image unique depuis la BDD injectée par EJS
+  // On récupère le chemin généré par EJS
   const dbImage = "<%= imagePath %>";
-  
-  // Comme la BDD n'a qu'une seule image pour l'instant, on crée un tableau avec la même image
-  // pour simuler le carrousel sans casser ton design.
-  const images = [dbImage, dbImage, dbImage];
-
+  const images = [dbImage, dbImage, dbImage]; 
   let currentIndex = 0;
 
-  // Mettre à jour l'image principale
   function updateMainImage(index) {
     currentIndex = index;
     mainImage.src = images[currentIndex];
     
-    // Style bordure rouge sur la miniature active
+    // Gestion du style "active" (bordure rouge)
     thumbnails.forEach((thumb, i) => {
       if (i === currentIndex) {
-          thumb.style.border = '2px solid #FD5035';
+          thumb.classList.add('active');
           thumb.style.opacity = '1';
       } else {
-          thumb.style.border = '1px solid transparent';
+          thumb.classList.remove('active');
           thumb.style.opacity = '0.7';
       }
     });
   }
 
-  // Cliquer sur les flèches
-  leftArrow.addEventListener('click', () => {
-    const nextIndex = (currentIndex - 1 + images.length) % images.length;
-    updateMainImage(nextIndex);
-  });
+  if(leftArrow) {
+      leftArrow.addEventListener('click', () => {
+        const nextIndex = (currentIndex - 1 + images.length) % images.length;
+        updateMainImage(nextIndex);
+      });
+  }
 
-  rightArrow.addEventListener('click', () => {
-    const nextIndex = (currentIndex + 1) % images.length;
-    updateMainImage(nextIndex);
-  });
+  if(rightArrow) {
+      rightArrow.addEventListener('click', () => {
+        const nextIndex = (currentIndex + 1) % images.length;
+        updateMainImage(nextIndex);
+      });
+  }
 
-  // Cliquer sur une miniature
   thumbnails.forEach((thumb, i) => {
-    thumb.addEventListener('click', () => {
-      updateMainImage(i);
-    });
+    thumb.addEventListener('click', () => updateMainImage(i));
   });
 
-  // Initialiser
+  // Initialisation
   updateMainImage(0);
 
-  // --- Petit script pour la validation des dates ---
+
+  // --- 2. GESTION INTELLIGENTE DES DATES ---
   const startInput = document.getElementById('start');
   const endInput = document.getElementById('end');
 
-  // Empêcher de sélectionner une date passée
-  const today = new Date().toISOString().split('T')[0];
-  if(startInput) startInput.setAttribute('min', today);
+  if (startInput && endInput) {
+      // Obtenir la date d'aujourd'hui format YYYY-MM-DD
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Empêcher de sélectionner une date passée
+      startInput.setAttribute('min', today);
+      endInput.setAttribute('min', today);
 
-  if(startInput && endInput) {
+      // Écouter le changement de la date de DÉBUT
       startInput.addEventListener('change', function() {
-          // La date de fin doit être après la date de début
-          endInput.setAttribute('min', this.value);
+          const startDate = this.value;
+          
+          // La date de FIN ne peut pas être avant la date de DÉBUT
+          endInput.setAttribute('min', startDate);
+
+          // Si une date de fin était déjà choisie et qu'elle devient invalide (avant le début), on la reset
+          if(endInput.value && endInput.value < startDate) {
+              endInput.value = ""; 
+              // Optionnel : endInput.value = startDate; (pour mettre la même date par défaut)
+          }
       });
   }
 </script>
