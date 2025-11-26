@@ -26,11 +26,13 @@
                     <% } else if (userRole === 'admin') { %>
                         <a href="/home">Accueil</a>
                         <a href="/admin/dashboard">Tableau de bord</a>
+                        
                     
                     <% } else if (userRole === 'agent') { %>
                         <a href="/home">Accueil</a>
                         <a href="/agent/ajout_produit">Ajouts Produits</a>
                         <a href="/agent/returnprod">Retours Produits</a>
+                        <a href="/agent/locations">Gestion Locations</a>
                     <% } %>
 
                 <% } else { %>
