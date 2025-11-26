@@ -1,55 +1,132 @@
-<!DOCTYPE html>
-<html lang="fr">
+<%- include('header') %>
 
-<head>
-  <meta charset="UTF-8" />
-  <title>Vos Locations - LocFit</title>
-  <link rel="stylesheet" href="/css/locations.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap"
-    rel="stylesheet" />
-</head>
+<main class="container" style="padding: 2rem">
+  <h1>📋 Gestion des locations</h1>
 
-<body>
-  <%- include('header') %>
+  <% if (message) { %>
+  <div class="alert"><%= message %></div>
+  <% } %> <% if (locations.length === 0) { %>
+  <p>Aucune location enregistrée.</p>
+  <% } else { %>
+  <table style="width: 100%; border-collapse: collapse; margin-top: 1rem">
+    <thead>
+      <tr style="background-color: var(--color-secondary); text-align: left">
+        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          #
+        </th>
+        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          Client
+        </th>
+        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          Email
+        </th>
+        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          Produit
+        </th>
+        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          Début
+        </th>
+        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          Retour prévu
+        </th>
+        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          Retour effectif
+        </th>
+        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          Prix
+        </th>
+        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          Actions
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <% locations.forEach(location => { %>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          #<%= location.id %>
+        </td>
+        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          <%= location.nom %> <%= location.prenom %>
+        </td>
+        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          <%= location.email %>
+        </td>
+        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          <%= location.type %> - <%= location.marque %> <%= location.modele %>
+        </td>
+        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          <%= new Date(location.date_debut).toLocaleDateString('fr-FR') %>
+        </td>
+        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          <%= new Date(location.date_retour_prevue).toLocaleDateString('fr-FR')
+          %>
+        </td>
+        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          <% if (location.date_retour_effective) { %>
+          <span style="color: var(--color-success)"
+            >✅ <%= new
+            Date(location.date_retour_effective).toLocaleDateString('fr-FR')
+            %></span
+          >
+          <% } else { %>
+          <span style="color: var(--color-warning)">⏳ En cours</span>
+          <% } %>
+        </td>
+        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          <%= location.prix_total %>€
+        </td>
+        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
+          <% if (!location.date_retour_effective) { %>
+          <button
+            onclick="finaliserLocation(<%= location.id %>)"
+            class="btn btn--primary"
+            style="padding: 0.5rem 1rem; cursor: pointer"
+          >
+            ✅ Finaliser
+          </button>
+          <% } else { %>
+          <span class="status status--success">Terminée</span>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</main>
 
-    <main class="locations-container">
+<script>
+  async function finaliserLocation(id) {
+    if (
+      !confirm(
+        "⚠️ Confirmer la finalisation de cette location ?\n\nLe produit sera remis en disponibilité et les surcoûts éventuels seront calculés."
+      )
+    ) {
+      return;
+    }
 
-      <h1 class="main-title">Vos Locations</h1>
+    try {
+      const res = await fetch(`/agent/finaliser_location/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
 
-      <h2 class="row-title">Locations en attente</h2>
+      const data = await res.json();
 
-      <div class="product-list">
-            <div class="product-card">
-              <h3 class="product-title"><%= loc.type %></h3>
-              <div class="product-price"><%= loc.prix_total %> €</div>
-              <img src="<%= loc.imageUrl %>" alt="<%= loc.type %>" class="product-image">
-              <button class="product-button">Voir détails</button>
-            </div>
-          <div class="location-card empty">
-            <p>Aucune location en attente</p>
-          </div>
-      </div>
+      if (data.success) {
+        alert(
+          `✅ Location finalisée avec succès !\n\nPrix final : ${data.prix_final}€`
+        );
+        location.reload();
+      } else {
+        alert("❌ Erreur : " + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Erreur lors de la finalisation");
+    }
+  }
+</script>
 
-      <h2 class="row-title">Locations confirmées</h2>
-
-      <div class="product-list">
-            <div class="product-card">
-              <h3 class="product-title"><%= loc.type %></h3>
-              <div class="product-price"><%= loc.prix_total %> €</div>
-              <img src="<%= loc.imageUrl %>" alt="<%= loc.type %>" class="product-image">
-              <button class="product-button">Voir détails</button>
-            </div>
-          <div class="location-card empty">
-            <p>Aucune location confirmée</p>
-          </div>
-      </div>
-
-    </main>
-
-    <%- include('footer'); %>
-</body>
-
-</html>
+<%- include('footer') %>
