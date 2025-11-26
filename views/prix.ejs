@@ -18,17 +18,7 @@
 
 <body>
 
-  <header>
-    <div class="logo">LOGO</div>
-    <nav>
-      <ul>
-        <li><a href="#">Accueil</a></li>
-        <li><a href="#">Produits</a></li>
-        <li><a href="#">À propos</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
+  <%- include('header'); %>
 
   <main>
     <div class="gauche">
@@ -109,40 +99,7 @@
     </div>
   </main>
 
-  <footer>
-    <div class="footer-content">
-      <div class="footer-section">
-        <h3>À propos</h3>
-        <ul>
-          <li><a href="#">Notre histoire</a></li>
-          <li><a href="#">Équipe</a></li>
-          <li><a href="#">Carrières</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-section">
-        <h3>Support</h3>
-        <ul>
-          <li><a href="#">FAQ</a></li>
-          <li><a href="#">Contact</a></li>
-          <li><a href="#">Conditions d'utilisation</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-section">
-        <h3>Suivez-nous</h3>
-        <div class="social-icons">
-          <a href="#"><i class="fab fa-facebook"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-        </div>
-      </div>
-    </div>
-    
-    <div class="copyright">
-      &copy; 2023 Votre entreprise. Tous droits réservés.
-    </div>
-  </footer>
+  <%- include('footer'); %>
 
   <script>
     document.getElementById('payment-form').addEventListener('submit', function(e) {
