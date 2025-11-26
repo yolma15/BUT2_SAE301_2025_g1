@@ -15,7 +15,6 @@ const app = express();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dir = "public/uploads/";
-    // Vérifie si le dossier existe, sinon le crée automatiquement
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -55,7 +54,7 @@ app.use(
   })
 );
 
-// Middleware pour exposer les données de session aux vues EJS
+// Middleware session
 app.use((req, res, next) => {
   res.locals.isLoggedIn = Boolean(req.session?.userId);
   res.locals.userRole = req.session?.userRole;
@@ -95,9 +94,7 @@ async function migratePasswordToBcrypt(userId, plainPassword) {
       hashedPassword,
       userId,
     ]);
-    console.log(
-      `✅ Mot de passe migré vers bcrypt pour l'utilisateur ${userId}`
-    );
+    console.log(`✅ Mot de passe migré vers bcrypt pour l'utilisateur ${userId}`);
   } catch (error) {
     console.error("Erreur migration mot de passe:", error);
   }
@@ -148,88 +145,59 @@ app.get("/login", (req, res) => {
   res.render("login", { message: null });
 });
 
-// Page d'inscription (Affichage)
 app.get("/register", (req, res) => {
   if (req.session?.userId) return res.redirect("/home");
   res.render("register", { message: null });
 });
 
-// TRAITEMENT INSCRIPTION CLIENT (Route modifiée)
 app.post("/register", async (req, res) => {
   const { login, password, nom, prenom, ddn, email } = req.body;
 
-  // 1. Vérification que tous les champs sont présents
   if (!login || !password || !nom || !prenom || !ddn || !email) {
     return res.render("register", { message: "❌ Tous les champs sont requis." });
   }
 
-  // 2. Vérification Format Email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email))
     return res.render("register", { message: "❌ Format d'email invalide." });
 
-  // 3. Vérification Âge (Doit être majeur)
   const dateNaissance = new Date(ddn);
   const today = new Date();
-  
   let age = today.getFullYear() - dateNaissance.getFullYear();
   const m = today.getMonth() - dateNaissance.getMonth();
-  
-  // Si le mois n'est pas encore passé, ou si on est le mois de l'anniv mais pas encore le jour
-  if (m < 0 || (m === 0 && today.getDate() < dateNaissance.getDate())) {
-      age--;
-  }
+  if (m < 0 || (m === 0 && today.getDate() < dateNaissance.getDate())) { age--; }
 
   if (age < 18) {
-      return res.render("register", { 
-        message: "⛔ Inscription impossible : Vous devez être majeur." 
-      });
+      return res.render("register", { message: "⛔ Inscription impossible : Vous devez être majeur." });
   }
 
-  // 4. Inscription en BDD
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // On force le type_utilisateur à 'client'
     await pool.query(
       `INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) 
        VALUES (?, ?, ?, ?, ?, ?, 'client')`,
       [login, hashedPassword, nom, prenom, ddn, email]
     );
-
     res.render("login", { message: "✅ Inscription réussie ! Vous pouvez vous connecter." });
-
   } catch (error) {
-    if (error.code === "ER_DUP_ENTRY")
-      return res.render("register", { message: "❌ Ce login ou cet email est déjà utilisé." });
-    
-    console.error(error);
+    if (error.code === "ER_DUP_ENTRY") return res.render("register", { message: "❌ Login ou email déjà utilisé." });
     res.status(500).render("register", { message: "❌ Erreur serveur." });
   }
 });
 
 app.post("/login", async (req, res) => {
   const { login, password } = req.body;
-  if (!login || !password)
-    return res.render("login", { message: "Identifiants requis" });
+  if (!login || !password) return res.render("login", { message: "Identifiants requis" });
 
   try {
-    const [results] = await pool.query(
-      "SELECT * FROM utilisateur WHERE login = ?",
-      [login]
-    );
-    if (results.length === 0)
-      return res.render("login", { message: "Identifiants incorrects" });
+    const [results] = await pool.query("SELECT * FROM utilisateur WHERE login = ?", [login]);
+    if (results.length === 0) return res.render("login", { message: "Identifiants incorrects" });
 
     const user = results[0];
     const match = await verifyPassword(password, user.password);
-    if (!match)
-      return res.render("login", { message: "Identifiants incorrects" });
+    if (!match) return res.render("login", { message: "Identifiants incorrects" });
 
-    if (
-      !user.password.startsWith("$2b$") &&
-      !user.password.startsWith("$2a$")
-    ) {
+    if (!user.password.startsWith("$2b$") && !user.password.startsWith("$2a$")) {
       await migratePasswordToBcrypt(user.id, password);
     }
 
@@ -268,62 +236,33 @@ app.get("/catalogue", async (req, res) => {
     query += " AND (modele LIKE ? OR marque LIKE ? OR description LIKE ?)";
     params.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
-
   if (category) {
     query += " AND type = ?";
     params.push(category);
   }
 
   switch (sort) {
-    case "priceAsc":
-      query += " ORDER BY prix_location ASC";
-      break;
-    case "priceDesc":
-      query += " ORDER BY prix_location DESC";
-      break;
-    default:
-      query += " ORDER BY id DESC";
-      break;
+    case "priceAsc": query += " ORDER BY prix_location ASC"; break;
+    case "priceDesc": query += " ORDER BY prix_location DESC"; break;
+    default: query += " ORDER BY id DESC"; break;
   }
 
   try {
     const [produits] = await pool.query(query, params);
-    const [categories] = await pool.query(
-      "SELECT DISTINCT type FROM produit WHERE etat != 'supprimé'"
-    );
-
-    res.render("catalogue", {
-      produits,
-      categories: categories.map((c) => c.type),
-      currentCategory: category,
-      currentSort: sort,
-      currentSearch: search,
-    });
+    const [categories] = await pool.query("SELECT DISTINCT type FROM produit WHERE etat != 'supprimé'");
+    res.render("catalogue", { produits, categories: categories.map((c) => c.type), currentCategory: category, currentSort: sort, currentSearch: search });
   } catch (err) {
-    console.error("Erreur catalogue :", err);
-    res.status(500).render("catalogue", {
-      produits: [],
-      categories: [],
-      message: "Erreur chargement produits",
-    });
+    res.status(500).render("catalogue", { produits: [], categories: [], message: "Erreur chargement produits" });
   }
 });
 
 app.get("/product/:id", async (req, res) => {
   try {
-    const [produits] = await pool.query("SELECT * FROM produit WHERE id = ?", [
-      req.params.id,
-    ]);
+    const [produits] = await pool.query("SELECT * FROM produit WHERE id = ?", [req.params.id]);
     if (produits.length === 0) return res.status(404).render("404");
-    
-    res.render("product", { 
-        produit: produits[0], 
-        message: req.query.message || null 
-    });
+    res.render("product", { produit: produits[0], message: req.query.message || null });
   } catch (err) {
-    res
-      .status(500)
-      .render("error", { message: "Erreur chargement produit", code: 500 });
+    res.status(500).render("error", { message: "Erreur chargement produit", code: 500 });
   }
 });
 
@@ -337,21 +276,24 @@ app.get("/mes-locations", authMiddleware, isClient, async (req, res) => {
     );
     res.render("mes_locations", { locations });
   } catch (err) {
-    res.status(500).render("mes_locations", {
-      locations: [],
-      message: "Erreur chargement locations",
-    });
+    res.status(500).render("mes_locations", { locations: [], message: "Erreur chargement locations" });
   }
 });
 
+// ROUTE PROFIL (MODIFIÉE POUR VÉRIFIER LES LOCATIONS ACTIVES)
 app.get("/profil", authMiddleware, isClient, async (req, res) => {
   try {
-    const [users] = await pool.query(
-      "SELECT id, login, nom, prenom, ddn, email, img FROM utilisateur WHERE id = ?",
+    const [users] = await pool.query("SELECT id, login, nom, prenom, ddn, email, img FROM utilisateur WHERE id = ?", [req.session.userId]);
+    if (users.length === 0) return res.redirect("/logout");
+
+    // NOUVEAU : VÉRIFICATION DES LOCATIONS EN COURS
+    const [activeLocations] = await pool.query(
+      "SELECT COUNT(*) AS count FROM location WHERE utilisateur_id = ? AND date_retour_effective IS NULL",
       [req.session.userId]
     );
-
-    if (users.length === 0) return res.redirect("/logout");
+    
+    const hasActiveRentals = activeLocations[0].count > 0;
+    // FIN NOUVEAU
 
     let profilMessage = null;
     const msg = req.query.message;
@@ -374,45 +316,36 @@ app.get("/profil", authMiddleware, isClient, async (req, res) => {
 
     if (msg && msgMap[msg]) profilMessage = msgMap[msg];
 
-    res.render("profil", { utilisateur: users[0], profilMessage });
+    res.render("profil", { 
+      utilisateur: users[0], 
+      profilMessage,
+      // PASSAGE DU FLAG D'ÉTAT
+      hasActiveRentals: hasActiveRentals 
+    });
   } catch (err) {
-    res
-      .status(500)
-      .render("error", { message: "Erreur chargement profil", code: 500 });
+    res.status(500).render("error", { message: "Erreur chargement profil", code: 500 });
   }
 });
 
 app.post("/profil/informations", authMiddleware, isClient, async (req, res) => {
   const { email, nom, prenom, ddn } = req.body;
-
-  if (!email || !nom || !prenom || !ddn)
-    return res.status(400).json({ error: "Champs requis" });
+  if (!email || !nom || !prenom || !ddn) return res.status(400).json({ error: "Champs requis" });
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email))
-    return res.status(400).json({ error: "Email invalide" });
+  if (!emailRegex.test(email)) return res.status(400).json({ error: "Email invalide" });
 
   try {
     const [result] = await pool.query(
       "UPDATE utilisateur SET email = ?, nom = ?, prenom = ?, ddn = ? WHERE id = ?",
       [email, nom, prenom, ddn, req.session.userId]
     );
-
     req.session.username = prenom;
-
     req.session.save((err) => {
-      if (err) {
-        console.error("Erreur save session:", err);
-        return res.status(500).json({ error: "Erreur sauvegarde session" });
-      }
-      if (result.affectedRows > 0) {
-        return res.json({ success: true, message: "Mise à jour réussie" });
-      }
-      return res.json({ success: true, message: "Aucune modification" });
+      if (err) return res.status(500).json({ error: "Erreur sauvegarde session" });
+      return res.json({ success: true, message: "Mise à jour réussie" });
     });
   } catch (err) {
-    if (err.code === "ER_DUP_ENTRY")
-      return res.status(409).json({ error: "Email déjà utilisé" });
+    if (err.code === "ER_DUP_ENTRY") return res.status(409).json({ error: "Email déjà utilisé" });
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
@@ -421,62 +354,67 @@ app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
   const { ancien_mdp, nouveau_mdp, confirmer_mdp } = req.body;
   const userId = req.session.userId;
 
-  if (!ancien_mdp || !nouveau_mdp || !confirmer_mdp)
-    return res.status(400).json({ error: "Champs requis" });
-  if (nouveau_mdp !== confirmer_mdp)
-    return res
-      .status(400)
-      .json({ error: "Les mots de passe ne correspondent pas" });
-  if (ancien_mdp === nouveau_mdp)
-    return res
-      .status(400)
-      .json({ error: "Le mot de passe doit être différent" });
-  if (nouveau_mdp.length < 4)
-    return res.status(400).json({ error: "Mot de passe trop court" });
+  if (!ancien_mdp || !nouveau_mdp || !confirmer_mdp) return res.status(400).json({ error: "Champs requis" });
+  if (nouveau_mdp !== confirmer_mdp) return res.status(400).json({ error: "Les mots de passe ne correspondent pas" });
+  if (nouveau_mdp.length < 4) return res.status(400).json({ error: "Mot de passe trop court" });
 
   try {
-    const [users] = await pool.query(
-      "SELECT password FROM utilisateur WHERE id = ?",
-      [userId]
-    );
-    if (users.length === 0)
-      return res.status(404).json({ error: "Utilisateur introuvable" });
+    const [users] = await pool.query("SELECT password FROM utilisateur WHERE id = ?", [userId]);
+    if (users.length === 0) return res.status(404).json({ error: "Utilisateur introuvable" });
 
     const match = await verifyPassword(ancien_mdp, users[0].password);
-    if (!match)
-      return res.status(401).json({ error: "Ancien mot de passe incorrect" });
+    if (!match) return res.status(401).json({ error: "Ancien mot de passe incorrect" });
 
     const newHash = await bcrypt.hash(nouveau_mdp, 10);
-    await pool.query("UPDATE utilisateur SET password = ? WHERE id = ?", [
-      newHash,
-      userId,
-    ]);
-
+    await pool.query("UPDATE utilisateur SET password = ? WHERE id = ?", [newHash, userId]);
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
+// ROUTE DE SUPPRESSION (Vérification serveur)
+app.delete("/profil/delete", authMiddleware, isClient, async (req, res) => {
+  try {
+    // 1. VÉRIFICATION : Le serveur bloque la suppression si le compte a des locations actives
+    const [locations] = await pool.query(
+      "SELECT * FROM location WHERE utilisateur_id = ? AND date_retour_effective IS NULL",
+      [req.session.userId]
+    );
+
+    if (locations.length > 0) {
+      return res.status(400).json({ 
+        error: "Impossible de supprimer : vous avez des locations en cours. Rendez le matériel d'abord." 
+      });
+    }
+
+    // 2. Supprimer l'utilisateur
+    await pool.query("DELETE FROM utilisateur WHERE id = ?", [req.session.userId]);
+
+    // 3. Logout
+    req.session.destroy();
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("Erreur suppression compte:", err);
+    res.status(500).json({ error: "Erreur serveur lors de la suppression" });
+  }
+});
+
+// --- LOCATIONS ---
+
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const { produit_id, date_debut, date_retour_prevue } = req.body;
-  if (!produit_id || !date_debut || !date_retour_prevue)
-    return res.status(400).json({ error: "Champs requis" });
+  if (!produit_id || !date_debut || !date_retour_prevue) return res.status(400).json({ error: "Champs requis" });
 
   const debut = new Date(date_debut);
   const fin = new Date(date_retour_prevue);
-  if (debut < new Date().setHours(0, 0, 0, 0))
-    return res.status(400).json({ error: "Date début invalide" });
+  if (debut < new Date().setHours(0, 0, 0, 0)) return res.status(400).json({ error: "Date début invalide" });
   if (fin <= debut) return res.status(400).json({ error: "Date fin invalide" });
 
   try {
-    const [prods] = await pool.query(
-      "SELECT * FROM produit WHERE id = ? AND etat = 'disponible'",
-      [produit_id]
-    );
-    if (prods.length === 0)
-      return res.status(400).send("Ce produit n'est plus disponible.");
+    const [prods] = await pool.query("SELECT * FROM produit WHERE id = ? AND etat = 'disponible'", [produit_id]);
+    if (prods.length === 0) return res.status(400).send("Produit indisponible.");
 
     const produit = prods[0];
     const nbJours = Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)) || 1;
@@ -486,49 +424,29 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
       "INSERT INTO location (date_debut, date_retour_prevue, prix_total, utilisateur_id, produit_id) VALUES (?, ?, ?, ?, ?)",
       [date_debut, date_retour_prevue, total, req.session.userId, produit_id]
     );
-    
-    // On met à jour UNIQUEMENT le produit concerné
-    await pool.query("UPDATE produit SET etat = 'loué' WHERE id = ?", [
-      produit_id,
-    ]);
-
-    res.redirect('/mes-locations'); 
-
+    await pool.query("UPDATE produit SET etat = 'loué' WHERE id = ?", [produit_id]);
+    res.redirect('/mes-locations');
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Erreur lors de la création de la location");
+    res.status(500).send("Erreur création location");
   }
 });
 
-app.get("/returnprod", authMiddleware, isClient, (req, res) =>
-  res.render("returnprod")
-);
+app.get("/returnprod", authMiddleware, isClient, (req, res) => res.render("returnprod"));
 
 app.post("/returnprod", authMiddleware, isClient, async (req, res) => {
   const { location_id } = req.body;
   if (!location_id) return res.status(400).json({ error: "ID requis" });
 
   try {
-    const [locs] = await pool.query(
-      "SELECT * FROM location WHERE id = ? AND utilisateur_id = ?",
-      [location_id, req.session.userId]
-    );
-    if (locs.length === 0)
-      return res.status(404).json({ error: "Location introuvable" });
+    const [locs] = await pool.query("SELECT * FROM location WHERE id = ? AND utilisateur_id = ?", [location_id, req.session.userId]);
+    if (locs.length === 0) return res.status(404).json({ error: "Location introuvable" });
 
     const loc = locs[0];
-    if (loc.date_retour_effective)
-      return res.status(400).json({ error: "Déjà retourné" });
+    if (loc.date_retour_effective) return res.status(400).json({ error: "Déjà retourné" });
 
     const now = new Date().toISOString().slice(0, 19).replace("T", " ");
-    await pool.query(
-      "UPDATE location SET date_retour_effective = ? WHERE id = ?",
-      [now, location_id]
-    );
-    await pool.query("UPDATE produit SET etat = 'disponible' WHERE id = ?", [
-      loc.produit_id,
-    ]);
-
+    await pool.query("UPDATE location SET date_retour_effective = ? WHERE id = ?", [now, location_id]);
+    await pool.query("UPDATE produit SET etat = 'disponible' WHERE id = ?", [loc.produit_id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Erreur retour" });
@@ -559,253 +477,114 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
   }
 });
 
-// 1. Suppression d'un produit (agent uniquement)
-app.post(
-  "/agent/supprimer_produit/:id",
-  authMiddleware,
-  isAgent,
-  async (req, res) => {
-    const produitId = req.params.id;
+app.post("/agent/supprimer_produit/:id", authMiddleware, isAgent, async (req, res) => {
+  const produitId = req.params.id;
+  try {
+    const [locations] = await pool.query("SELECT COUNT(*) as count FROM location WHERE produit_id = ? AND date_retour_effective IS NULL", [produitId]);
+    if (locations[0].count > 0) return res.status(400).json({ error: "Impossible de supprimer : produit en location." });
 
-    try {
-      const [locations] = await pool.query(
-        "SELECT COUNT(*) as count FROM location WHERE produit_id = ? AND date_retour_effective IS NULL",
-        [produitId]
-      );
-
-      if (locations[0].count > 0) {
-        return res.status(400).json({
-          error:
-            "Impossible de supprimer : ce produit est actuellement en location",
-        });
-      }
-
-      await pool.query("DELETE FROM produit WHERE id = ?", [produitId]);
-
-      res.json({ success: true, message: "Produit supprimé avec succès" });
-    } catch (err) {
-      console.error("Erreur suppression produit:", err);
-      res.status(500).json({ error: "Erreur lors de la suppression" });
-    }
+    await pool.query("DELETE FROM produit WHERE id = ?", [produitId]);
+    res.json({ success: true, message: "Produit supprimé." });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur suppression" });
   }
-);
-
-// 2. Finaliser une location (agent uniquement)
-app.post(
-  "/agent/finaliser_location/:id",
-  authMiddleware,
-  isAgent,
-  async (req, res) => {
-    const locationId = req.params.id;
-
-    try {
-      const [locations] = await pool.query(
-        "SELECT * FROM location WHERE id = ?",
-        [locationId]
-      );
-
-      if (locations.length === 0) {
-        return res.status(404).json({ error: "Location introuvable" });
-      }
-
-      const location = locations[0];
-
-      if (location.date_retour_effective) {
-        return res
-          .status(400)
-          .json({ error: "Cette location est déjà finalisée" });
-      }
-
-      const dateDebut = new Date(location.date_debut);
-      const dateRetourPrevue = new Date(location.date_retour_prevue);
-      const dateRetourEffective = new Date();
-
-      const dureeReelle = Math.ceil(
-        (dateRetourEffective - dateDebut) / (1000 * 60 * 60 * 24)
-      );
-
-      let prixFinal = parseFloat(location.prix_total);
-
-      if (dureeReelle > 60 || dateRetourEffective > dateRetourPrevue) {
-        const [produits] = await pool.query(
-          "SELECT prix_location FROM produit WHERE id = ?",
-          [location.produit_id]
-        );
-        const prixBase = parseFloat(produits[0].prix_location);
-        const surcoutCalcule = prixBase * 0.2;
-        prixFinal += surcoutCalcule;
-      }
-
-      await pool.query(
-        "UPDATE location SET date_retour_effective = NOW(), prix_total = ? WHERE id = ?",
-        [prixFinal, locationId]
-      );
-
-      await pool.query("UPDATE produit SET etat = 'disponible' WHERE id = ?", [
-        location.produit_id,
-      ]);
-
-      res.json({
-        success: true,
-        message: "Location finalisée avec succès",
-        prix_final: prixFinal,
-      });
-    } catch (err) {
-      console.error("Erreur finalisation location:", err);
-      res.status(500).json({ error: "Erreur lors de la finalisation" });
-    }
-  }
-);
-
-// 3. Afficher formulaire modification produit
-app.get(
-  "/agent/modifier_produit/:id",
-  authMiddleware,
-  isAgent,
-  async (req, res) => {
-    try {
-      const [produits] = await pool.query(
-        "SELECT * FROM produit WHERE id = ?",
-        [req.params.id]
-      );
-      if (produits.length === 0) return res.status(404).render("404");
-
-      res.render("modifier_produit", { produit: produits[0], message: null });
-    } catch (err) {
-      res
-        .status(500)
-        .render("error", { message: "Erreur chargement produit", code: 500 });
-    }
-  }
-);
-
-// 4. Traiter modification produit
-app.post(
-  "/agent/modifier_produit/:id",
-  authMiddleware,
-  isAgent,
-  upload.single("image"),
-  async (req, res) => {
-    const { type, marque, modele, prix_location, description, etat } = req.body;
-    const produitId = req.params.id;
-    const imageFilename = req.file ? req.file.filename : req.body.current_image;
-
-    try {
-      await pool.query(
-        "UPDATE produit SET type = ?, description = ?, marque = ?, modele = ?, prix_location = ?, etat = ?, img = ? WHERE id = ?",
-        [
-          type,
-          description || "",
-          marque,
-          modele,
-          parseFloat(prix_location),
-          etat,
-          imageFilename,
-          produitId,
-        ]
-      );
-
-      res.redirect(`/product/${produitId}?message=success`);
-    } catch (err) {
-      console.error("Erreur modification produit:", err);
-      const [produits] = await pool.query(
-        "SELECT * FROM produit WHERE id = ?",
-        [produitId]
-      );
-      res.render("modifier_produit", {
-        produit: produits[0],
-        message: "❌ Erreur lors de la modification",
-      });
-    }
-  }
-);
-
-// Route Affichage Formulaire Ajout
-app.get("/agent/ajout_produit", authMiddleware, isAgent, (req, res) => {
-  res.render("ajout_produit", { message: null });
 });
 
-app.get("/agent/returnprod", authMiddleware, isAgent, (req, res) => {
-  res.render("returnprod", { message: null });
-});
+app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, res) => {
+  const locationId = req.params.id;
+  try {
+    const [locations] = await pool.query("SELECT * FROM location WHERE id = ?", [locationId]);
+    if (locations.length === 0) return res.status(404).json({ error: "Location introuvable" });
 
-app.get("/agent/locations", authMiddleware, isAgent, (req, res) => {
-  res.render("locations", { message: null });
-});
+    const location = locations[0];
+    if (location.date_retour_effective) return res.status(400).json({ error: "Déjà finalisée" });
 
-// Traitement Formulaire avec Image
-app.post(
-  "/agent/ajout_produit",
-  authMiddleware,
-  isAgent,
-  upload.single("image"),
-  async (req, res) => {
-    const { type, marque, modele, prix_location, description, etat } = req.body;
-    const imageFilename = req.file ? req.file.filename : null;
-
-    if (!type || !marque || !modele || !prix_location) {
-      return res.render("ajout_produit", {
-        message: "❌ Champs requis manquants",
-      });
+    const dateDebut = new Date(location.date_debut);
+    const dateRetourPrevue = new Date(location.date_retour_prevue);
+    const dateRetourEffective = new Date();
+    const dureeReelle = Math.ceil((dateRetourEffective - dateDebut) / (1000 * 60 * 60 * 24));
+    
+    let prixFinal = parseFloat(location.prix_total);
+    if (dureeReelle > 60 || dateRetourEffective > dateRetourPrevue) {
+      const [produits] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [location.produit_id]);
+      const prixBase = parseFloat(produits[0].prix_location);
+      prixFinal += prixBase * 0.2;
     }
 
-    try {
-      await pool.query(
-        "INSERT INTO produit (type, description, marque, modele, prix_location, etat, img) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [
-          type,
-          description || "",
-          marque,
-          modele,
-          parseFloat(prix_location),
-          etat,
-          imageFilename,
-        ]
-      );
-      res.render("ajout_produit", {
-        message: "✅ Produit ajouté avec succès !",
-      });
-    } catch (err) {
-      console.error("Erreur ajout produit:", err);
-      res.status(500).render("ajout_produit", {
-        message: "❌ Erreur ajout dans la base de données",
-      });
-    }
+    await pool.query("UPDATE location SET date_retour_effective = NOW(), prix_total = ? WHERE id = ?", [prixFinal, locationId]);
+    await pool.query("UPDATE produit SET etat = 'disponible' WHERE id = ?", [location.produit_id]);
+    res.json({ success: true, message: "Location finalisée.", prix_final: prixFinal });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur finalisation" });
   }
-);
+});
 
-// Création d'agent (réservé admin)
-app.get("/inscription_agent", authMiddleware, isAdmin, (req, res) =>
-  res.render("inscription_agent", { message: null })
-);
+app.get("/agent/modifier_produit/:id", authMiddleware, isAgent, async (req, res) => {
+  try {
+    const [produits] = await pool.query("SELECT * FROM produit WHERE id = ?", [req.params.id]);
+    if (produits.length === 0) return res.status(404).render("404");
+    res.render("modifier_produit", { produit: produits[0], message: null });
+  } catch (err) {
+    res.status(500).render("error", { message: "Erreur chargement", code: 500 });
+  }
+});
 
-// AJOUT AGENT (POST) - Modifié précédemment
+app.post("/agent/modifier_produit/:id", authMiddleware, isAgent, upload.single("image"), async (req, res) => {
+  const { type, marque, modele, prix_location, description, etat } = req.body;
+  const produitId = req.params.id;
+  const imageFilename = req.file ? req.file.filename : req.body.current_image;
+
+  try {
+    await pool.query(
+      "UPDATE produit SET type = ?, description = ?, marque = ?, modele = ?, prix_location = ?, etat = ?, img = ? WHERE id = ?",
+      [type, description || "", marque, modele, parseFloat(prix_location), etat, imageFilename, produitId]
+    );
+    res.redirect(`/product/${produitId}?message=success`);
+  } catch (err) {
+    const [produits] = await pool.query("SELECT * FROM produit WHERE id = ?", [produitId]);
+    res.render("modifier_produit", { produit: produits[0], message: "❌ Erreur modification" });
+  }
+});
+
+app.get("/agent/ajout_produit", authMiddleware, isAgent, (req, res) => res.render("ajout_produit", { message: null }));
+app.get("/agent/returnprod", authMiddleware, isAgent, (req, res) => res.render("returnprod", { message: null }));
+app.get("/agent/locations", authMiddleware, isAgent, (req, res) => res.render("locations", { message: null }));
+
+app.post("/agent/ajout_produit", authMiddleware, isAgent, upload.single("image"), async (req, res) => {
+  const { type, marque, modele, prix_location, description, etat } = req.body;
+  const imageFilename = req.file ? req.file.filename : null;
+
+  if (!type || !marque || !modele || !prix_location) return res.render("ajout_produit", { message: "❌ Champs requis manquants" });
+
+  try {
+    await pool.query(
+      "INSERT INTO produit (type, description, marque, modele, prix_location, etat, img) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [type, description || "", marque, modele, parseFloat(prix_location), etat, imageFilename]
+    );
+    res.render("ajout_produit", { message: "✅ Produit ajouté !" });
+  } catch (err) {
+    res.status(500).render("ajout_produit", { message: "❌ Erreur ajout base de données" });
+  }
+});
+
+app.get("/inscription_agent", authMiddleware, isAdmin, (req, res) => res.render("inscription_agent", { message: null }));
+
 app.post("/inscription_agent", authMiddleware, isAdmin, upload.single("image"), async (req, res) => {
   const { login, password, nom, prenom, ddn, email } = req.body;
   const imageFilename = req.file ? req.file.filename : null;
 
-  if (!login || !password || !nom || !prenom || !email || !ddn) {
-    return res.render("inscription_agent", { message: "❌ Tous les champs sont requis." });
-  }
+  if (!login || !password || !nom || !prenom || !email || !ddn) return res.render("inscription_agent", { message: "❌ Tous les champs sont requis." });
 
   try {
     const hash = await bcrypt.hash(password, 10);
-    
     await pool.query(
-      `INSERT INTO utilisateur 
-      (login, password, nom, prenom, ddn, email, type_utilisateur, img) 
-      VALUES (?, ?, ?, ?, ?, ?, 'agent', ?)`,
+      `INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur, img) VALUES (?, ?, ?, ?, ?, ?, 'agent', ?)`,
       [login, hash, nom, prenom, ddn, email, imageFilename]
     );
-
     res.render("inscription_agent", { message: "✅ Agent ajouté avec succès !" });
-
   } catch (err) {
-    console.error("Erreur ajout agent:", err);
-    if (err.code === 'ER_DUP_ENTRY') {
-        return res.render("inscription_agent", { message: "❌ Ce login ou cet email est déjà utilisé." });
-    }
-    res.status(500).render("inscription_agent", { message: "❌ Erreur serveur lors de l'ajout." });
+    if (err.code === 'ER_DUP_ENTRY') return res.render("inscription_agent", { message: "❌ Login/Email déjà utilisé." });
+    res.status(500).render("inscription_agent", { message: "❌ Erreur serveur." });
   }
 });
 
