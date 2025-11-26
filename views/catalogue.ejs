@@ -83,6 +83,20 @@
                             </div>
 
                             <a href="/product/<%= produit.id %>" class="product-button">Voir détails</a>
+                                          <a href="/product/<%= produit.id %>" class="btn btn--primary">Voir détails</a>
+              
+             
+              <% if (userRole === 'agent' || userRole === 'admin') { %>
+                <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                  <a href="/agent/modifier_produit/<%= produit.id %>" class="btn btn--secondary" style="flex: 1;">
+                    ✏️ Modifier
+                  </a>
+                  <button onclick="supprimerProduit(<%= produit.id %>)" class="btn btn--outline" style="flex: 1; color: var(--color-error); border-color: var(--color-error);">
+                    🗑️ Supprimer
+                  </button>
+                </div>
+              <% } %>
+
                         </div>
 
                     <% }) %>
@@ -92,6 +106,32 @@
             </div>
         </div>
     </div>
+<script>
+async function supprimerProduit(id) {
+  if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer ce produit ?\n\nCette action est irréversible.')) {
+    return;
+  }
+  
+  try {
+    const res = await fetch(`/agent/supprimer_produit/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      alert('✅ ' + data.message);
+      location.reload();
+    } else {
+      alert('❌ ' + data.error);
+    }
+  } catch (err) {
+    console.error(err);
+    alert('❌ Erreur lors de la suppression');
+  }
+}
+</script>
 
     <%- include('footer') %>
 </body>
