@@ -178,6 +178,10 @@ h2 {
 /* CONTRÔLES D'ÉDITION (BOUTONS) */
 /* ========================================== */
 
+.button {
+    display: none;
+}
+
 .edit-controls {
     display: flex;
     justify-content: flex-end; /* Aligne les boutons à droite */
