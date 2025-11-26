@@ -13,23 +13,32 @@
     <%- include('header') %>
 
     <div class="content-wrapper">
+        
         <form class="search-container" action="/catalogue" method="GET">
+            
             <input type="text" name="search" id="searchBar" placeholder="Rechercher un produit..."
                 value="<%= typeof currentSearch !== 'undefined' ? currentSearch : '' %>">
+
+            <div class="select-wrapper">
+                <select name="sort" class="sort-dropdown" id="sortMenu" onchange="this.form.submit()">
+                    <option value="default" <%=typeof currentSort==='undefined' || currentSort==='default' ? 'selected' : '' %>>Trier par...</option>
+                    <option value="priceAsc" <%=typeof currentSort !=='undefined' && currentSort==='priceAsc' ? 'selected' : '' %>>Prix : croissant</option>
+                    <option value="priceDesc" <%=typeof currentSort !=='undefined' && currentSort==='priceDesc' ? 'selected' : '' %>>Prix : décroissant</option>
+                    <option value="popularity" <%=typeof currentSort !=='undefined' && currentSort==='popularity' ? 'selected' : '' %>>Popularité</option>
+                    <option value="rating" <%=typeof currentSort !=='undefined' && currentSort==='rating' ? 'selected' : '' %>>Meilleures notes</option>
+                </select>
+            </div>
+
+            <button type="submit" id="searchBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
 
             <% if (typeof currentCategory !=='undefined' && currentCategory) { %>
                 <input type="hidden" name="category" value="<%= currentCategory %>">
             <% } %>
-
-            <select name="sort" class="sort-dropdown" id="sortMenu">
-                <option value="default" <%=typeof currentSort==='undefined' || currentSort==='default' ? 'selected' : '' %>>Trier par...</option>
-                <option value="priceAsc" <%=typeof currentSort !=='undefined' && currentSort==='priceAsc' ? 'selected' : '' %>>Prix : croissant</option>
-                <option value="priceDesc" <%=typeof currentSort !=='undefined' && currentSort==='priceDesc' ? 'selected' : '' %>>Prix : décroissant</option>
-                <option value="popularity" <%=typeof currentSort !=='undefined' && currentSort==='popularity' ? 'selected' : '' %>>Popularité</option>
-                <option value="rating" <%=typeof currentSort !=='undefined' && currentSort==='rating' ? 'selected' : '' %>>Meilleures notes</option>
-            </select>
-
-            <button type="submit" id="searchBtn">🔍</button>
         </form>
 
         <div class="main-content-area">
@@ -85,15 +94,13 @@
                             <a href="/product/<%= produit.id %>" class="product-button">Voir détails</a>
                                     
                             <% if (userRole === 'agent' || userRole === 'admin') { %>
-                                
                                 <% if (produit.etat === 'disponible') { %>
                                     <div style="margin-top: 0.5rem;">
-                                        <button onclick="supprimerProduit(<%= produit.id %>)" class="btn btn--outline" style="width: 100%; color: var(--color-error); border-color: var(--color-error); cursor: pointer;">
+                                        <button onclick="supprimerProduit(<%= produit.id %>)" class="btn btn--outline" style="width: 100%; color: var(--error-color); border-color: var(--error-color); cursor: pointer;">
                                             🗑️ Supprimer
                                         </button>
                                     </div>
                                 <% } %>
-
                             <% } %>
 
                         </div>
