@@ -2,39 +2,80 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/css/register.css" />
     <title>Inscription</title>
   </head>
 
   <body>
     <%- include('header') %>
+    
     <div class="login-container">
-      <h2>S'inscrire</h2>
-      <p><% if (this.message){ %> <%= message %> <% } %></p>
+      <h2>Créer un compte</h2>
+      
+      <p style="color: red; text-align: center;">
+        <% if (locals.message){ %> <%= message %> <% } %>
+      </p>
 
-      <form class="login-form" action="/login" method="POST">
-        <label for="login"><b>Nom</b></label>
-        <input type="text" placeholder="Entrez Prenom" name="login" required />
-        <input type="text" placeholder="Entrez Nom de famille " name="login" required />
+      <form class="login-form" action="/register" method="POST" onsubmit="return verifierAge(event)">
         
-        <label for="login"><b>Identifiant</b></label>
-        <input type="text" placeholder="Entrez l'Identifiant" name="login" />
+        <div style="display: flex; gap: 10px;">
+            <div style="flex:1;">
+                <label for="prenom"><b>Prénom</b></label>
+                <input type="text" placeholder="Prénom" name="prenom" required />
+            </div>
+            <div style="flex:1;">
+                <label for="nom"><b>Nom</b></label>
+                <input type="text" placeholder="Nom" name="nom" required />
+            </div>
+        </div>
 
-        <label for="login"><b>Adresse mail</b></label>
-        <input type="text" placeholder="Entrez votre adresse mail" name="login" required />
+        <label for="ddn"><b>Date de naissance</b> <small>(Requis pour vérifier l'âge)</small></label>
+        <input type="date" id="ddn" name="ddn" required />
 
-        <label for="password"><b>Mot de passe :</b></label>
-        <input type="password" placeholder="Enter 1234" name="password" required />
+        <label for="email"><b>Adresse mail</b></label>
+        <input type="email" placeholder="exemple@email.com" name="email" required />
+
+        <label for="login"><b>Identifiant (Login)</b></label>
+        <input type="text" placeholder="Choisissez un pseudo" name="login" required />
+
+        <label for="password"><b>Mot de passe</b></label>
+        <input type="password" placeholder="Mot de passe sécurisé" name="password" required />
 
         <button type="submit">S'enregistrer</button>
       </form>
+
       <div class="google-login">
-        <p>Se connecter avec</p>
-        <a href="/auth/google" class="google-icon">
-          <img src="img/google.png" alt="Google" />
-        </a>
+        <p>Déjà un compte ? <a href="/login" style="color: #FD5035;">Se connecter</a></p>
       </div>
     </div>
+
     <%- include('footer') %>
+
+    <script>
+      function verifierAge(event) {
+        const inputDate = document.getElementById('ddn').value;
+        if (!inputDate) return;
+
+        const dateNaissance = new Date(inputDate);
+        const today = new Date();
+        
+        let age = today.getFullYear() - dateNaissance.getFullYear();
+        const m = today.getMonth() - dateNaissance.getMonth();
+        
+        // Ajustement si l'anniversaire n'est pas encore passé cette année
+        if (m < 0 || (m === 0 && today.getDate() < dateNaissance.getDate())) {
+            age--;
+        }
+
+        if (age < 18) {
+            alert("⛔ Inscription impossible : Vous devez être majeur pour créer un compte.");
+            event.preventDefault(); // Empêche l'envoi du formulaire
+            return false;
+        }
+        
+        return true; // Autorise l'envoi
+      }
+    </script>
   </body>
 </html>

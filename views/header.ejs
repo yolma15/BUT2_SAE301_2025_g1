@@ -49,19 +49,23 @@
                     <div class="user-menu">
                         
                         <% 
-                            // --- CORRECTION ICI ---
-                            // Par défaut, on cherche une image "avatar-default.png" dans public/img/
-                            let avatarSrc = '/img/avatar-default.png';
+                            // 1. Image par défaut (fall back local)
+                            let avatarSrc = '/img/default.jpg';
                             
-                            // Si l'utilisateur a une image (venant de la BDD)
-                            if (typeof userImg !== 'undefined' && userImg) {
-                                // On pointe vers le dossier /uploads/ car c'est là que Multer enregistre
-                                avatarSrc = '/uploads/' + userImg;
+                            // 2. CORRECTION : On utilise le chemin /img/ pour les images BDD,
+                            // car c'est le chemin qui fonctionne sur la page profil.
+                            if (typeof userImg !== 'undefined' && userImg && userImg !== 'null' && userImg.trim() !== '') {
+                                avatarSrc = '/img/' + userImg; // Chemin corrigé pour correspondre à /profil
                             }
                         %>
 
-                        <img class="avatar" src="<%= avatarSrc %>" alt="profil" 
-                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid white;">
+                        <img class="avatar" 
+                             src="<%= avatarSrc %>" 
+                             alt="profil" 
+                             
+                             onerror="this.onerror=null; this.src='/img/default.jpg';"
+                             
+                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid white; cursor: pointer;">
 
                         <span class="username"><%= typeof username !== 'undefined' ? username : 'Utilisateur' %></span>
 
@@ -99,7 +103,7 @@
             
             if (!userMenu) return; 
 
-            // 1. Gérer l'ouverture/fermeture au clic sur le menu utilisateur complet
+            // 1. Gérer l'ouverture au clic
             userMenu.addEventListener('click', function(event) {
                 if (event.target.closest('.dropdown-item')) {
                     return; 
@@ -108,14 +112,14 @@
                 userMenu.classList.toggle('open');
             });
 
-            // 2. Gérer la fermeture lorsque l'utilisateur clique n'importe où ailleurs
+            // 2. Fermer si clic ailleurs
             document.addEventListener('click', function(event) {
                 if (userMenu.classList.contains('open') && !userMenu.contains(event.target)) {
                     userMenu.classList.remove('open');
                 }
             });
 
-            // 3. Empêcher le menu de se fermer si l'on clique à l'intérieur
+            // 3. Empêcher fermeture si clic dans le dropdown
             const dropdownMenu = userMenu.querySelector('.dropdown-menu');
             if (dropdownMenu) {
                 dropdownMenu.addEventListener('click', function(event) {
