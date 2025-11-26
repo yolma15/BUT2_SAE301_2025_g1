@@ -83,9 +83,7 @@
                             </div>
 
                             <a href="/product/<%= produit.id %>" class="product-button">Voir détails</a>
-                                          <a href="/product/<%= produit.id %>" class="btn btn--primary">Voir détails</a>
-              
-             
+                                       
               <% if (userRole === 'agent' || userRole === 'admin') { %>
                 <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
                   <a href="/agent/modifier_produit/<%= produit.id %>" class="btn btn--secondary" style="flex: 1;">
