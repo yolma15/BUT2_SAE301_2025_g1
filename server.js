@@ -4,8 +4,8 @@ import session from "express-session";
 import bcrypt from "bcrypt";
 import crypto from "crypto"; // Pour supporter MD5 temporairement
 import pool from "./db.js";
-import multer from "multer"; // IMPORT INDISPENSABLE
-import fs from "fs"; // IMPORT INDISPENSABLE
+import multer from "multer";
+import fs from "fs";
 
 const app = express();
 
@@ -461,7 +461,7 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
       [produit_id]
     );
     if (prods.length === 0)
-      return res.status(400).json({ error: "Produit non disponible" });
+      return res.status(400).send("Ce produit n'est plus disponible.");
 
     const produit = prods[0];
     const nbJours = Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)) || 1;
@@ -471,6 +471,8 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
       "INSERT INTO location (date_debut, date_retour_prevue, prix_total, utilisateur_id, produit_id) VALUES (?, ?, ?, ?, ?)",
       [date_debut, date_retour_prevue, total, req.session.userId, produit_id]
     );
+    
+    // On met à jour UNIQUEMENT le produit concerné
     await pool.query("UPDATE produit SET etat = 'loué' WHERE id = ?", [
       produit_id,
     ]);
@@ -542,7 +544,7 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
   }
 });
 
-// 1️⃣ Suppression d'un produit (agent uniquement)
+// 1. Suppression d'un produit (agent uniquement)
 app.post(
   "/agent/supprimer_produit/:id",
   authMiddleware,
@@ -551,7 +553,8 @@ app.post(
     const produitId = req.params.id;
 
     try {
-      // Vérifier si le produit est en location
+      // VÉRIFICATION DE SÉCURITÉ : Vérifier dans la BDD que le produit est bien disponible
+      // (Au cas où quelqu'un appellerait l'URL manuellement alors que le bouton est caché)
       const [locations] = await pool.query(
         "SELECT COUNT(*) as count FROM location WHERE produit_id = ? AND date_retour_effective IS NULL",
         [produitId]
@@ -575,7 +578,7 @@ app.post(
   }
 );
 
-// 2️⃣ Finaliser une location (agent uniquement)
+// 2. Finaliser une location (agent uniquement)
 app.post(
   "/agent/finaliser_location/:id",
   authMiddleware,
@@ -648,7 +651,7 @@ app.post(
   }
 );
 
-// 3️⃣ Afficher formulaire modification produit
+// 3. Afficher formulaire modification produit
 app.get(
   "/agent/modifier_produit/:id",
   authMiddleware,
@@ -670,7 +673,7 @@ app.get(
   }
 );
 
-// 4️⃣ Traiter modification produit
+// 4. Traiter modification produit
 app.post(
   "/agent/modifier_produit/:id",
   authMiddleware,
@@ -726,18 +729,14 @@ app.get("/agent/locations", authMiddleware, isAgent, (req, res) => {
   res.render("locations", { message: null });
 });
 
-// --- MODIFICATION ICI : Traitement Formulaire avec Image ---
-// On utilise upload.single('image') pour gérer le fichier envoyé
+// Traitement Formulaire avec Image
 app.post(
   "/agent/ajout_produit",
   authMiddleware,
   isAgent,
   upload.single("image"),
   async (req, res) => {
-    // Grâce à multer, req.body contient maintenant les champs textes
     const { type, marque, modele, prix_location, description, etat } = req.body;
-
-    // Et req.file contient le fichier image
     const imageFilename = req.file ? req.file.filename : null;
 
     if (!type || !marque || !modele || !prix_location) {
@@ -747,7 +746,6 @@ app.post(
     }
 
     try {
-      // Insertion dans la BDD avec le nom de l'image
       await pool.query(
         "INSERT INTO produit (type, description, marque, modele, prix_location, etat, img) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [
