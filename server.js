@@ -518,6 +518,11 @@ app.post("/returnprod", authMiddleware, isClient, async (req, res) => {
   }
 });
 
+app.get("/prix", (req, res) => {
+  if (req.session?.userId) return res.redirect("/home");
+  res.render("prix", { message: null });
+});
+
 // ============================================
 // ROUTES AGENT & ADMIN
 // ============================================
