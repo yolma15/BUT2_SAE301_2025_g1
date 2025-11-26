@@ -444,7 +444,6 @@ app.post("/profil/password", authMiddleware, isClient, async (req, res) => {
   }
 });
 
-// --- CORRECTION CRITIQUE ICI (WHERE id = ?) ---
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const { produit_id, date_debut, date_retour_prevue } = req.body;
   if (!produit_id || !date_debut || !date_retour_prevue)
@@ -473,7 +472,7 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
       [date_debut, date_retour_prevue, total, req.session.userId, produit_id]
     );
     
-    // ICI : On met à jour UNIQUEMENT le produit concerné grâce à "WHERE id = ?"
+    // On met à jour UNIQUEMENT le produit concerné
     await pool.query("UPDATE produit SET etat = 'loué' WHERE id = ?", [
       produit_id,
     ]);
@@ -549,7 +548,8 @@ app.post(
     const produitId = req.params.id;
 
     try {
-      // Vérifier si le produit est en location
+      // VÉRIFICATION DE SÉCURITÉ : Vérifier dans la BDD que le produit est bien disponible
+      // (Au cas où quelqu'un appellerait l'URL manuellement alors que le bouton est caché)
       const [locations] = await pool.query(
         "SELECT COUNT(*) as count FROM location WHERE produit_id = ? AND date_retour_effective IS NULL",
         [produitId]
