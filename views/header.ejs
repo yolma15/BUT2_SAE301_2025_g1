@@ -49,14 +49,19 @@
                     <div class="user-menu">
                         
                         <% 
-                            // Logique de protection :
+                            // --- CORRECTION ICI ---
+                            // Par défaut, on cherche une image "avatar-default.png" dans public/img/
                             let avatarSrc = '/img/avatar-default.png';
+                            
+                            // Si l'utilisateur a une image (venant de la BDD)
                             if (typeof userImg !== 'undefined' && userImg) {
-                                avatarSrc = '/img/' + userImg;
+                                // On pointe vers le dossier /uploads/ car c'est là que Multer enregistre
+                                avatarSrc = '/uploads/' + userImg;
                             }
                         %>
 
-                        <img class="avatar" src="<%= avatarSrc %>" alt="profil"/>
+                        <img class="avatar" src="<%= avatarSrc %>" alt="profil" 
+                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid white;">
 
                         <span class="username"><%= typeof username !== 'undefined' ? username : 'Utilisateur' %></span>
 
@@ -96,27 +101,21 @@
 
             // 1. Gérer l'ouverture/fermeture au clic sur le menu utilisateur complet
             userMenu.addEventListener('click', function(event) {
-                // Si l'utilisateur clique sur un lien de déconnexion, laisser l'action se faire.
                 if (event.target.closest('.dropdown-item')) {
                     return; 
                 }
-                
-                // Empêcher la propagation pour ne pas déclencher immédiatement le document listener de fermeture
                 event.stopPropagation();
-                
-                // Basculer la classe 'open'
                 userMenu.classList.toggle('open');
             });
 
-            // 2. Gérer la fermeture lorsque l'utilisateur clique n'importe où ailleurs sur la page
+            // 2. Gérer la fermeture lorsque l'utilisateur clique n'importe où ailleurs
             document.addEventListener('click', function(event) {
-                // Vérifier si l'élément cliqué n'est pas à l'intérieur du .user-menu
                 if (userMenu.classList.contains('open') && !userMenu.contains(event.target)) {
                     userMenu.classList.remove('open');
                 }
             });
 
-            // 3. Empêcher le menu de se fermer si l'on clique à l'intérieur (mais pas sur un lien)
+            // 3. Empêcher le menu de se fermer si l'on clique à l'intérieur
             const dropdownMenu = userMenu.querySelector('.dropdown-menu');
             if (dropdownMenu) {
                 dropdownMenu.addEventListener('click', function(event) {
@@ -128,5 +127,4 @@
         });
     </script>
 </body>
-
 </html>

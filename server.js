@@ -775,22 +775,36 @@ app.get("/inscription_agent", authMiddleware, isAdmin, (req, res) =>
   res.render("inscription_agent", { message: null })
 );
 
-app.post("/inscription_agent", authMiddleware, isAdmin, async (req, res) => {
-  const { login, password, nom, prenom, email } = req.body;
-  if (!login || !password)
-    return res.render("inscription_agent", { message: "Champs requis" });
+// ============================================
+// MODIFICATION POUR AJOUT AGENT COMPLET
+// ============================================
+app.post("/inscription_agent", authMiddleware, isAdmin, upload.single("image"), async (req, res) => {
+  const { login, password, nom, prenom, ddn, email } = req.body;
+  const imageFilename = req.file ? req.file.filename : null;
+
+  if (!login || !password || !nom || !prenom || !email || !ddn) {
+    return res.render("inscription_agent", { message: "❌ Tous les champs sont requis." });
+  }
 
   try {
     const hash = await bcrypt.hash(password, 10);
+    
+    // Insertion avec tous les champs
     await pool.query(
-      "INSERT INTO utilisateur (login, password, nom, prenom, ddn, email, type_utilisateur) VALUES (?, ?, ?, ?, '2000-01-01', ?, 'agent')",
-      [login, hash, nom, prenom, email]
+      `INSERT INTO utilisateur 
+      (login, password, nom, prenom, ddn, email, type_utilisateur, img) 
+      VALUES (?, ?, ?, ?, ?, ?, 'agent', ?)`,
+      [login, hash, nom, prenom, ddn, email, imageFilename]
     );
-    res.render("inscription_agent", { message: "Agent créé" });
+
+    res.render("inscription_agent", { message: "✅ Agent ajouté avec succès !" });
+
   } catch (err) {
-    res
-      .status(500)
-      .render("inscription_agent", { message: "Erreur création agent" });
+    console.error("Erreur ajout agent:", err);
+    if (err.code === 'ER_DUP_ENTRY') {
+        return res.render("inscription_agent", { message: "❌ Ce login ou cet email est déjà utilisé." });
+    }
+    res.status(500).render("inscription_agent", { message: "❌ Erreur serveur lors de l'ajout." });
   }
 });
 
