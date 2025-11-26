@@ -1,3 +1,6 @@
+/* ============================================================
+   1. BASES & LAYOUT
+   ============================================================ */
 * {
   box-sizing: border-box;
   max-width: 100%;
@@ -7,7 +10,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: #fff;
+  background-color: #ffffff; /* Fond blanc */
   color: #000;
   font-family: 'Lexend', sans-serif;
 }
@@ -18,9 +21,12 @@ main {
   flex-wrap: wrap;
   gap: 60px;
   justify-content: center;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
+/* ============================================================
+   2. COLONNE GAUCHE (Images)
+   ============================================================ */
 .gauche {
   display: flex;
   flex-direction: column;
@@ -49,6 +55,7 @@ main {
   object-fit: cover;
   transition: all 0.3s ease-in-out;
   display: block;
+  background-color: #ffffff;
 }
 
 .fa-chevron-left,
@@ -88,22 +95,33 @@ main {
   object-fit: cover;
   cursor: pointer;
   transition: transform 0.2s;
+  background-color: #ffffff;
 }
 
 .P_img img:hover { transform: scale(1.1); }
 
+/* Miniature active */
+.P_img img.active {
+    outline: #FD5035 solid 2px;
+    transform: scale(1.05);
+}
+
+/* ============================================================
+   3. COLONNE DROITE (Détails)
+   ============================================================ */
 .droite {
   flex: 1;
   min-width: 280px;
-  max-width: 700px;
+  max-width: 550px; /* Taille compacte */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 5%;
+  padding: 30px;
   outline: #FD5035 solid 4px;
   border-radius: 30px;
   box-sizing: border-box;
   margin-left: 40px;
+  background-color: #ffffff;
 }
 
 .droite h1 {
@@ -126,24 +144,114 @@ main {
   margin-bottom: 10%;
 }
 
-.droite button {
-  width: clamp(110px, 30vw, 160px);
-  height: clamp(40px, 10vw, 50px);
-  background-color: #fff;
-  color: #FD5035;
-  border: 3px solid #FD5035;
-  border-radius: 25px;
-  font-size: clamp(1em, 3vw, 1.5em);
-  cursor: pointer;
-  transition: all 0.3s;
-  align-self: center;
+/* ============================================================
+   4. FORMULAIRE & BOUTONS (Mis à jour)
+   ============================================================ */
+
+.rental-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.droite button:hover {
-  background-color: #FD5035;
-  color: #fff;
-  transform: scale(1.05);
+.date-inputs {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 15px;
 }
+
+.date-inputs > div {
+    flex: 1;
+}
+
+.droite label {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: #333;
+}
+
+/* Champs Date : Contour Rouge & Fond Blanc */
+input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #FD5035; /* Contour Rouge */
+    border-radius: 15px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: box-shadow 0.3s ease-in-out;
+    background-color: #ffffff;
+    color: #333;
+}
+
+/* Focus Date : Ombre rouge */
+input[type="date"]:focus {
+    box-shadow: 0 0 10px rgba(253, 80, 53, 0.5);
+}
+
+/* Bouton "Louer" (Rouge) */
+.rental-form button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background-color: #FD5035;
+    color: #fff;
+    border: 2px solid #FD5035;
+    border-radius: 50px; /* Pillule */
+    font-size: 1.2em;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 5px;
+}
+
+.rental-form button[type="submit"]:hover {
+    background-color: #fff;
+    color: #FD5035;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(253, 80, 53, 0.3);
+}
+
+/* Bouton désactivé (Indisponible) */
+.rental-form button:disabled {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #ccc;
+    color: #999;
+    background-color: #f5f5f5;
+    border-radius: 50px;
+    font-size: 1.2em;
+    cursor: not-allowed;
+}
+
+/* Bouton "Connectez-vous" (Noir) */
+.login-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: #333;
+    color: #fff;
+    text-decoration: none;
+    padding: 15px;
+    border-radius: 50px;
+    font-size: 1.1em;
+    font-family: 'Lexend', sans-serif;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+}
+
+.login-link:hover {
+    background-color: #000;
+}
+
+/* ============================================================
+   5. MEDIA QUERIES
+   ============================================================ */
 
 @media (max-width: 900px) {
   main {
@@ -160,7 +268,7 @@ main {
   .droite {
     width: 90%;
     max-width: 90%;
-    padding: 7%;
+    padding: 30px;
     margin-left: 0;
   }
 }
@@ -194,8 +302,13 @@ main {
     width: 95%;
     max-width: 95%;
     outline-width: 2px;
-    padding: 6%;
+    padding: 20px;
     border-radius: 20px;
+  }
+  
+  .date-inputs {
+      flex-direction: column;
+      gap: 10px;
   }
 }
 
@@ -206,5 +319,4 @@ main {
   .P_img img { width: 40px; height: 40px; }
   .droite h1 { font-size: 1.8em; }
   .droite h2 { font-size: 1.3em; }
-  .droite button { font-size: 1em; }
 }
