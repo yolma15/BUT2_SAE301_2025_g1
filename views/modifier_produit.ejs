@@ -1,0 +1,76 @@
+<%- include('header') %>
+
+<main class="container" style="max-width: 800px; padding: 2rem; margin: 0 auto;">
+  <h1>✏️ Modifier le produit</h1>
+  
+  <% if (message) { %>
+    <div class="alert" style="padding: 1rem; margin: 1rem 0; background-color: var(--color-secondary); border-radius: var(--radius-base);">
+      <%= message %>
+    </div>
+  <% } %>
+  
+  <form action="/agent/modifier_produit/<%= produit.id %>" method="POST" enctype="multipart/form-data" style="margin-top: 2rem;">
+    <input type="hidden" name="current_image" value="<%= produit.img %>">
+    
+    <div class="form-group">
+      <label class="form-label">Type de produit *</label>
+      <input type="text" name="type" class="form-control" value="<%= produit.type %>" required placeholder="Ex: Vélo, Ski, Kayak...">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Marque *</label>
+      <input type="text" name="marque" class="form-control" value="<%= produit.marque %>" required placeholder="Ex: Decathlon, Rossignol...">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Modèle *</label>
+      <input type="text" name="modele" class="form-control" value="<%= produit.modele %>" required placeholder="Ex: VTT Rockrider 520">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Prix de location (€/jour) *</label>
+      <input type="number" name="prix_location" class="form-control" value="<%= produit.prix_location %>" step="0.01" min="0" required>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea name="description" class="form-control" rows="4" placeholder="Description détaillée du produit..."><%= produit.description || '' %></textarea>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">État *</label>
+      <select name="etat" class="form-control" required>
+        <option value="disponible" <%= produit.etat === 'disponible' ? 'selected' : '' %>>✅ Disponible</option>
+        <option value="loué" <%= produit.etat === 'loué' ? 'selected' : '' %>>🔒 Loué</option>
+        <option value="maintenance" <%= produit.etat === 'maintenance' ? 'selected' : '' %>>🔧 En maintenance</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Image</label>
+      <% if (produit.img) { %>
+        <div style="margin-bottom: 0.5rem;">
+          <img src="/uploads/<%= produit.img %>" alt="Image actuelle" style="max-width: 200px; border-radius: var(--radius-base); border: 1px solid var(--color-border);">
+          <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: 0.5rem;">
+            📷 Image actuelle : <%= produit.img %>
+          </p>
+        </div>
+      <% } %>
+      <input type="file" name="image" class="form-control" accept="image/*" style="padding: 0.5rem;">
+      <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: 0.25rem;">
+        💡 Laissez vide pour conserver l'image actuelle
+      </p>
+    </div>
+    
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+      <button type="submit" class="btn btn--primary" style="flex: 1;">
+        💾 Enregistrer les modifications
+      </button>
+      <a href="/catalogue" class="btn btn--secondary" style="flex: 1; text-align: center; text-decoration: none; display: inline-block;">
+        ❌ Annuler
+      </a>
+    </div>
+  </form>
+</main>
+
+<%- include('footer') %>
