@@ -51,6 +51,10 @@
       
       <h2 class="prix"><%= produit.prix_location %> € <span style="font-size: 0.6em; color: #666;">/ jour</span></h2>
       
+      <p id="totalPrice" style="font-weight:600; margin-top:5px;">
+      Prix total : 0 € 
+      </p>
+
       <p class="description">
         <%= produit.description || "Aucune description disponible pour ce produit." %>
       </p>
@@ -127,6 +131,9 @@
 </body>
 
 <script>
+  // --- 3. calcule prix ---
+  const prixParJour = <%= produit.prix_location %>; // nombre JS
+
   // --- 1. GESTION DU CARROUSEL ---
   const mainImage = document.getElementById('mainDisplayImg');
   const thumbnails = document.querySelectorAll('.P_img img');
@@ -176,6 +183,47 @@
   // --- 2. GESTION DATES ---
   const startInput = document.getElementById('start');
   const endInput = document.getElementById('end');
+  const totalPriceEl = document.getElementById('totalPrice');
+
+  function calculerNbJours(debut, fin) {
+    const d1 = new Date(debut);
+    const d2 = new Date(fin);
+    const diffTime = d2.getTime() - d1.getTime(); // ms
+    const diffJours = diffTime / (1000 * 60 * 60 * 24);
+    return diffJours > 0 ? diffJours : 0;
+  }
+
+  function majPrixTotal() {
+  if (!startInput || !endInput || !totalPriceEl) return;
+
+  const dateDebut = startInput.value;
+  const dateFin = endInput.value;
+
+  if (dateDebut && dateFin) {
+    const nbJours = calculerNbJours(dateDebut, dateFin);
+    if (nbJours > 0) {
+      const joursPayants = Math.max(0, nbJours - 3);
+
+      let total = joursPayants * prixParJour;
+      let texteRemise = '';
+
+      // Réduction de 10 % au-dessus de 7 jours
+      if (nbJours > 7) {
+        total = total * 0.9; // -10 %
+        texteRemise = ' avec 10% de réduction';
+      }
+
+      totalPriceEl.textContent =
+        `Prix total : ${total.toFixed(2)} € (${nbJours} jour(s) dont 3 gratuit(s)${texteRemise})`;
+    } else {
+      totalPriceEl.textContent = 'Prix total : 0 €';
+    }
+  } else {
+    totalPriceEl.textContent = 'Prix total : 0 €';
+  }
+}
+
+
 
   if (startInput && endInput) {
       const today = new Date().toISOString().split('T')[0];
@@ -189,6 +237,11 @@
           if(endInput.value && endInput.value < startDate) {
               endInput.value = ""; 
           }
+          majPrixTotal();
+      });
+
+      endInput.addEventListener('change', function() {
+          majPrixTotal();
       });
   }
 </script>
