@@ -15,7 +15,6 @@ const app = express();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dir = "public/uploads/";
-    // Vérifie si le dossier existe, sinon le crée automatiquement
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -239,35 +238,26 @@ app.get("/catalogue", async (req, res) => {
   }
 });
 
-// --- ROUTE PRODUCT (CALCUL DISPONIBILITÉ) ---
+// --- ROUTE PRODUCT (ENVOIE LES RÉSERVATIONS POUR LE CALENDRIER) ---
 app.get("/product/:id", async (req, res) => {
   try {
     const [produits] = await pool.query("SELECT * FROM produit WHERE id = ?", [req.params.id]);
     if (produits.length === 0) return res.status(404).render("404");
     
     const produit = produits[0];
-    let dateDispo = null;
 
-    // VÉRIFICATION : Est-ce que ce produit est actuellement dehors (Location non rendue) ?
-    const [locations] = await pool.query(
-        `SELECT date_retour_prevue 
+    // Récupérer toutes les plages de location futures ou en cours pour ce produit
+    const [reservations] = await pool.query(
+        `SELECT date_debut, date_retour_prevue 
          FROM location 
-         WHERE produit_id = ? AND date_retour_effective IS NULL 
-         ORDER BY date_retour_prevue DESC LIMIT 1`,
+         WHERE produit_id = ? AND date_retour_effective IS NULL`,
         [req.params.id]
     );
-    
-    if (locations.length > 0) {
-        // Il y a une location en cours, on calcule la date de retour + 1 jour
-        const dateRetour = new Date(locations[0].date_retour_prevue);
-        dateRetour.setDate(dateRetour.getDate() + 1); 
-        dateDispo = dateRetour.toLocaleDateString("fr-FR");
-    }
 
     res.render("product", { 
         produit: produit, 
         message: req.query.message || null,
-        dateDispo: dateDispo // Variable envoyée à la vue
+        reservations: reservations // Liste des dates occupées
     });
   } catch (err) {
     res.status(500).render("error", { message: "Erreur chargement produit", code: 500 });
@@ -378,44 +368,55 @@ app.delete("/profil/delete", authMiddleware, isClient, async (req, res) => {
   }
 });
 
-// --- CRÉATION LOCATION (SÉCURISÉE) ---
+// --- CRÉATION DE LOCATION (Sécurisée : check chevauchement + limite 6 mois) ---
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const { produit_id, date_debut, date_retour_prevue } = req.body;
   if (!produit_id || !date_debut || !date_retour_prevue) return res.status(400).send("Champs requis");
 
   const debut = new Date(date_debut);
   const fin = new Date(date_retour_prevue);
-  if (debut < new Date().setHours(0, 0, 0, 0)) return res.status(400).send("Date début invalide");
-  if (fin <= debut) return res.status(400).send("Date fin invalide");
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  if (debut < today) return res.status(400).send("Date début invalide.");
+  if (fin <= debut) return res.status(400).send("Date fin invalide.");
+
+  // VÉRIFICATION LIMITE 6 MOIS
+  const dateLimite = new Date(debut);
+  dateLimite.setMonth(dateLimite.getMonth() + 6);
+  if (fin > dateLimite) {
+      return res.status(400).send("⛔ Erreur : La durée maximale de location est de 6 mois.");
+  }
 
   try {
-    // 1. Vérification si déjà loué
-    const [alreadyRented] = await pool.query(
-        "SELECT * FROM location WHERE produit_id = ? AND date_retour_effective IS NULL",
-        [produit_id]
+    // 1. VÉRIFICATION DE CHEVAUCHEMENT (Overlap)
+    // On vérifie si la période demandée [debut, fin] n'entre pas en conflit avec une réservation existante
+    const [collisions] = await pool.query(
+        `SELECT * FROM location 
+         WHERE produit_id = ? 
+         AND date_retour_effective IS NULL
+         AND NOT (date_retour_prevue <= ? OR date_debut >= ?)`, 
+        [produit_id, date_debut, date_retour_prevue]
     );
-    if (alreadyRented.length > 0) {
-        return res.status(400).send("Erreur : Ce produit est actuellement indisponible.");
+
+    if (collisions.length > 0) {
+        return res.status(400).send("⛔ Ce produit est déjà réservé sur cette période.");
     }
 
-    // 2. Vérification état
-    const [prods] = await pool.query("SELECT * FROM produit WHERE id = ? AND etat = 'disponible'", [produit_id]);
-    if (prods.length === 0) return res.status(400).send("Produit non disponible.");
-
-    const produit = prods[0];
-    const nbJours = Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)) || 1;
-    const total = nbJours * produit.prix_location;
+    // 2. Création de la location
+    const [prods] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [produit_id]);
+    const prixLoc = prods[0].prix_location;
+    const nbJours = Math.max(1, Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)));
+    const total = nbJours * prixLoc;
 
     await pool.query(
       "INSERT INTO location (date_debut, date_retour_prevue, prix_total, utilisateur_id, produit_id) VALUES (?, ?, ?, ?, ?)",
       [date_debut, date_retour_prevue, total, req.session.userId, produit_id]
     );
-    
-    // On met à jour l'état, bien que la vérification se fasse surtout sur la table location
-    await pool.query("UPDATE produit SET etat = 'loué' WHERE id = ?", [produit_id]);
-    
+    // On ne change PAS l'état du produit ici, car il peut être disponible sur d'autres plages
     res.redirect('/mes-locations');
   } catch (err) {
+    console.error(err);
     res.status(500).send("Erreur création location");
   }
 });

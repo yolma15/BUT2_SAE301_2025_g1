@@ -19,11 +19,14 @@
   <%- include('header'); %>
 
   <% 
+    // Gestion intelligente du chemin de l'image
     let imagePath = "https://placehold.co/600x600?text=No+Image"; 
     if (produit.img) {
+        // Si c'est une URL ou une image locale statique
         if (produit.img.startsWith('img/') || produit.img.startsWith('http')) {
             imagePath = "/" + produit.img;
         } else {
+            // Sinon c'est un upload Multer
             imagePath = "/uploads/" + produit.img;
         }
     }
@@ -52,26 +55,22 @@
       <h2 class="prix"><%= produit.prix_location %> € <span style="font-size: 0.6em; color: #666;">/ jour</span></h2>
       
       <p class="description">
-        <%= produit.description || "Aucune description disponible pour ce produit." %>
+        <%= produit.description || "Aucune description disponible." %>
       </p>
 
       <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
       <% 
-          // 1. Est-ce que le serveur a dit qu'il y a une date de retour ? (Si oui, c'est loué)
-          const estEnLocation = (typeof dateDispo !== 'undefined' && dateDispo !== null);
-
-          // 2. Nettoyage de l'état (ex: "Bon", "bon ", "Disponible")
+          // On vérifie seulement si le produit est PHYSIQUEMENT disponible
+          // (pas cassé, pas perdu). Les dates sont gérées par le JS.
           const etatActuel = (produit.etat || '').toLowerCase().trim();
-
-          // 3. Est-ce qu'on peut louer ? 
-          // OUI SI : Pas en location ET (état est 'disponible' OU 'bon')
-          const estDisponible = !estEnLocation && (etatActuel === 'disponible' || etatActuel === 'bon');
+          const etatsBloquants = ['hors service', 'en réparation', 'supprimé', 'perdu'];
+          const estPhysiquementDisponible = !etatsBloquants.includes(etatActuel);
       %>
 
-      <% if (estDisponible) { %>
+      <% if (estPhysiquementDisponible) { %>
           
-          <form action="/locations/create" method="POST" class="rental-form">
+          <form action="/locations/create" method="POST" class="rental-form" id="rentalForm">
               <input type="hidden" name="produit_id" value="<%= produit.id %>">
               
               <div class="date-inputs">
@@ -84,42 +83,49 @@
                       <input type="date" name="date_retour_prevue" id="end" required>
                   </div>
               </div>
+              
+              <p id="date-error" style="color: #d63031; display: none; font-size: 0.9em; margin-top: 10px; font-weight: 500; text-align: center;"></p>
 
               <% if (isLoggedIn) { %>
-                  <button type="submit">
+                  <button type="submit" id="btn-submit" style="margin-top: 15px;">
                       Louer ce produit
                   </button>
               <% } else { %>
-                  <a href="/login" class="btn-login-link" style="display:block; text-align:center; background:#333; color:white; padding:15px; border-radius:50px; text-decoration:none; font-weight:bold;">
+                  <a href="/login" class="btn-login-link" style="margin-top: 15px;">
                       Connectez-vous pour louer
                   </a>
               <% } %>
           </form>
 
+          <% if (typeof reservations !== 'undefined' && reservations.length > 0) { %>
+            <div style="margin-top: 20px; font-size: 0.9em; color: #666; background: #fff5f3; padding: 15px; border-radius: 10px; border: 1px solid #ffebe8;">
+                <strong style="color: #FD5035;">⚠️ Ce produit est déjà réservé sur ces périodes :</strong>
+                <ul style="list-style: none; padding: 0; margin-top: 5px;">
+                    <% reservations.forEach(res => { %>
+                        <li>
+                            • Du <strong><%= new Date(res.date_debut).toLocaleDateString() %></strong> 
+                            au <strong><%= new Date(res.date_retour_prevue).toLocaleDateString() %></strong>
+                        </li>
+                    <% }) %>
+                </ul>
+            </div>
+          <% } %>
+
       <% } else { %>
 
           <div class="unavailable-box" style="background-color: #fff0ed; border: 1px solid #ffccc7; color: #d63031; padding: 25px; border-radius: 20px; text-align: center; margin-top: 20px;">
+              <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; margin-bottom: 15px; display:block;"></i>
+              <h3 style="margin: 0 0 10px 0; font-size: 1.3rem;">Produit Indisponible</h3>
+              <p style="margin: 0; color: #555;">Raison : <strong><%= produit.etat %></strong></p>
               
-              <i class="fa-solid fa-calendar-xmark" style="font-size: 2.5rem; margin-bottom: 15px; display:block;"></i>
-              
-              <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; font-weight: 600;">Produit momentanément indisponible</h3>
-              
-              <% if (estEnLocation) { %>
-                  <p style="margin: 0; color: #555; font-size: 1.1rem;">
-                      Disponible à partir du : <br>
-                      <strong style="color: #FD5035; font-size: 1.4rem; display:block; margin-top:5px;"><%= dateDispo %></strong>
-                  </p>
-              <% } else { %>
-                  <p style="margin: 0; color: #555;">Raison : <strong><%= produit.etat %></strong></p>
-              <% } %>
-
-              <a href="/catalogue" style="display: inline-block; margin-top: 20px; text-decoration: none; color: #555; font-size: 0.9rem; border-bottom: 1px solid #555;">
+              <a href="/catalogue" style="display: inline-block; margin-top: 20px; text-decoration: none; color: #555; border-bottom: 1px solid #555;">
                   ← Voir d'autres produits
               </a>
           </div>
 
       <% } %>
-      </div>
+
+    </div>
   </main>
 
   <%- include('footer'); %>
@@ -127,14 +133,14 @@
 </body>
 
 <script>
-  // --- 1. GESTION DU CARROUSEL ---
+  // --- 1. GESTION DU CARROUSEL D'IMAGES ---
   const mainImage = document.getElementById('mainDisplayImg');
   const thumbnails = document.querySelectorAll('.P_img img');
   const leftArrow = document.querySelector('.fa-chevron-left');
   const rightArrow = document.querySelector('.fa-chevron-right');
 
   const dbImage = "<%= imagePath %>";
-  const images = [dbImage, dbImage, dbImage]; 
+  const images = [dbImage, dbImage, dbImage]; // Simule 3 images identiques pour le carrousel
   let currentIndex = 0;
 
   function updateMainImage(index) {
@@ -173,23 +179,94 @@
   updateMainImage(0);
 
 
-  // --- 2. GESTION DATES ---
+  // --- 2. GESTION DES DATES (Sécurité) ---
+  
+  // Récupération des réservations envoyées par le serveur
+  const reservations = <%- JSON.stringify(typeof reservations !== 'undefined' ? reservations : []) %>;
+
   const startInput = document.getElementById('start');
   const endInput = document.getElementById('end');
+  const errorMsg = document.getElementById('date-error');
+  const btnSubmit = document.getElementById('btn-submit');
+
+  // Fonction pour vérifier si deux plages de dates se chevauchent
+  function checkOverlap(d1, d2) {
+      if(!d1 || !d2) return false;
+      const start = new Date(d1);
+      const end = new Date(d2);
+      
+      for(let res of reservations) {
+          const resStart = new Date(res.date_debut);
+          const resEnd = new Date(res.date_retour_prevue);
+          
+          // Logique de collision : La nouvelle période commence avant la fin d'une autre ET finit après le début d'une autre
+          if (start <= resEnd && end >= resStart) {
+              return true;
+          }
+      }
+      return false;
+  }
+
+  function validateDates() {
+      const s = startInput.value;
+      const e = endInput.value;
+      
+      // Reset visuel
+      errorMsg.style.display = 'none';
+      if(btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.style.opacity = '1';
+          btnSubmit.style.cursor = 'pointer';
+      }
+
+      if(s && e) {
+          const startDate = new Date(s);
+          const endDate = new Date(e);
+
+          // Règle 1 : Fin doit être après Début
+          if (startDate > endDate) {
+              errorMsg.textContent = "La date de fin doit être après le début.";
+              errorMsg.style.display = 'block';
+              if(btnSubmit) btnSubmit.disabled = true;
+              return;
+          }
+
+          // Règle 2 : Durée max 6 mois
+          const maxDate = new Date(startDate);
+          maxDate.setMonth(maxDate.getMonth() + 6);
+
+          if (endDate > maxDate) {
+              errorMsg.innerHTML = "⛔ <strong>Durée trop longue :</strong><br>La location ne peut pas dépasser 6 mois.";
+              errorMsg.style.display = 'block';
+              if(btnSubmit) {
+                  btnSubmit.disabled = true;
+                  btnSubmit.style.opacity = '0.5';
+                  btnSubmit.style.cursor = 'not-allowed';
+              }
+              return;
+          }
+
+          // Règle 3 : Chevauchement avec une autre réservation
+          if (checkOverlap(s, e)) {
+              errorMsg.textContent = "⛔ Ce produit est déjà réservé sur cette période.";
+              errorMsg.style.display = 'block';
+              if(btnSubmit) {
+                  btnSubmit.disabled = true;
+                  btnSubmit.style.opacity = '0.5';
+                  btnSubmit.style.cursor = 'not-allowed';
+              }
+          }
+      }
+  }
 
   if (startInput && endInput) {
+      // Date min = Aujourd'hui
       const today = new Date().toISOString().split('T')[0];
-      
       startInput.setAttribute('min', today);
       endInput.setAttribute('min', today);
 
-      startInput.addEventListener('change', function() {
-          const startDate = this.value;
-          endInput.setAttribute('min', startDate);
-          if(endInput.value && endInput.value < startDate) {
-              endInput.value = ""; 
-          }
-      });
+      startInput.addEventListener('change', validateDates);
+      endInput.addEventListener('change', validateDates);
   }
 </script>
 
