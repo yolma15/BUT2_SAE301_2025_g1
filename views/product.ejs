@@ -54,6 +54,10 @@
       
       <h2 class="prix"><%= produit.prix_location %> € <span style="font-size: 0.6em; color: #666;">/ jour</span></h2>
       
+      <p id="totalPrice" style="font-weight:600; margin-top:5px;">
+      Prix total : 0 € 
+      </p>
+
       <p class="description">
         <%= produit.description || "Aucune description disponible." %>
       </p>
@@ -133,7 +137,10 @@
 </body>
 
 <script>
-  // --- 1. GESTION DU CARROUSEL D'IMAGES ---
+  // --- 3. calcule prix ---
+  const prixParJour = <%= produit.prix_location %>; // nombre JS
+
+  // --- 1. GESTION DU CARROUSEL ---
   const mainImage = document.getElementById('mainDisplayImg');
   const thumbnails = document.querySelectorAll('.P_img img');
   const leftArrow = document.querySelector('.fa-chevron-left');
@@ -186,78 +193,47 @@
 
   const startInput = document.getElementById('start');
   const endInput = document.getElementById('end');
-  const errorMsg = document.getElementById('date-error');
-  const btnSubmit = document.getElementById('btn-submit');
+  const totalPriceEl = document.getElementById('totalPrice');
 
-  // Fonction pour vérifier si deux plages de dates se chevauchent
-  function checkOverlap(d1, d2) {
-      if(!d1 || !d2) return false;
-      const start = new Date(d1);
-      const end = new Date(d2);
-      
-      for(let res of reservations) {
-          const resStart = new Date(res.date_debut);
-          const resEnd = new Date(res.date_retour_prevue);
-          
-          // Logique de collision : La nouvelle période commence avant la fin d'une autre ET finit après le début d'une autre
-          if (start <= resEnd && end >= resStart) {
-              return true;
-          }
-      }
-      return false;
+  function calculerNbJours(debut, fin) {
+    const d1 = new Date(debut);
+    const d2 = new Date(fin);
+    const diffTime = d2.getTime() - d1.getTime(); // ms
+    const diffJours = diffTime / (1000 * 60 * 60 * 24);
+    return diffJours > 0 ? diffJours : 0;
   }
 
-  function validateDates() {
-      const s = startInput.value;
-      const e = endInput.value;
-      
-      // Reset visuel
-      errorMsg.style.display = 'none';
-      if(btnSubmit) {
-          btnSubmit.disabled = false;
-          btnSubmit.style.opacity = '1';
-          btnSubmit.style.cursor = 'pointer';
+  function majPrixTotal() {
+  if (!startInput || !endInput || !totalPriceEl) return;
+
+  const dateDebut = startInput.value;
+  const dateFin = endInput.value;
+
+  if (dateDebut && dateFin) {
+    const nbJours = calculerNbJours(dateDebut, dateFin);
+    if (nbJours > 0) {
+      const joursPayants = Math.max(0, nbJours - 3);
+
+      let total = joursPayants * prixParJour;
+      let texteRemise = '';
+
+      // Réduction de 10 % au-dessus de 7 jours
+      if (nbJours > 7) {
+        total = total * 0.9; // -10 %
+        texteRemise = ' avec 10% de réduction';
       }
 
-      if(s && e) {
-          const startDate = new Date(s);
-          const endDate = new Date(e);
-
-          // Règle 1 : Fin doit être après Début
-          if (startDate > endDate) {
-              errorMsg.textContent = "La date de fin doit être après le début.";
-              errorMsg.style.display = 'block';
-              if(btnSubmit) btnSubmit.disabled = true;
-              return;
-          }
-
-          // Règle 2 : Durée max 6 mois
-          const maxDate = new Date(startDate);
-          maxDate.setMonth(maxDate.getMonth() + 6);
-
-          if (endDate > maxDate) {
-              errorMsg.innerHTML = "⛔ <strong>Durée trop longue :</strong><br>La location ne peut pas dépasser 6 mois.";
-              errorMsg.style.display = 'block';
-              if(btnSubmit) {
-                  btnSubmit.disabled = true;
-                  btnSubmit.style.opacity = '0.5';
-                  btnSubmit.style.cursor = 'not-allowed';
-              }
-              return;
-          }
-
-          // Règle 3 : Chevauchement avec une autre réservation
-          if (checkOverlap(s, e)) {
-              errorMsg.textContent = "⛔ Ce produit est déjà réservé sur cette période.";
-              errorMsg.style.display = 'block';
-              if(btnSubmit) {
-                  btnSubmit.disabled = true;
-                  btnSubmit.style.opacity = '0.5';
-                  btnSubmit.style.cursor = 'not-allowed';
-              }
-          }
-      }
+      totalPriceEl.textContent =
+        `Prix total : ${total.toFixed(2)} € (${nbJours} jour(s) dont 3 gratuit(s)${texteRemise})`;
+    } else {
+      totalPriceEl.textContent = 'Prix total : 0 €';
+    }
+  } else {
+    totalPriceEl.textContent = 'Prix total : 0 €';
   }
+}
+
+
 
   if (startInput && endInput) {
       // Date min = Aujourd'hui
@@ -265,8 +241,18 @@
       startInput.setAttribute('min', today);
       endInput.setAttribute('min', today);
 
-      startInput.addEventListener('change', validateDates);
-      endInput.addEventListener('change', validateDates);
+      startInput.addEventListener('change', function() {
+          const startDate = this.value;
+          endInput.setAttribute('min', startDate);
+          if(endInput.value && endInput.value < startDate) {
+              endInput.value = ""; 
+          }
+          majPrixTotal();
+      });
+
+      endInput.addEventListener('change', function() {
+          majPrixTotal();
+      });
   }
 </script>
 
