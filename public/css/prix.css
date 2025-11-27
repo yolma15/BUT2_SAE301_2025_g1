@@ -20,7 +20,8 @@ body {
   max-width: 420px;
 }
 
-.payment-form {
+.payment-form,
+.success-message {
   background: #f9fafb;
   border-radius: 16px;
   padding: 24px 24px 20px;
@@ -128,9 +129,41 @@ input:focus {
   text-align: center;
 }
 
-/* Responsive */
+.hidden {
+  display: none;
+}
+
+.success-message {
+  text-align: center;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #16a34a;
+  font-size: 32px;
+  margin: 0 auto 12px;
+}
+
+.success-message h1 {
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.success-message p {
+  font-size: 0.9rem;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
 @media (max-width: 480px) {
-  .payment-form {
+  .payment-form,
+  .success-message {
     padding: 20px 16px 16px;
   }
 

@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Paiement</title>
-  <link rel="stylesheet" href="/css/prix.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/prix.css">
 </head>
 <body>
   <div class="payment-container">
-    <form class="payment-form">
+
+    <!-- FORMULAIRE -->
+    <form class="payment-form" id="payment-form">
       <h1>Paiement sécurisé</h1>
 
       <div class="section">
@@ -61,6 +63,28 @@
       <button type="submit" class="btn-primary">Payer maintenant</button>
       <p class="helper-text">Tes données sont chiffrées et transmises de façon sécurisée.</p>
     </form>
+
+    <!-- MESSAGE DE CONFIRMATION -->
+    <div class="success-message hidden" id="success-message">
+      <div class="success-icon">✓</div>
+      <h1>Paiement validé</h1>
+      <p>Merci pour votre achat.</p>
+      <p>Un e‑mail de confirmation vient de vous être envoyé.</p>
+    </div>
   </div>
+
+  <script>
+    const form = document.getElementById('payment-form');
+    const success = document.getElementById('success-message');
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      // Ici tu peux ajouter l'appel à ton backend / API si besoin
+
+      form.classList.add('hidden');
+      success.classList.remove('hidden');
+    });
+  </script>
 </body>
 </html>
