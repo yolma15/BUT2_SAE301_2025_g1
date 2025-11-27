@@ -15,6 +15,7 @@ const app = express();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dir = "public/uploads/";
+    // Vérifie si le dossier existe, sinon le crée automatiquement
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -133,7 +134,6 @@ app.get("/register", (req, res) => {
   res.render("register", { message: null });
 });
 
-// Register Logic
 app.post("/register", async (req, res) => {
   const { login, password, nom, prenom, ddn, email } = req.body;
 
@@ -168,7 +168,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Login Logic
 app.post("/login", async (req, res) => {
   const { login, password } = req.body;
   if (!login || !password) return res.render("login", { message: "Identifiants requis" });
@@ -240,11 +239,36 @@ app.get("/catalogue", async (req, res) => {
   }
 });
 
+// --- ROUTE PRODUCT (CALCUL DISPONIBILITÉ) ---
 app.get("/product/:id", async (req, res) => {
   try {
     const [produits] = await pool.query("SELECT * FROM produit WHERE id = ?", [req.params.id]);
     if (produits.length === 0) return res.status(404).render("404");
-    res.render("product", { produit: produits[0], message: req.query.message || null });
+    
+    const produit = produits[0];
+    let dateDispo = null;
+
+    // VÉRIFICATION : Est-ce que ce produit est actuellement dehors (Location non rendue) ?
+    const [locations] = await pool.query(
+        `SELECT date_retour_prevue 
+         FROM location 
+         WHERE produit_id = ? AND date_retour_effective IS NULL 
+         ORDER BY date_retour_prevue DESC LIMIT 1`,
+        [req.params.id]
+    );
+    
+    if (locations.length > 0) {
+        // Il y a une location en cours, on calcule la date de retour + 1 jour
+        const dateRetour = new Date(locations[0].date_retour_prevue);
+        dateRetour.setDate(dateRetour.getDate() + 1); 
+        dateDispo = dateRetour.toLocaleDateString("fr-FR");
+    }
+
+    res.render("product", { 
+        produit: produit, 
+        message: req.query.message || null,
+        dateDispo: dateDispo // Variable envoyée à la vue
+    });
   } catch (err) {
     res.status(500).render("error", { message: "Erreur chargement produit", code: 500 });
   }
@@ -264,14 +288,11 @@ app.get("/mes-locations", authMiddleware, isClient, async (req, res) => {
   }
 });
 
-// --- GESTION PROFIL ---
-
 app.get("/profil", authMiddleware, isClient, async (req, res) => {
   try {
     const [users] = await pool.query("SELECT id, login, nom, prenom, ddn, email, img FROM utilisateur WHERE id = ?", [req.session.userId]);
     if (users.length === 0) return res.redirect("/logout");
 
-    // Vérifier locations actives
     const [activeLocations] = await pool.query(
       "SELECT COUNT(*) AS count FROM location WHERE utilisateur_id = ? AND date_retour_effective IS NULL",
       [req.session.userId]
@@ -357,18 +378,29 @@ app.delete("/profil/delete", authMiddleware, isClient, async (req, res) => {
   }
 });
 
+// --- CRÉATION LOCATION (SÉCURISÉE) ---
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const { produit_id, date_debut, date_retour_prevue } = req.body;
-  if (!produit_id || !date_debut || !date_retour_prevue) return res.status(400).json({ error: "Champs requis" });
+  if (!produit_id || !date_debut || !date_retour_prevue) return res.status(400).send("Champs requis");
 
   const debut = new Date(date_debut);
   const fin = new Date(date_retour_prevue);
-  if (debut < new Date().setHours(0, 0, 0, 0)) return res.status(400).json({ error: "Date début invalide" });
-  if (fin <= debut) return res.status(400).json({ error: "Date fin invalide" });
+  if (debut < new Date().setHours(0, 0, 0, 0)) return res.status(400).send("Date début invalide");
+  if (fin <= debut) return res.status(400).send("Date fin invalide");
 
   try {
+    // 1. Vérification si déjà loué
+    const [alreadyRented] = await pool.query(
+        "SELECT * FROM location WHERE produit_id = ? AND date_retour_effective IS NULL",
+        [produit_id]
+    );
+    if (alreadyRented.length > 0) {
+        return res.status(400).send("Erreur : Ce produit est actuellement indisponible.");
+    }
+
+    // 2. Vérification état
     const [prods] = await pool.query("SELECT * FROM produit WHERE id = ? AND etat = 'disponible'", [produit_id]);
-    if (prods.length === 0) return res.status(400).send("Produit indisponible.");
+    if (prods.length === 0) return res.status(400).send("Produit non disponible.");
 
     const produit = prods[0];
     const nbJours = Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)) || 1;
@@ -378,7 +410,10 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
       "INSERT INTO location (date_debut, date_retour_prevue, prix_total, utilisateur_id, produit_id) VALUES (?, ?, ?, ?, ?)",
       [date_debut, date_retour_prevue, total, req.session.userId, produit_id]
     );
+    
+    // On met à jour l'état, bien que la vérification se fasse surtout sur la table location
     await pool.query("UPDATE produit SET etat = 'loué' WHERE id = ?", [produit_id]);
+    
     res.redirect('/mes-locations');
   } catch (err) {
     res.status(500).send("Erreur création location");
@@ -404,8 +439,6 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
   }
 });
 
-// --- ROUTE CORRIGÉE : DASHBOARD RETOURS (/agent/returnprod) ---
-// Cette route doit matcher le lien du Header !
 app.get("/agent/returnprod", authMiddleware, isAgent, async (req, res) => {
     try {
         const [locations] = await pool.query(`
@@ -425,7 +458,6 @@ app.get("/agent/returnprod", authMiddleware, isAgent, async (req, res) => {
     }
 });
 
-// --- FINALISATION LOCATION (API) ---
 app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, res) => {
   const locationId = req.params.id;
   const { surcout } = req.body;
@@ -446,7 +478,6 @@ app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, r
         prixFinal += parseFloat(surcout);
     }
 
-    // Pénalité automatique (>60 jours)
     if (dureeReelle > 60) {
         const [produits] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [location.produit_id]);
         prixFinal += parseFloat(produits[0].prix_location) * 0.2;

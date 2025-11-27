@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="UTF-8" />
@@ -19,7 +19,6 @@
   <%- include('header'); %>
 
   <% 
-    // Gestion de l'affichage de l'image (Uploadée vs Externe/Manuelle)
     let imagePath = "https://placehold.co/600x600?text=No+Image"; 
     if (produit.img) {
         if (produit.img.startsWith('img/') || produit.img.startsWith('http')) {
@@ -58,54 +57,69 @@
 
       <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-      <form action="/locations/create" method="POST" class="rental-form">
-          <input type="hidden" name="produit_id" value="<%= produit.id %>">
+      <% 
+          // 1. Est-ce que le serveur a dit qu'il y a une date de retour ? (Si oui, c'est loué)
+          const estEnLocation = (typeof dateDispo !== 'undefined' && dateDispo !== null);
+
+          // 2. Nettoyage de l'état (ex: "Bon", "bon ", "Disponible")
+          const etatActuel = (produit.etat || '').toLowerCase().trim();
+
+          // 3. Est-ce qu'on peut louer ? 
+          // OUI SI : Pas en location ET (état est 'disponible' OU 'bon')
+          const estDisponible = !estEnLocation && (etatActuel === 'disponible' || etatActuel === 'bon');
+      %>
+
+      <% if (estDisponible) { %>
           
-          <div class="date-inputs">
-              <div style="flex: 1;">
-                  <label for="start">Début</label>
-                  <input type="date" name="date_debut" id="start" required>
-              </div>
-              <div style="flex: 1;">
-                  <label for="end">Fin</label>
-                  <input type="date" name="date_retour_prevue" id="end" required>
-              </div>
-          </div>
-
-          <% 
-             // --- LOGIQUE DE DISPONIBILITÉ ---
-             // 1. On nettoie la chaine (minuscule, sans espaces autour)
-             const etat = (produit.etat || '').toLowerCase().trim();
-             
-             // 2. Liste des états qui INTERDISENT la location
-             const etatsBloquants = ['loué', 'loue', 'maintenance', 'hors service', 'hors_service', 'supprimé'];
-             
-             // 3. Si l'état actuel n'est PAS dans la liste bloquante, c'est bon !
-             const estLouable = !etatsBloquants.includes(etat);
-          %>
-
-          <% if (estLouable) { %>
+          <form action="/locations/create" method="POST" class="rental-form">
+              <input type="hidden" name="produit_id" value="<%= produit.id %>">
               
+              <div class="date-inputs">
+                  <div style="flex: 1;">
+                      <label for="start">Début</label>
+                      <input type="date" name="date_debut" id="start" required>
+                  </div>
+                  <div style="flex: 1;">
+                      <label for="end">Fin</label>
+                      <input type="date" name="date_retour_prevue" id="end" required>
+                  </div>
+              </div>
+
               <% if (isLoggedIn) { %>
                   <button type="submit">
                       Louer ce produit
                   </button>
               <% } else { %>
-                  <a href="/login" class="login-link">
+                  <a href="/login" class="btn-login-link" style="display:block; text-align:center; background:#333; color:white; padding:15px; border-radius:50px; text-decoration:none; font-weight:bold;">
                       Connectez-vous pour louer
                   </a>
               <% } %>
+          </form>
 
-          <% } else { %>
+      <% } else { %>
+
+          <div class="unavailable-box" style="background-color: #fff0ed; border: 1px solid #ffccc7; color: #d63031; padding: 25px; border-radius: 20px; text-align: center; margin-top: 20px;">
               
-              <button type="button" disabled>
-                  Indisponible (<%= produit.etat %>)
-              </button>
+              <i class="fa-solid fa-calendar-xmark" style="font-size: 2.5rem; margin-bottom: 15px; display:block;"></i>
+              
+              <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; font-weight: 600;">Produit momentanément indisponible</h3>
+              
+              <% if (estEnLocation) { %>
+                  <p style="margin: 0; color: #555; font-size: 1.1rem;">
+                      Disponible à partir du : <br>
+                      <strong style="color: #FD5035; font-size: 1.4rem; display:block; margin-top:5px;"><%= dateDispo %></strong>
+                  </p>
+              <% } else { %>
+                  <p style="margin: 0; color: #555;">Raison : <strong><%= produit.etat %></strong></p>
+              <% } %>
 
-          <% } %>
-      </form>
+              <a href="/catalogue" style="display: inline-block; margin-top: 20px; text-decoration: none; color: #555; font-size: 0.9rem; border-bottom: 1px solid #555;">
+                  ← Voir d'autres produits
+              </a>
+          </div>
 
-    </div>
+      <% } %>
+      </div>
   </main>
 
   <%- include('footer'); %>
@@ -113,13 +127,12 @@
 </body>
 
 <script>
-  // --- 1. GESTION DU CARROUSEL D'IMAGES ---
+  // --- 1. GESTION DU CARROUSEL ---
   const mainImage = document.getElementById('mainDisplayImg');
   const thumbnails = document.querySelectorAll('.P_img img');
   const leftArrow = document.querySelector('.fa-chevron-left');
   const rightArrow = document.querySelector('.fa-chevron-right');
 
-  // On récupère le chemin généré par EJS
   const dbImage = "<%= imagePath %>";
   const images = [dbImage, dbImage, dbImage]; 
   let currentIndex = 0;
@@ -128,14 +141,13 @@
     currentIndex = index;
     mainImage.src = images[currentIndex];
     
-    // Gestion du style "active" (bordure rouge)
     thumbnails.forEach((thumb, i) => {
       if (i === currentIndex) {
           thumb.classList.add('active');
           thumb.style.opacity = '1';
       } else {
-          thumb.classList.remove('active');
-          thumb.style.opacity = '0.7';
+        thumb.classList.remove('active');
+        thumb.style.opacity = '0.7';
       }
     });
   }
@@ -158,30 +170,22 @@
     thumb.addEventListener('click', () => updateMainImage(i));
   });
 
-  // Initialisation
   updateMainImage(0);
 
 
-  // --- 2. GESTION INTELLIGENTE DES DATES ---
+  // --- 2. GESTION DATES ---
   const startInput = document.getElementById('start');
   const endInput = document.getElementById('end');
 
   if (startInput && endInput) {
-      // Obtenir la date d'aujourd'hui format YYYY-MM-DD
       const today = new Date().toISOString().split('T')[0];
       
-      // Empêcher de sélectionner une date passée
       startInput.setAttribute('min', today);
       endInput.setAttribute('min', today);
 
-      // Écouter le changement de la date de DÉBUT
       startInput.addEventListener('change', function() {
           const startDate = this.value;
-          
-          // La date de FIN ne peut pas être avant la date de DÉBUT
           endInput.setAttribute('min', startDate);
-
-          // Si une date de fin était déjà choisie et qu'elle devient invalide (avant le début), on la reset
           if(endInput.value && endInput.value < startDate) {
               endInput.value = ""; 
           }

@@ -7,7 +7,6 @@
     <title>Gestion des Retours</title>
     <link rel="stylesheet" href="/css/returnprod.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    
 </head>
 
 <body>
@@ -37,10 +36,19 @@
                 <div class="return-card" id="card-<%= loc.id %>">
                     
                     <div class="card-header">
-                        <img src="<%= loc.img ? '/uploads/' + loc.img : '/img/no-image.png' %>" 
-                             class="prod-img" 
-                             alt="Produit"
-                             onerror="this.src='https://placehold.co/60x60?text=Prod'">
+                        
+                        <div class="img-container">
+                            <% if (loc.img) { %>
+                                <% if (loc.img.startsWith('img/') || loc.img.startsWith('http')) { %>
+                                    <img src="/<%= loc.img %>" class="prod-img" alt="Produit">
+                                <% } else { %>
+                                    <img src="/uploads/<%= loc.img %>" class="prod-img" alt="Produit">
+                                <% } %>
+                            <% } else { %>
+                                <img src="https://placehold.co/60x60?text=No+Img" class="prod-img" alt="Image par défaut">
+                            <% } %>
+                        </div>
+
                         <div class="prod-info">
                             <h3><%= loc.marque %> <%= loc.modele %></h3>
                             <p>ID Location: #<%= loc.id %></p>
