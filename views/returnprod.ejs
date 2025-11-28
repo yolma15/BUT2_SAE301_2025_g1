@@ -12,7 +12,7 @@
 <body>
     <%- include('header'); %>
 
-    <div class="titre" style="text-align: center; margin-top: 30px;">
+    <div class="titre">
         <h1>Retours en attente (<%= locations.length %>)</h1>
     </div>
 
@@ -22,8 +22,9 @@
             
             <% if (locations.length === 0) { %>
                 <div class="no-returns">
-                    <i class="fa-regular fa-calendar-check" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
-                    Aucun produit en cours de location. <br> Tout a été rendu !
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <p>Aucun produit en cours de location.</p>
+                    <small>Tout le matériel a été rendu.</small>
                 </div>
             <% } %>
 
@@ -31,7 +32,7 @@
                 // Calcul du retard pour affichage visuel
                 const today = new Date();
                 const due = new Date(loc.date_retour_prevue);
-                const isLate = today > due;
+                const isLate = today.setHours(0,0,0,0) > due.setHours(0,0,0,0);
             %>
                 <div class="return-card" id="card-<%= loc.id %>">
                     
@@ -51,32 +52,42 @@
 
                         <div class="prod-info">
                             <h3><%= loc.marque %> <%= loc.modele %></h3>
-                            <p>ID Location: #<%= loc.id %></p>
+                            <p>Loc #<%= loc.id %> • <span style="font-weight:500; color:#FD5035"><%= loc.prix_total %> €</span></p>
                         </div>
                     </div>
 
                     <div class="client-info">
-                        <i class="fa-solid fa-user"></i> 
+                        <i class="fa-solid fa-user" style="color: #FD5035;"></i> 
                         <strong><%= loc.prenom %> <%= loc.nom %></strong><br>
-                        <small><%= loc.email %></small>
+                        <small style="color:#666; margin-left: 18px;"><%= loc.email %></small>
                     </div>
 
                     <div class="dates-info">
-                        <span>Retour prévu : <br><strong><%= new Date(loc.date_retour_prevue).toLocaleDateString() %></strong></span>
+                        <div style="line-height: 1.2;">
+                            <span style="font-size: 0.8rem; color: #888;">RETOUR PRÉVU :</span><br>
+                            <strong><%= new Date(loc.date_retour_prevue).toLocaleDateString('fr-FR') %></strong>
+                        </div>
+                        
                         <% if (isLate) { %>
-                            <span class="late-badge">⚠️ En retard</span>
+                            <span class="late-badge">
+                                <i class="fa-solid fa-triangle-exclamation"></i> En retard
+                            </span>
                         <% } else { %>
-                            <span style="color: green;">Dans les temps</span>
+                            <span style="color: #27ae60; font-weight: 600; font-size: 0.9rem;">
+                                <i class="fa-regular fa-clock"></i> À l'heure
+                            </span>
                         <% } %>
                     </div>
 
                     <div class="action-area">
-                        <input type="number" 
-                               id="cout-<%= loc.id %>" 
-                               class="input-cout" 
-                               placeholder="Surcoût (€)" 
-                               min="0" 
-                               step="0.01">
+                        <div class="input-wrapper">
+                            <input type="number" 
+                                   id="cout-<%= loc.id %>" 
+                                   class="input-cout" 
+                                   placeholder="Surcoût éventuel (€)" 
+                                   min="0" 
+                                   step="0.01">
+                        </div>
                         
                         <button class="btn-validate" onclick="validerRetour(<%= loc.id %>)">
                             <i class="fa-solid fa-check"></i> Valider
@@ -97,12 +108,11 @@
             const surcout = parseFloat(inputCout.value) || 0;
             const card = document.getElementById('card-' + id);
 
-            if (!confirm(`Valider le retour de la location #${id} ?\nSurcoût appliqué : ${surcout} €`)) {
+            if (!confirm(`Confirmer le retour de la location #${id} ?\n(Surcoût appliqué : ${surcout} €)`)) {
                 return;
             }
 
             try {
-                // On appelle l'API agent pour finaliser
                 const response = await fetch(`/agent/finaliser_location/${id}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -112,19 +122,20 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Animation de succès et suppression de la carte
-                    card.style.transition = "all 0.5s ease";
                     card.style.opacity = "0";
                     card.style.transform = "scale(0.9)";
                     
                     setTimeout(() => {
                         card.remove();
-                        // Vérifier s'il reste des cartes, sinon afficher le message vide
                         const grid = document.querySelector('.returns-grid');
                         if (grid.children.length === 0) {
-                            grid.innerHTML = '<div class="no-returns">Aucun produit en cours de location.</div>';
+                            grid.innerHTML = `
+                                <div class="no-returns">
+                                    <i class="fa-solid fa-clipboard-check"></i>
+                                    <p>Plus aucun retour en attente.</p>
+                                </div>`;
                         }
-                        alert(`✅ Retour validé !\nPrix final total : ${data.prix_final.toFixed(2)} €`);
+                        alert(`✅ Retour validé avec succès !\nPrix final : ${data.prix_final.toFixed(2)} €`);
                     }, 500);
                 } else {
                     alert('❌ Erreur : ' + data.error);
@@ -132,7 +143,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert('❌ Erreur de connexion au serveur.');
+                alert('❌ Erreur de communication avec le serveur.');
             }
         }
     </script>

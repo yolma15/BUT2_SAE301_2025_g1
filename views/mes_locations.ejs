@@ -8,98 +8,107 @@
     <link rel="stylesheet" href="/css/mes_locations.css" />
 </head>
 
+<body>
 <%- include('header') %>
 
-<main class="container mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-6">Mes Locations</h1>
+<main class="container">
+  <h1>Mes Locations</h1>
 
   <% if (typeof message !== 'undefined' && message) { %>
-    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+    <div class="alert-message" role="alert">
       <p><%= message %></p>
     </div>
   <% } %>
 
   <% if (locations.length === 0) { %>
-    <div class="bg-gray-100 rounded-lg p-8 text-center">
-      <p class="text-gray-600 mb-4">Vous n'avez pas encore de location.</p>
-      <a href="/catalogue" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+    <div class="empty-locations">
+      <p>Vous n'avez aucune location en cours.</p>
+      <a href="/catalogue" class="btn-primary">
         Découvrir le catalogue
       </a>
     </div>
+
   <% } else { %>
-    <div class="grid gap-4">
+    <div class="locations-grid">
       <% locations.forEach(location => { %>
         <% 
           const now = new Date();
           const dateDebut = new Date(location.date_debut);
           const dateRetourPrevue = new Date(location.date_retour_prevue);
           
-          // On peut annuler si la location n'est pas commencée ET n'est pas terminée
-          const peutAnnuler = !location.date_retour_effective && dateDebut > now;
+          // Vérification si la date de retour est dépassée (comparaison simple)
+          // On compare les timestamps pour être précis
+          const isTimePassed = now.setHours(0,0,0,0) > dateRetourPrevue.setHours(0,0,0,0);
+
+          // On peut annuler SEULEMENT si la location n'a pas encore commencé
+          const peutAnnuler = dateDebut > new Date(); 
         %>
-        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-          <div class="flex justify-between items-start mb-4">
-            <div class="flex-1">
-              <h3 class="text-xl font-semibold mb-2">
-                <%= location.marque %> <%= location.modele %>
-              </h3>
-              <p class="text-gray-600 mb-1">
-                <span class="font-medium">Type:</span> <%= location.type %>
-              </p>
+        
+        <div class="location-card">
+          
+          <div class="location-card-header">
+            <div class="location-main-info">
+              <h3><%= location.marque %> <%= location.modele %></h3>
+              <p><span style="font-weight:600;">Type:</span> <%= location.type %></p>
             </div>
-            <div class="text-right">
-              <p class="text-2xl font-bold text-blue-600">
-                <%= location.prix_total.toFixed(2) %> €
-              </p>
-              <p class="text-sm text-gray-500">Prix total</p>
+            
+            <div class="location-price">
+              <span class="location-price-value"><%= location.prix_total.toFixed(2) %> €</span>
+              <span class="location-price-label">Prix total</span>
             </div>
           </div>
 
-          <div class="border-t pt-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <p class="text-sm text-gray-600 mb-1">Date de début</p>
-                <p class="font-medium">
-                  <%= new Date(location.date_debut).toLocaleDateString('fr-FR') %>
-                </p>
+          <div class="location-card-divider">
+            <div class="location-details-grid">
+              
+              <div class="location-details-item">
+                <p class="label">Date de début</p>
+                <p class="value"><%= new Date(location.date_debut).toLocaleDateString('fr-FR') %></p>
               </div>
-              <div>
-                <p class="text-sm text-gray-600 mb-1">Date de retour prévue</p>
-                <p class="font-medium">
-                  <%= new Date(location.date_retour_prevue).toLocaleDateString('fr-FR') %>
-                </p>
+              
+              <div class="location-details-item">
+                <p class="label">Retour prévu</p>
+                <p class="value"><%= new Date(location.date_retour_prevue).toLocaleDateString('fr-FR') %></p>
               </div>
-              <div>
-                <p class="text-sm text-gray-600 mb-1">Statut</p>
-                <% if (location.date_retour_effective) { %>
-                  <span class="inline-block bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
-                    ✓ Rendu le <%= new Date(location.date_retour_effective).toLocaleDateString('fr-FR') %>
-                  </span>
+              
+              <div class="location-details-item">
+                <p class="label">Statut</p>
+                
+                <% if (isTimePassed) { %>
+                    <span class="status-pill status-pill--late">
+                        ⏳ En attente de retour
+                    </span>
                 <% } else { %>
-                  <% 
-                    const isLate = now > dateRetourPrevue;
-                  %>
-                  <span class="inline-block <%= isLate ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' %> text-sm px-3 py-1 rounded-full">
-                    <%= isLate ? '⚠️ En retard' : '📋 En cours' %>
-                  </span>
+                    <span class="status-pill status-pill--ongoing">
+                        📋 En cours
+                    </span>
                 <% } %>
+
               </div>
+
             </div>
 
-            <% if (!location.date_retour_effective) { %>
-              <div class="mt-4 flex justify-end gap-3">
+            <div class="location-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                
                 <% if (peutAnnuler) { %>
-                  <button 
-                    onclick="annulerReservation(<%= location.id %>)"
-                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
-                    ❌ Annuler la réservation
+                  <button onclick="annulerReservation(<%= location.id %>)" 
+                          class="btn-cancel-custom">
+                    ❌ Annuler
                   </button>
                 <% } %>
-                <a href="/returnprod" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                  Signaler le retour
-                </a>
-              </div>
-            <% } %>
+
+                <% if (isTimePassed) { %>
+                     <div style="text-align: right; font-size: 0.85rem; color: #d63031; font-weight: 600;">
+                        ⚠️ Date dépassée.<br>Veuillez rapporter le matériel.
+                     </div>
+                <% } else { %>
+                    <div style="text-align: right; font-size: 0.85rem; color: #27ae60; font-weight: 500;">
+                        ✓ Location active
+                    </div>
+                <% } %>
+
+            </div>
+
           </div>
         </div>
       <% }); %>
@@ -116,9 +125,7 @@ async function annulerReservation(locationId) {
   try {
     const response = await fetch(`/locations/cancel/${locationId}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
 
     const data = await response.json();
@@ -137,3 +144,5 @@ async function annulerReservation(locationId) {
 </script>
 
 <%- include('footer') %>
+</body>
+</html>
