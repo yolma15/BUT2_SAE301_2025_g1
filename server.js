@@ -554,24 +554,43 @@ app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, r
     if (location.date_retour_effective) return res.status(400).json({ error: "Déjà finalisée" });
 
     const dateDebut = new Date(location.date_debut);
+    const dateRetourPrevue = new Date(location.date_retour_prevue);
     const dateRetourEffective = new Date();
     const dureeReelle = Math.ceil((dateRetourEffective - dateDebut) / (1000 * 60 * 60 * 24));
 
-    let prixFinal = parseFloat(location.prix_total);
+    // Calcul du prix de base (comme dans /prix et /locations/create)
+    const [produits] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [location.produit_id]);
+    const prixLoc = produits[0].prix_location;
+    const nbJours = Math.max(1, Math.ceil((dateRetourPrevue - dateDebut) / (1000 * 60 * 60 * 24)));
+    const joursPayants = Math.max(0, nbJours - 3);
+    let prixBasique = joursPayants * prixLoc;
+    if (nbJours > 7) {
+      prixBasique = prixBasique * 0.9; // -10% au-delà de 7 jours
+    }
+
+    // Appliquer le surcoût de 20% si le retour est en retard
+    let prixFinal = prixBasique;
     if (surcout) {
       prixFinal += parseFloat(surcout);
     }
 
+    // Si le retour est en retard (date_retour_effective > date_retour_prevue)
+    if (dateRetourEffective > dateRetourPrevue) {
+      prixFinal = prixFinal * 1.2; // +20%
+    }
+
+    // Si la durée réelle dépasse 60 jours, ajouter 20% du prix journalier
     if (dureeReelle > 60) {
-      const [produits] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [location.produit_id]);
       prixFinal += parseFloat(produits[0].prix_location) * 0.2;
     }
 
+    // Mettre à jour la location et le produit
     await pool.query("UPDATE location SET date_retour_effective = NOW(), prix_total = ? WHERE id = ?", [prixFinal, locationId]);
     await pool.query("UPDATE produit SET etat = 'disponible' WHERE id = ?", [location.produit_id]);
 
     res.json({ success: true, message: "Location finalisée.", prix_final: prixFinal });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Erreur finalisation" });
   }
 });
