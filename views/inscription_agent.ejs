@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/inscription_agent.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <title>Ajout Agent</title>
 </head>
 <body>
@@ -13,7 +14,7 @@
     <h1>Ajout Agent</h1>
     
     <% if (typeof message !== 'undefined' && message) { %>
-        <div style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+        <div class="alert-message">
             <%= message %>
         </div>
     <% } %>
@@ -21,20 +22,20 @@
     <form action="/inscription_agent" method="POST" enctype="multipart/form-data">
       
       <div class="colonnes">
-        <div class="gauche">
+        <div class="input-group">
           <input type="text" id="nom" name="nom" placeholder="Nom" required>
         </div>
-        <div class="droite">
+        <div class="input-group">
           <input type="text" id="prenom" name="prenom" placeholder="Prénom" required>
         </div>
       </div>
 
-      <div class="colonnes" style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <div style="flex: 1;">
-            <input type="text" name="login" placeholder="Identifiant (Login)" required style="width: 100%; padding: 10px;">
+      <div class="colonnes">
+        <div class="input-group">
+            <input type="text" name="login" placeholder="Identifiant (Login)" required>
         </div>
-        <div style="flex: 1;">
-            <input type="date" name="ddn" required style="width: 100%; padding: 10px; color: #666;">
+        <div class="input-group">
+            <input type="date" name="ddn" required>
         </div>
       </div>
 
@@ -42,8 +43,8 @@
       
       <input type="password" id="password" name="password" placeholder="Mot de passe" required>
 
-      <div style="margin: 15px 0;">
-        <label for="image" style="display:block; margin-bottom:5px;">Photo de profil :</label>
+      <div class="file-wrapper">
+        <label for="image" class="input-label">Photo de profil :</label>
         <input type="file" id="image" name="image" accept="image/*">
       </div>
 

@@ -1,6 +1,17 @@
 /* =========================================
-   1. RESET & BASES (Identique DA)
+   1. RESET & BASES
    ========================================= */
+:root {
+    --primary-color: #FD5035;
+    --primary-hover: #e03e25;
+    --text-dark: #343a40;
+    --text-light: #555;
+    --bg-color: #ffffff;
+    --error-bg: #f8d7da;
+    --error-text: #721c24;
+    --error-border: #f5c6cb;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -9,8 +20,8 @@
 
 body {
     font-family: 'Lexend', sans-serif;
-    background-color: #ffffff;
-    color: #343a40;
+    background-color: var(--bg-color);
+    color: var(--text-dark);
     line-height: 1.6;
     display: flex;
     flex-direction: column;
@@ -19,7 +30,7 @@ body {
 
 main {
     width: 90%;
-    max-width: 800px; /* Un peu plus étroit pour un formulaire d'inscription */
+    max-width: 800px;
     margin: 3rem auto;
     padding: 0 1.5rem;
     flex: 1;
@@ -29,27 +40,23 @@ main {
    2. TITRE & ALERTES
    ========================================= */
 h1 {
-    font-family: 'Lexend', sans-serif;
-    color: #FD5035;
+    color: var(--primary-color);
     font-size: 3rem;
     font-weight: 700;
     text-align: center;
     margin-bottom: 3rem;
 }
 
-/* Style pour les messages d'erreur/succès (si présents) */
+/* Style du message d'erreur/succès */
 .alert-message {
-    padding: 1rem 1.5rem;
-    border-radius: 50px;
-    margin-bottom: 2rem;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 30px;
     text-align: center;
     font-weight: 500;
-    background-color: #ffffff;
-    color: #c0392b;
-    border: 1px solid #fadbd8;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+    background-color: var(--error-bg);
+    color: var(--error-text);
+    border: 1px solid var(--error-border);
 }
 
 /* =========================================
@@ -58,21 +65,19 @@ h1 {
 form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem; /* Espacement vertical uniforme entre les champs */
+    gap: 1.5rem; /* Espacement vertical entre les lignes */
     width: 100%;
 }
 
-/* Gestion des colonnes (Nom / Prénom) */
+/* Gestion des colonnes (2 inputs côte à côte) */
 .colonnes {
     display: flex;
     gap: 20px; /* Espace horizontal */
     width: 100%;
 }
 
-.colonnes > div, 
-.colonnes .gauche, 
-.colonnes .droite {
-    flex: 1; /* Chaque colonne prend 50% */
+.input-group {
+    flex: 1; /* Prend 50% de la largeur */
 }
 
 /* =========================================
@@ -81,38 +86,57 @@ form {
 input[type="text"],
 input[type="password"],
 input[type="email"],
-input[type="date"],
-input[type="file"] {
+input[type="date"] {
     width: 100%;
     padding: 1rem 1.5rem;
-    border: 1px solid #FD5035;
-    border-radius: 50px; /* Arrondi style "pilule" */
+    border: 1px solid var(--primary-color);
+    border-radius: 50px; /* Style "Pilule" */
     font-family: 'Lexend', sans-serif;
     font-size: 1rem;
-    color: #555;
+    color: var(--text-light);
     background-color: #fff;
     outline: none;
     transition: box-shadow 0.3s, transform 0.2s;
 }
 
-/* Placeholder couleur douce */
+/* Placeholder */
 ::placeholder {
     color: #aaa;
 }
 
-/* Effet Focus (Ombre orange et léger soulèvement) */
+/* Effet Focus */
 input:focus {
     box-shadow: 0 8px 20px rgba(253, 80, 53, 0.15);
     transform: translateY(-2px);
 }
 
-/* Spécifique pour l'input file pour qu'il soit propre */
-input[type="file"] {
-    padding: 0.8rem 1.5rem; /* Ajustement léger pour le bouton parcourir */
-    cursor: pointer;
+/* --- Input File (Image) --- */
+.file-wrapper {
+    margin: 10px 0;
 }
+
+.input-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-left: 15px;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 0.8rem 1.5rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 50px;
+    font-family: 'Lexend', sans-serif;
+    color: var(--text-light);
+    cursor: pointer;
+    background: #fff;
+}
+
+/* Style du bouton "Choisir un fichier" à l'intérieur de l'input */
 input[type="file"]::file-selector-button {
-    background-color: #FD5035;
+    background-color: var(--primary-color);
     color: white;
     border: none;
     border-radius: 20px;
@@ -122,8 +146,9 @@ input[type="file"]::file-selector-button {
     font-family: 'Lexend', sans-serif;
     transition: background 0.3s;
 }
+
 input[type="file"]::file-selector-button:hover {
-    background-color: #e03e25;
+    background-color: var(--primary-hover);
 }
 
 /* =========================================
@@ -131,26 +156,25 @@ input[type="file"]::file-selector-button:hover {
    ========================================= */
 input[type="submit"] {
     display: block;
-    margin: 1.5rem auto 0 auto; /* Centré avec marge au-dessus */
+    width: 100%;
+    max-width: 400px; /* Limite la largeur sur grand écran */
+    margin: 1.5rem auto 0 auto;
     padding: 1rem 4rem;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 600;
     border-radius: 50px;
     cursor: pointer;
-    background-color: #FD5035;
+    background-color: var(--primary-color);
     color: #ffffff;
     border: none;
     font-family: 'Lexend', sans-serif;
     transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
 }
 
-/* Hover Bouton : Devient plus foncé + ombre (comme DA) */
 input[type="submit"]:hover {
-    background-color: #e03e25;
+    background-color: var(--primary-hover);
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(253, 80, 53, 0.3);
-    /* On annule l'ancien style "fond blanc" pour garder la cohérence DA */
-    border: none; 
 }
 
 /* =========================================
@@ -167,14 +191,15 @@ input[type="submit"]:hover {
         margin-bottom: 2rem;
     }
 
-    /* Les colonnes passent l'une sous l'autre sur mobile */
+    /* Sur mobile, les colonnes passent l'une sous l'autre */
     .colonnes {
         flex-direction: column;
         gap: 1.5rem;
     }
 
     input[type="submit"] {
-        width: 100%; /* Bouton pleine largeur sur mobile */
+        width: 100%;
+        max-width: none;
         font-size: 1.2rem;
     }
 }
