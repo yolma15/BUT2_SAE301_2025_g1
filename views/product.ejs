@@ -141,8 +141,8 @@
 </body>
 
 <script>
-  // --- 3. calcule prix ---
-  const prixParJour = <%= produit.prix_location %>; // nombre JS
+  // --- 0. PRIX PAR JOUR (depuis EJS) ---
+  const prixParJour = <%= produit.prix_location %>;
 
   // --- 1. GESTION DU CARROUSEL ---
   const mainImage = document.getElementById('mainDisplayImg');
@@ -151,7 +151,7 @@
   const rightArrow = document.querySelector('.fa-chevron-right');
 
   const dbImage = "<%= imagePath %>";
-  const images = [dbImage, dbImage, dbImage]; // Simule 3 images identiques pour le carrousel
+  const images = [dbImage, dbImage, dbImage];
   let currentIndex = 0;
 
   function updateMainImage(index) {
@@ -189,13 +189,7 @@
 
   updateMainImage(0);
 
-
-  // --- 2. GESTION DES DATES (Sécurité) ---
-
-  // Récupération des réservations envoyées par le serveur
-  const reservations = <% - JSON.stringify(typeof reservations !== 'undefined' ? reservations : []) %>;
-
-
+  // --- 2. GESTION DES DATES & PRIX ---
   const startInput = document.getElementById('start');
   const endInput = document.getElementById('end');
   const totalPriceEl = document.getElementById('totalPrice');
@@ -203,7 +197,7 @@
   function calculerNbJours(debut, fin) {
     const d1 = new Date(debut);
     const d2 = new Date(fin);
-    const diffTime = d2.getTime() - d1.getTime(); // ms
+    const diffTime = d2.getTime() - d1.getTime();
     const diffJours = diffTime / (1000 * 60 * 60 * 24);
     return diffJours > 0 ? diffJours : 0;
   }
@@ -218,13 +212,12 @@
       const nbJours = calculerNbJours(dateDebut, dateFin);
       if (nbJours > 0) {
         const joursPayants = Math.max(0, nbJours - 3);
-
         let total = joursPayants * prixParJour;
         let texteRemise = '';
 
         // Réduction de 10 % au-dessus de 7 jours
         if (nbJours > 7) {
-          total = total * 0.9; // -10 %
+          total = total * 0.9;
           texteRemise = ' avec 10% de réduction';
         }
 
@@ -238,10 +231,7 @@
     }
   }
 
-
-
   if (startInput && endInput) {
-    // Date min = Aujourd'hui
     const today = new Date().toISOString().split('T')[0];
     startInput.setAttribute('min', today);
     endInput.setAttribute('min', today);
@@ -259,6 +249,10 @@
       majPrixTotal();
     });
   }
+
+  // --- 3. RÉSERVATIONS (une seule fois) ---
+  const reservations = <%- JSON.stringify(typeof reservations !== 'undefined' ? reservations : []) %>;
 </script>
+
 
 </html>
