@@ -4,15 +4,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestion des Retours</title>
+    <title>Gestion des Retours - Agent</title>
     <link rel="stylesheet" href="/css/returnprod.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
 <body>
     <%- include('header'); %>
 
-    <div class="titre" style="text-align: center; margin-top: 30px;">
+    <div class="titre">
         <h1>Retours en attente (<%= locations.length %>)</h1>
     </div>
 
@@ -22,64 +24,76 @@
             
             <% if (locations.length === 0) { %>
                 <div class="no-returns">
-                    <i class="fa-regular fa-calendar-check" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
-                    Aucun produit en cours de location. <br> Tout a été rendu !
+                    <i class="fa-solid fa-clipboard-check" style="font-size: 4rem; margin-bottom: 20px; color: #ddd; display: block;"></i>
+                    <p>Aucun produit en cours de location.</p>
+                    <small>Tout le matériel a été rendu.</small>
                 </div>
             <% } %>
 
             <% locations.forEach(loc => { 
-                // Calcul du retard pour affichage visuel
+                // 1. Calcul du retard
                 const today = new Date();
                 const due = new Date(loc.date_retour_prevue);
-                const isLate = today > due;
+                // On compare les timestamps pour la précision
+                const isLate = today.setHours(0,0,0,0) > due.setHours(0,0,0,0);
+
+                // 2. Gestion de l'image (Logique Catalogue)
+                let imagePath = "https://placehold.co/600x600?text=No+Img";
+                if (loc.img) {
+                    if (loc.img.startsWith('img/') || loc.img.startsWith('http')) {
+                        imagePath = "/" + loc.img;
+                    } else {
+                        imagePath = "/uploads/" + loc.img;
+                    }
+                }
             %>
                 <div class="return-card" id="card-<%= loc.id %>">
                     
                     <div class="card-header">
+                        <img src="<%= imagePath %>" 
+                             class="prod-img" 
+                             alt="Produit"
+                             onerror="this.src='https://placehold.co/60x60?text=Err'">
                         
-                        <div class="img-container">
-                            <% if (loc.img) { %>
-                                <% if (loc.img.startsWith('img/') || loc.img.startsWith('http')) { %>
-                                    <img src="/<%= loc.img %>" class="prod-img" alt="Produit">
-                                <% } else { %>
-                                    <img src="/uploads/<%= loc.img %>" class="prod-img" alt="Produit">
-                                <% } %>
-                            <% } else { %>
-                                <img src="https://placehold.co/60x60?text=No+Img" class="prod-img" alt="Image par défaut">
-                            <% } %>
-                        </div>
-
                         <div class="prod-info">
                             <h3><%= loc.marque %> <%= loc.modele %></h3>
-                            <p>ID Location: #<%= loc.id %></p>
+                            <p>Loc #<%= loc.id %> • <span style="font-weight:500; color:#FD5035"><%= loc.prix_total %> €</span></p>
                         </div>
                     </div>
 
                     <div class="client-info">
-                        <i class="fa-solid fa-user"></i> 
+                        <i class="fa-solid fa-user" style="color: #FD5035;"></i> 
                         <strong><%= loc.prenom %> <%= loc.nom %></strong><br>
-                        <small><%= loc.email %></small>
+                        <small style="color:#666; margin-left: 18px;"><%= loc.email %></small>
                     </div>
 
                     <div class="dates-info">
-                        <span>Retour prévu : <br><strong><%= new Date(loc.date_retour_prevue).toLocaleDateString() %></strong></span>
+                        <div style="line-height: 1.2;">
+                            <span style="font-size: 0.8rem; color: #888;">RETOUR PRÉVU :</span><br>
+                            <strong><%= new Date(loc.date_retour_prevue).toLocaleDateString('fr-FR') %></strong>
+                        </div>
+                        
                         <% if (isLate) { %>
                             <span class="late-badge">⚠️ En retard</span>
                         <% } else { %>
-                            <span style="color: green;">Dans les temps</span>
+                            <span style="color: #27ae60; font-weight: 600; font-size: 0.9rem;">
+                                <i class="fa-regular fa-clock"></i> À l'heure
+                            </span>
                         <% } %>
                     </div>
 
                     <div class="action-area">
-                        <input type="number" 
-                               id="cout-<%= loc.id %>" 
-                               class="input-cout" 
-                               placeholder="Surcoût (€)" 
-                               min="0" 
-                               step="0.01">
+                        <div class="input-wrapper" style="flex: 1;">
+                            <input type="number" 
+                                   id="cout-<%= loc.id %>" 
+                                   class="input-cout" 
+                                   placeholder="Surcoût éventuel (€)" 
+                                   min="0" 
+                                   step="0.01">
+                        </div>
                         
                         <button class="btn-validate" onclick="validerRetour(<%= loc.id %>)">
-                            <i class="fa-solid fa-check"></i> Valider
+                            Valider
                         </button>
                     </div>
 
@@ -97,12 +111,13 @@
             const surcout = parseFloat(inputCout.value) || 0;
             const card = document.getElementById('card-' + id);
 
-            if (!confirm(`Valider le retour de la location #${id} ?\nSurcoût appliqué : ${surcout} €`)) {
+            // Confirmation simple
+            if (!confirm(`Confirmer le retour de la location #${id} ?\n(Surcoût appliqué : ${surcout} €)`)) {
                 return;
             }
 
             try {
-                // On appelle l'API agent pour finaliser
+                // Appel à l'API Agent
                 const response = await fetch(`/agent/finaliser_location/${id}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -112,27 +127,34 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Animation de succès et suppression de la carte
+                    // Effet visuel de suppression
                     card.style.transition = "all 0.5s ease";
-                    card.style.opacity = "0";
                     card.style.transform = "scale(0.9)";
+                    card.style.opacity = "0";
                     
                     setTimeout(() => {
                         card.remove();
-                        // Vérifier s'il reste des cartes, sinon afficher le message vide
+                        
+                        // Si c'était la dernière carte, on affiche le message vide
                         const grid = document.querySelector('.returns-grid');
                         if (grid.children.length === 0) {
-                            grid.innerHTML = '<div class="no-returns">Aucun produit en cours de location.</div>';
+                            grid.innerHTML = `
+                                <div class="no-returns">
+                                    <i class="fa-solid fa-clipboard-check" style="font-size: 4rem; margin-bottom: 20px; color: #ddd; display: block;"></i>
+                                    <p>Plus aucun retour en attente.</p>
+                                </div>`;
                         }
-                        alert(`✅ Retour validé !\nPrix final total : ${data.prix_final.toFixed(2)} €`);
+                        
+                        alert(`✅ Retour validé avec succès !\nPrix final : ${data.prix_final.toFixed(2)} €`);
                     }, 500);
+
                 } else {
                     alert('❌ Erreur : ' + data.error);
                 }
 
             } catch (err) {
                 console.error(err);
-                alert('❌ Erreur de connexion au serveur.');
+                alert('❌ Erreur de communication avec le serveur.');
             }
         }
     </script>

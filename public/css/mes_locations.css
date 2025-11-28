@@ -1,263 +1,297 @@
+/* ========================
+   1. RESET & VARIABLES
+   ======================== */
 :root {
---primary-color: #FD5035;
---primary-hover: #e03e25;
---bg-color: #f5f5f5;
---text-dark: #343a40;
---text-light: #666;
---success-color: #22c55e;
---warning-color: #facc15;
---danger-color: #dc3545;
---white: #ffffff;
+    --primary-color: #FD5035;
+    --primary-hover: #e03e25;
+    --bg-color: #f5f5f5;
+    --text-dark: #343a40;
+    --text-light: #666;
+    --white: #ffffff;
+    
+    /* Couleurs de statut */
+    --success-bg: #dcfce7;
+    --success-text: #166534;
+    --info-bg: #dbeafe;
+    --info-text: #1e40af;
+    --error-bg: #fee2e2;
+    --error-text: #b91c1c;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-font-family: 'Lexend', sans-serif;
-background-color: var(--bg-color);
-color: var(--text-dark);
+    font-family: 'Lexend', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+    line-height: 1.5;
 }
 
-/* Wrapper */
+/* ========================
+   2. CONTENEUR PRINCIPAL
+   ======================== */
 main.container {
-max-width: 1200px;
-margin: 40px auto;
-padding: 0 20px 40px;
+    max-width: 1400px; /* J'ai élargi un peu pour que 3 cartes rentrent bien */
+    margin: 40px auto;
+    padding: 0 20px 60px;
 }
 
-/* Titre */
-.page-title,
-main h1 {
-font-size: 2rem;
-font-weight: 700;
-margin-bottom: 24px;
-color: #000;
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 30px;
+    text-align: center;
 }
 
-/* Message flash */
+/* ========================
+   3. MESSAGES & VIDANGE
+   ======================== */
 .alert-message {
-background-color: #fff7e0;
-border-left: 4px solid var(--warning-color);
-color: #92400e;
-padding: 12px 16px;
-border-radius: 12px;
-margin-bottom: 20px;
-font-size: 0.95rem;
+    background-color: #fff7ed;
+    border-left: 5px solid var(--primary-color);
+    color: #9a3412;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
-/* Bloc “aucune location” -> style proche .product-card */
 .empty-locations {
-background: var(--white);
-border: 2px solid var(--primary-color);
-border-radius: 40px;
-padding: 40px 30px;
-text-align: center;
-box-shadow: 0 10px 25px rgba(253, 80, 53, 0.15);
+    background: var(--white);
+    border: 2px solid var(--primary-color);
+    border-radius: 40px;
+    padding: 50px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(253, 80, 53, 0.1);
 }
 
 .empty-locations p {
-color: var(--text-light);
-margin-bottom: 20px;
-font-size: 0.95rem;
+    font-size: 1.2rem;
+    color: var(--text-light);
+    margin-bottom: 25px;
 }
 
-/* Bouton principal (catalogue) */
 .btn-primary {
-display: inline-block;
-background: var(--white);
-border: 2px solid var(--primary-color);
-border-radius: 50px;
-padding: 10px 24px;
-text-decoration: none;
-font-weight: 600;
-font-size: 0.95rem;
-color: #000;
-transition: all 0.3s ease;
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 12px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid var(--primary-color);
 }
 
 .btn-primary:hover {
-background: var(--primary-color);
-color: var(--white);
+    background-color: var(--white);
+    color: var(--primary-color);
+    transform: translateY(-2px);
 }
 
-/* LISTE & CARTES (même esprit que .product-list / .product-card) */
+/* ========================
+   4. GRILLE (MODIFIÉE POUR 3 PAR LIGNE)
+   ======================== */
 .locations-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-gap: 30px;
+    display: grid;
+    /* FORCE 3 COLONNES ÉGALES */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 30px;
 }
 
 .location-card {
-background: var(--white);
-border: 2px solid var(--primary-color);
-border-radius: 40px;
-padding: 25px;
-display: flex;
-flex-direction: column;
-justify-content: space-between;
-transition: transform 0.3s ease, box-shadow 0.3s ease;
-height: 100%;
-position: relative;
+    background: var(--white);
+    border: 2px solid var(--primary-color);
+    border-radius: 30px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100%; /* Assure que toutes les cartes ont la même hauteur */
 }
 
 .location-card:hover {
-transform: translateY(-5px);
-box-shadow: 0 10px 25px rgba(253, 80, 53, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(253, 80, 53, 0.15);
 }
 
-/* Header de carte (titre + prix) */
+/* ========================
+   5. CONTENU CARTE
+   ======================== */
 .location-card-header {
-display: flex;
-align-items: flex-end;
-justify-content: space-between;
-margin-bottom: 20px;
-width: 100%;
-gap: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
 }
 
 .location-main-info h3 {
-font-size: 1.1rem;
-font-weight: 600;
-margin-bottom: 6px;
-color: #000;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #000;
 }
 
 .location-main-info p {
-font-size: 0.9rem;
-color: var(--text-light);
+    font-size: 0.9rem;
+    color: var(--text-light);
 }
 
-/* Bloc prix proche .product-price */
 .location-price {
-border: 2px solid var(--primary-color);
-border-radius: 30px;
-padding: 8px 12px;
-white-space: nowrap;
-display: flex;
-flex-direction: column;
-align-items: flex-end;
-background: var(--white);
-margin-bottom: 10px;
-margin-left: 20px;
-flex-shrink: 0;
+    background: #fff;
+    border: 2px solid var(--primary-color);
+    border-radius: 20px;
+    padding: 8px 12px;
+    text-align: right;
+    min-width: 80px;
+    flex-shrink: 0;
 }
 
 .location-price-value {
-font-weight: 700;
-font-size: 1.1rem;
-color: #000;
+    display: block;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.1rem;
 }
 
 .location-price-label {
-font-size: 0.75rem;
-color: var(--text-light);
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-light);
+    text-transform: uppercase;
 }
 
-/* Séparateur */
 .location-card-divider {
-border-top: 1px solid #e5e7eb;
-margin-top: 16px;
-padding-top: 16px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    margin-top: auto; 
 }
 
-/* Détails dates / statut */
+/* Grille interne (Dates / Statut) */
 .location-details-grid {
-display: grid;
-grid-template-columns: repeat(3, minmax(0, 1fr));
-gap: 16px;
+    display: grid;
+    /* On passe sur 1 colonne à l'intérieur de la carte pour éviter que ça soit trop serré */
+    grid-template-columns: 1fr; 
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.location-details-item p.label {
-font-size: 0.8rem;
-color: #9ca3af;
-margin-bottom: 4px;
+.location-details-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 5px;
 }
 
-.location-details-item p.value {
-font-size: 0.95rem;
-font-weight: 500;
+.location-details-item .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #999;
+    font-weight: 600;
 }
 
-/* Badges statut type “pill” */
+.location-details-item .value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+/* Badges */
 .status-pill {
-display: inline-block;
-padding: 4px 12px;
-border-radius: 999px;
-font-size: 0.8rem;
-font-weight: 600;
-white-space: nowrap;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
-/* Rendu */
-.status-pill--returned {
-background-color: #dcfce7;
-color: #166534;
-}
+.status-pill--ongoing { background-color: var(--info-bg); color: var(--info-text); }
+.status-pill--returned { background-color: var(--success-bg); color: var(--success-text); }
+.status-pill--late { background-color: var(--error-bg); color: var(--error-text); }
 
-/* En cours */
-.status-pill--ongoing {
-background-color: #dbeafe;
-color: #1d4ed8;
-}
-
-/* En retard */
-.status-pill--late {
-background-color: #fee2e2;
-color: #b91c1c;
-}
-
-/* Bouton “Signaler le retour” dans l’esprit .product-button */
+/* Actions */
 .location-actions {
-margin-top: 16px;
-display: flex;
-justify-content: flex-end;
+    display: flex;
+    justify-content: space-between; /* Espace entre Annuler et Signaler */
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
 }
 
 .btn-success {
-display: inline-block;
-background: var(--white);
-border: 2px solid #16a34a;
-border-radius: 50px;
-padding: 8px 18px;
-text-decoration: none;
-font-size: 0.9rem;
-font-weight: 600;
-color: #000;
-transition: all 0.3s ease;
+    display: inline-block;
+    background-color: #fff;
+    color: #16a34a;
+    border: 2px solid #16a34a;
+    padding: 8px 16px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    text-align: center;
+    flex: 1; /* Prend la place restante */
 }
 
-.btn-success:hover {
-background: #16a34a;
-color: var(--white);
+.btn-success:hover { background-color: #16a34a; color: #fff; }
+
+/* ========================
+   6. RESPONSIVE
+   ======================== */
+
+/* Tablettes (moins de 1100px) : on passe à 2 colonnes */
+@media (max-width: 1100px) {
+    .locations-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-.location-details-grid {
-grid-template-columns: 1fr;
+/* Mobiles (moins de 700px) : on passe à 1 colonne */
+@media (max-width: 700px) {
+    .locations-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .location-actions {
+        flex-direction: column;
+    }
+    
+    .location-actions button, 
+    .location-actions a {
+        width: 100%;
+    }
+}
+.status-pill--pending {
+    background-color: #fff3cd; /* Jaune/Orange pâle */
+    color: #d97706; /* Orange foncé */
+    border: 1px solid #ffeeba;
 }
 
-.location-card-header {
-flex-direction: column;
-align-items: flex-start;
+/* Bouton Annuler personnalisé */
+.btn-cancel-custom {
+    background: transparent;
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    padding: 8px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: 'Lexend';
+    transition: all 0.3s;
 }
 
-.location-price {
-align-items: flex-start;
-margin-left: 0;
-}
-}
-
-@media (max-width: 600px) {
-main.container {
-margin-top: 20px;
-padding: 0 16px 24px;
-}
-
-.page-title,
-main h1 {
-font-size: 1.6rem;
-}
-
-.locations-grid {
-grid-template-columns: 1fr;
-}
+.btn-cancel-custom:hover {
+    background: #dc3545;
+    color: white;
 }
