@@ -1,12 +1,14 @@
-<%- include('header') %>
-
+<!DOCTYPE html>
+<html lang="fr">
 <head> 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mes locations</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="/css/mes_locations.css" />
+    <link rel="stylesheet" href="/css/mes_locations.css" />
 </head>
+
+<%- include('header') %>
 
 <main class="container mx-auto px-4 py-8">
   <h1 class="text-3xl font-bold mb-6">Mes Locations</h1>
@@ -27,6 +29,14 @@
   <% } else { %>
     <div class="grid gap-4">
       <% locations.forEach(location => { %>
+        <% 
+          const now = new Date();
+          const dateDebut = new Date(location.date_debut);
+          const dateRetourPrevue = new Date(location.date_retour_prevue);
+          
+          // On peut annuler si la location n'est pas commencée ET n'est pas terminée
+          const peutAnnuler = !location.date_retour_effective && dateDebut > now;
+        %>
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
           <div class="flex justify-between items-start mb-4">
             <div class="flex-1">
@@ -67,9 +77,7 @@
                   </span>
                 <% } else { %>
                   <% 
-                    const now = new Date();
-                    const retourPrevue = new Date(location.date_retour_prevue);
-                    const isLate = now > retourPrevue;
+                    const isLate = now > dateRetourPrevue;
                   %>
                   <span class="inline-block <%= isLate ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' %> text-sm px-3 py-1 rounded-full">
                     <%= isLate ? '⚠️ En retard' : '📋 En cours' %>
@@ -79,7 +87,14 @@
             </div>
 
             <% if (!location.date_retour_effective) { %>
-              <div class="mt-4 flex justify-end">
+              <div class="mt-4 flex justify-end gap-3">
+                <% if (peutAnnuler) { %>
+                  <button 
+                    onclick="annulerReservation(<%= location.id %>)"
+                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                    ❌ Annuler la réservation
+                  </button>
+                <% } %>
                 <a href="/returnprod" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
                   Signaler le retour
                 </a>
@@ -91,5 +106,34 @@
     </div>
   <% } %>
 </main>
+
+<script>
+async function annulerReservation(locationId) {
+  if (!confirm("⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?\n\nCette action est irréversible.")) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/locations/cancel/${locationId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      alert("✅ " + data.message);
+      window.location.reload();
+    } else {
+      alert("❌ " + data.error);
+    }
+  } catch (error) {
+    console.error("Erreur:", error);
+    alert("❌ Une erreur est survenue lors de l'annulation");
+  }
+}
+</script>
 
 <%- include('footer') %>
