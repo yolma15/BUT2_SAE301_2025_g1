@@ -16,6 +16,8 @@
     --info-text: #1e40af;
     --error-bg: #fee2e2;
     --error-text: #b91c1c;
+    --pending-bg: #fff3cd;
+    --pending-text: #d97706;
 }
 
 * {
@@ -35,7 +37,7 @@ body {
    2. CONTENEUR PRINCIPAL
    ======================== */
 main.container {
-    max-width: 1400px; /* J'ai élargi un peu pour que 3 cartes rentrent bien */
+    max-width: 1400px;
     margin: 40px auto;
     padding: 0 20px 60px;
 }
@@ -49,7 +51,7 @@ h1 {
 }
 
 /* ========================
-   3. MESSAGES & VIDANGE
+   3. MESSAGES & ÉTAT VIDE
    ======================== */
 .alert-message {
     background-color: #fff7ed;
@@ -96,11 +98,10 @@ h1 {
 }
 
 /* ========================
-   4. GRILLE (MODIFIÉE POUR 3 PAR LIGNE)
+   4. GRILLE (3 Colonnes)
    ======================== */
 .locations-grid {
     display: grid;
-    /* FORCE 3 COLONNES ÉGALES */
     grid-template-columns: repeat(3, 1fr); 
     gap: 30px;
 }
@@ -116,7 +117,7 @@ h1 {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
-    height: 100%; /* Assure que toutes les cartes ont la même hauteur */
+    height: 100%;
 }
 
 .location-card:hover {
@@ -146,6 +147,7 @@ h1 {
     color: var(--text-light);
 }
 
+/* Bulle Prix */
 .location-price {
     background: #fff;
     border: 2px solid var(--primary-color);
@@ -176,10 +178,9 @@ h1 {
     margin-top: auto; 
 }
 
-/* Grille interne (Dates / Statut) */
+/* Grille Détails */
 .location-details-grid {
     display: grid;
-    /* On passe sur 1 colonne à l'intérieur de la carte pour éviter que ça soit trop serré */
     grid-template-columns: 1fr; 
     gap: 10px;
     margin-bottom: 20px;
@@ -206,7 +207,7 @@ h1 {
     color: var(--text-dark);
 }
 
-/* Badges */
+/* --- BADGES DE STATUT --- */
 .status-pill {
     display: inline-block;
     padding: 4px 10px;
@@ -219,16 +220,25 @@ h1 {
 .status-pill--returned { background-color: var(--success-bg); color: var(--success-text); }
 .status-pill--late { background-color: var(--error-bg); color: var(--error-text); }
 
-/* Actions */
+.status-pill--pending {
+    background-color: var(--pending-bg);
+    color: var(--pending-text);
+    border: 1px solid #ffeeba;
+}
+
+/* ========================
+   6. BOUTONS D'ACTION
+   ======================== */
 .location-actions {
     display: flex;
-    justify-content: space-between; /* Espace entre Annuler et Signaler */
+    justify-content: space-between;
     align-items: center;
     gap: 10px;
     margin-top: 15px;
     flex-wrap: wrap;
 }
 
+/* Bouton Signaler Retour (Vert) */
 .btn-success {
     display: inline-block;
     background-color: #fff;
@@ -241,23 +251,45 @@ h1 {
     font-size: 0.9rem;
     transition: all 0.2s ease;
     text-align: center;
-    flex: 1; /* Prend la place restante */
+    flex: 1;
 }
 
-.btn-success:hover { background-color: #16a34a; color: #fff; }
+.btn-success:hover {
+    background-color: #16a34a;
+    color: #fff;
+}
+
+/* Bouton Annuler (Rouge Outline) */
+.btn-cancel-custom {
+    background: transparent;
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    padding: 8px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.btn-cancel-custom:hover {
+    background: #dc3545;
+    color: white;
+}
 
 /* ========================
-   6. RESPONSIVE
+   7. RESPONSIVE
    ======================== */
 
-/* Tablettes (moins de 1100px) : on passe à 2 colonnes */
+/* Tablettes */
 @media (max-width: 1100px) {
     .locations-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-/* Mobiles (moins de 700px) : on passe à 1 colonne */
+/* Mobiles */
 @media (max-width: 700px) {
     .locations-grid {
         grid-template-columns: 1fr;
@@ -271,27 +303,4 @@ h1 {
     .location-actions a {
         width: 100%;
     }
-}
-.status-pill--pending {
-    background-color: #fff3cd; /* Jaune/Orange pâle */
-    color: #d97706; /* Orange foncé */
-    border: 1px solid #ffeeba;
-}
-
-/* Bouton Annuler personnalisé */
-.btn-cancel-custom {
-    background: transparent;
-    border: 2px solid #dc3545;
-    color: #dc3545;
-    padding: 8px 15px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 600;
-    font-family: 'Lexend';
-    transition: all 0.3s;
-}
-
-.btn-cancel-custom:hover {
-    background: #dc3545;
-    color: white;
 }

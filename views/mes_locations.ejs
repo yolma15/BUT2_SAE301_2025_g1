@@ -36,11 +36,9 @@
           const dateDebut = new Date(location.date_debut);
           const dateRetourPrevue = new Date(location.date_retour_prevue);
           
-          // Vérification si la date de retour est dépassée (comparaison simple)
-          // On compare les timestamps pour être précis
+          
           const isTimePassed = now.setHours(0,0,0,0) > dateRetourPrevue.setHours(0,0,0,0);
 
-          // On peut annuler SEULEMENT si la location n'a pas encore commencé
           const peutAnnuler = dateDebut > new Date(); 
         %>
         
@@ -76,11 +74,11 @@
                 
                 <% if (isTimePassed) { %>
                     <span class="status-pill status-pill--late">
-                        ⏳ En attente de retour
+                        En attente de retour
                     </span>
                 <% } else { %>
                     <span class="status-pill status-pill--ongoing">
-                        📋 En cours
+                      En cours
                     </span>
                 <% } %>
 
@@ -88,22 +86,22 @@
 
             </div>
 
-            <div class="location-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+            <div class="location-actions" >
                 
                 <% if (peutAnnuler) { %>
                   <button onclick="annulerReservation(<%= location.id %>)" 
                           class="btn-cancel-custom">
-                    ❌ Annuler
+                    Annuler
                   </button>
                 <% } %>
 
                 <% if (isTimePassed) { %>
-                     <div style="text-align: right; font-size: 0.85rem; color: #d63031; font-weight: 600;">
-                        ⚠️ Date dépassée.<br>Veuillez rapporter le matériel.
+                     <div >
+                        Date dépassée.<br>Veuillez rapporter le matériel.
                      </div>
                 <% } else { %>
-                    <div style="text-align: right; font-size: 0.85rem; color: #27ae60; font-weight: 500;">
-                        ✓ Location active
+                    <div >
+                        Location active
                     </div>
                 <% } %>
 
@@ -118,7 +116,7 @@
 
 <script>
 async function annulerReservation(locationId) {
-  if (!confirm("⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?\n\nCette action est irréversible.")) {
+  if (!confirm("Êtes-vous sûr de vouloir annuler cette réservation ?\n\nCette action est irréversible.")) {
     return;
   }
 
@@ -131,14 +129,14 @@ async function annulerReservation(locationId) {
     const data = await response.json();
 
     if (data.success) {
-      alert("✅ " + data.message);
+      alert(data.message);
       window.location.reload();
     } else {
-      alert("❌ " + data.error);
+      alert(data.error);
     }
   } catch (error) {
     console.error("Erreur:", error);
-    alert("❌ Une erreur est survenue lors de l'annulation");
+    alert("Une erreur est survenue lors de l'annulation");
   }
 }
 </script>
