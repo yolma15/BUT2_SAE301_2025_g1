@@ -74,32 +74,33 @@
 
       <% if (estPhysiquementDisponible) { %>
           
-          <form action="/locations/create" method="POST" class="rental-form" id="rentalForm">
-              <input type="hidden" name="produit_id" value="<%= produit.id %>">
-              
-              <div class="date-inputs">
-                  <div style="flex: 1;">
-                      <label for="start">Début</label>
-                      <input type="date" name="date_debut" id="start" required>
-                  </div>
-                  <div style="flex: 1;">
-                      <label for="end">Fin</label>
-                      <input type="date" name="date_retour_prevue" id="end" required>
-                  </div>
-              </div>
-              
-              <p id="date-error" style="color: #d63031; display: none; font-size: 0.9em; margin-top: 10px; font-weight: 500; text-align: center;"></p>
+          <form action="/prix" method="POST" class="rental-form" id="rentalForm">
+  <input type="hidden" name="produit_id" value="<%= produit.id %>">
 
-              <% if (isLoggedIn) { %>
-                  <button type="submit" id="btn-submit" style="margin-top: 15px;">
-                      Louer ce produit
-                  </button>
-              <% } else { %>
-                  <a href="/login" class="btn-login-link" style="margin-top: 15px;">
-                      Connectez-vous pour louer
-                  </a>
-              <% } %>
-          </form>
+  <div class="date-inputs">
+    <div style="flex: 1;">
+      <label for="start">Début</label>
+      <input type="date" name="date_debut" id="start" required>
+    </div>
+    <div style="flex: 1;">
+      <label for="end">Fin</label>
+      <input type="date" name="date_retour_prevue" id="end" required>
+    </div>
+  </div>
+
+  <p id="date-error" style="color: #d63031; display: none; font-size: 0.9em; margin-top: 10px; font-weight: 500; text-align: center;"></p>
+
+  <% if (isLoggedIn) { %>
+    <button type="submit" id="btn-submit" style="margin-top: 15px;">
+      Louer ce produit
+    </button>
+  <% } else { %>
+    <a href="/login" class="btn-login-link" style="margin-top: 15px;">
+      Connectez-vous pour louer
+    </a>
+  <% } %>
+</form>
+
 
           <% if (typeof reservations !== 'undefined' && reservations.length > 0) { %>
             <div style="margin-top: 20px; font-size: 0.9em; color: #666; background: #fff5f3; padding: 15px; border-radius: 10px; border: 1px solid #ffebe8;">

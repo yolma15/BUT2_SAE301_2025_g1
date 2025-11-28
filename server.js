@@ -368,6 +368,42 @@ app.delete("/profil/delete", authMiddleware, isClient, async (req, res) => {
   }
 });
 
+
+app.post('/prix', authMiddleware, isClient, async (req, res) => {
+  const { produit_id, date_debut, date_retour_prevue } = req.body;
+
+  try {
+    const [prods] = await pool.query('SELECT * FROM produit WHERE id = ?', [produit_id]);
+    if (prods.length === 0) {
+      return res.status(404).render('error', { message: 'Produit introuvable', code: 404 });
+    }
+    const produit = prods[0];
+
+    const debut = new Date(date_debut);
+    const fin = new Date(date_retour_prevue);
+    const nbJours = Math.max(1, Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)));
+
+    const prixParJour = produit.prixlocation;
+    const joursPayants = Math.max(0, nbJours - 3);
+    let total = joursPayants * prixParJour;
+    if (nbJours > 7) {
+      total = total * 0.9;
+    }
+
+    res.render('prix', {
+      produit,
+      date_debut,
+      date_retour_prevue,
+      nbJours,
+      total: total.toFixed(2)
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { message: 'Erreur préparation paiement', code: 500 });
+  }
+});
+
+
 // --- CRÉATION DE LOCATION (Sécurisée : check chevauchement + limite 6 mois) ---
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const { produit_id, date_debut, date_retour_prevue } = req.body;
@@ -573,9 +609,7 @@ app.post("/inscription_agent", authMiddleware, isAdmin, upload.single("image"), 
   }
 });
 
-app.get("/prix", (req, res) => {
-  res.render("prix", { message: null });
-});
+
 
 // ============================================
 // DÉMARRAGE
