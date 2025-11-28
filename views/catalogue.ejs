@@ -24,16 +24,12 @@
                     <option value="default" <%=typeof currentSort==='undefined' || currentSort==='default' ? 'selected' : '' %>>Trier par...</option>
                     <option value="priceAsc" <%=typeof currentSort !=='undefined' && currentSort==='priceAsc' ? 'selected' : '' %>>Prix : croissant</option>
                     <option value="priceDesc" <%=typeof currentSort !=='undefined' && currentSort==='priceDesc' ? 'selected' : '' %>>Prix : décroissant</option>
-                    <option value="popularity" <%=typeof currentSort !=='undefined' && currentSort==='popularity' ? 'selected' : '' %>>Popularité</option>
-                    <option value="rating" <%=typeof currentSort !=='undefined' && currentSort==='rating' ? 'selected' : '' %>>Meilleures notes</option>
+                    
                 </select>
             </div>
 
             <button type="submit" id="searchBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
+                Rechercher
             </button>
 
             <% if (typeof currentCategory !=='undefined' && currentCategory) { %>
@@ -79,27 +75,36 @@
                                 </div>
 
                                 <div class="image-wrapper">
-                                    <% if (produit.img) { %>
-                                        <% if (produit.img.startsWith('img/') || produit.img.startsWith('http')) { %>
-                                            <img src="/<%= produit.img %>" alt="<%= produit.modele %>" class="product-image">
-                                        <% } else { %>
-                                            <img src="/uploads/<%= produit.img %>" alt="<%= produit.modele %>" class="product-image">
-                                        <% } %>
-                                    <% } else { %>
-                                        <img src="https://placehold.co/150x150?text=No+Img" alt="Image par défaut" class="product-image">
-                                    <% } %>
+                                    <% 
+                                        let imgPath = "https://placehold.co/150x150?text=No+Img";
+                                        if(produit.img) {
+                                            if(produit.img.startsWith('img/') || produit.img.startsWith('http')) imgPath = "/" + produit.img;
+                                            else imgPath = "/uploads/" + produit.img;
+                                        }
+                                    %>
+                                    <img src="<%= imgPath %>" alt="<%= produit.modele %>" class="product-image">
                                 </div>
                             </div>
 
-                            <a href="/product/<%= produit.id %>" class="product-button">Voir détails</a>
+                            <a href="/product/<%= produit.id %>" class="product-button">
+                                Voir détails
+                            </a>
                                     
                             <% if (userRole === 'agent' || userRole === 'admin') { %>
                                 <% if (produit.etat === 'disponible') { %>
-                                    <div style="margin-top: 0.5rem;">
-                                        <button onclick="supprimerProduit(<%= produit.id %>)" class="btn btn--outline" style="width: 100%; color: var(--error-color); border-color: var(--error-color); cursor: pointer;">
-                                            🗑️ Supprimer
+                                    
+                                    <div class="card-actions">
+                                        <button onclick="supprimerProduit(<%= produit.id %>)" class="btn btn--outline btn-full">
+                                            Supprimer
                                         </button>
                                     </div>
+
+                                <% } else { %>
+                                    
+                                    <div class="status-text">
+                                        (Actuellement loué)
+                                    </div>
+
                                 <% } %>
                             <% } %>
 
@@ -115,7 +120,7 @@
 
     <script>
     async function supprimerProduit(id) {
-      if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer ce produit ?\n\nCette action est irréversible.')) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?\n\nCette action est irréversible.')) {
         return;
       }
       
@@ -128,14 +133,14 @@
         const data = await res.json();
         
         if (data.success) {
-          alert('✅ ' + data.message);
+          alert( data.message);
           location.reload();
         } else {
-          alert('❌ ' + data.error);
+          alert(data.error);
         }
       } catch (err) {
         console.error(err);
-        alert('❌ Erreur lors de la suppression');
+        alert('Erreur lors de la suppression');
       }
     }
     </script>

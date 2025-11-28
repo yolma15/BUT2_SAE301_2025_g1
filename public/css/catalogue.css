@@ -2,7 +2,7 @@
    1. RESET & VARIABLES
    ======================== */
 :root {
-    --primary-color: #FD5035; /* Orange DA */
+    --primary-color: #FD5035;
     --primary-hover: #e03e25;
     --bg-color: #f5f5f5;
     --text-dark: #343a40;
@@ -37,13 +37,13 @@ body {
 }
 
 /* ========================
-   2. BARRE DE RECHERCHE (Style Bandeau)
+   2. BARRE DE RECHERCHE
    ======================== */
 .search-container {
     display: flex;
     align-items: center;
     gap: 10px;
-    background-color: var(--primary-color); /* Fond orange */
+    background-color: var(--primary-color);
     padding: 10px;
     border-radius: 12px;
     width: 100%;
@@ -57,7 +57,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Champ Texte */
 #searchBar {
     flex: 1;
     background-color: var(--white);
@@ -76,13 +75,11 @@ body {
     font-weight: 300;
 }
 
-/* Wrapper Select */
 .select-wrapper {
     position: relative;
     display: flex;
 }
 
-/* Menu déroulant */
 .sort-dropdown {
     appearance: none;
     -webkit-appearance: none;
@@ -98,40 +95,35 @@ body {
     outline: none;
     text-align: center;
     min-width: 130px;
-    /* Suppression des changements au hover */
-    transition: none; 
 }
 
-/* Bouton Loupe */
+/* Bouton Rechercher (Textuel) */
 #searchBtn {
     background-color: var(--white);
     border: none;
     border-radius: 50px;
-    width: 60px; 
+    padding: 0 20px; /* Espace pour le texte */
     height: 45px; 
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #555; /* Couleur icône par défaut */
+    color: #555;
     transition: all 0.2s ease;
     flex-shrink: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: 'Lexend', sans-serif;
 }
 
-#searchBtn svg {
-    width: 20px;
-    height: 20px;
-}
-
-/* Hover Bouton Loupe -> Devient Orange avec icône Blanche */
 #searchBtn:hover {
-    background-color: #d13015; /* Orange un peu plus foncé */
-    color: var(--white);       /* Icône blanche */
-    transform: scale(1.05);
+    background-color: #d13015;
+    color: var(--white);
+    transform: scale(1.02);
 }
 
 /* ========================
-   3. LAYOUT & SIDEBAR
+   3. SIDEBAR & LAYOUT
    ======================== */
 .main-content-area {
     display: flex;
@@ -183,7 +175,7 @@ body {
 }
 
 /* ========================
-   4. LISTE & CARTES
+   4. CARTES PRODUITS
    ======================== */
 .product-list {
     flex: 1;
@@ -278,7 +270,7 @@ body {
 }
 
 /* ========================
-   5. BOUTONS
+   5. BOUTONS & TEXTES
    ======================== */
 .product-button {
     display: block;
@@ -300,8 +292,12 @@ body {
     color: var(--white) !important;
 }
 
+.card-actions {
+    margin-top: 0.5rem;
+}
+
 .btn {
-    display: inline-block;
+    display: block;
     padding: 8px 15px;
     font-size: 0.9rem;
     font-weight: 600;
@@ -311,6 +307,7 @@ body {
     text-decoration: none;
     transition: all 0.2s ease;
     font-family: 'Lexend', sans-serif;
+    width: 100%;
 }
 
 .btn--outline {
@@ -322,6 +319,14 @@ body {
 .btn--outline:hover {
     background-color: var(--error-color) !important;
     color: var(--white) !important;
+}
+
+.status-text {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #999;
+    font-style: italic;
 }
 
 /* ========================
