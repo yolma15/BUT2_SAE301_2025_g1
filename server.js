@@ -272,6 +272,65 @@ app.get("/product/:id", async (req, res) => {
 });
 
 // --- CRÉATION DE LOCATION (limite 60 jours) ---
+
+app.post('/prix', authMiddleware, isClient, async (req, res) => {
+  const { produit_id, date_debut, date_retour_prevue } = req.body;
+
+  try {
+    // 1. Récupérer le produit
+    const [prods] = await pool.query('SELECT * FROM produit WHERE id = ?', [produit_id]);
+    if (prods.length === 0) {
+      return res.status(404).render('error', { message: 'Produit introuvable', code: 404 });
+    }
+    const produit = prods[0];
+
+    // 2. Calcul du nombre de jours
+    const debut = new Date(date_debut);
+    const fin = new Date(date_retour_prevue);
+    const nbJours = Math.max(1, Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)));
+
+    // 3. Calcul du total (même logique que /locations/create)
+    const prixParJour = produit.prix_location;
+
+// Nombre de jours prévu
+const joursPayants = Math.max(0, nbJours - 3);
+let prixBase = joursPayants * prixParJour;
+
+// Réduction selon paliers (à l’avantage du client)
+// 4–7 jours : 4%, 8–14 : 2%, 15–30 : 1%, 31–60 : 0%
+let remise = 0;
+if (nbJours >= 4 && nbJours <= 7) remise = 0.04;
+else if (nbJours >= 8 && nbJours <= 14) remise = 0.02;
+else if (nbJours >= 15 && nbJours <= 30) remise = 0.01;
+
+// 1) Appliquer la remise de palier
+prixBase = prixBase * (1 - remise);
+
+// 2) Si plus de 7 jours, appliquer EN PLUS -10%
+if (nbJours > 7) {
+  prixBase = prixBase * 0.9;
+}
+
+// Arrondi à l’avantage du client (au centime inférieur)
+const total = Math.floor(prixBase * 100) / 100;
+
+
+    // 4. Rendre la vue prix.ejs avec toutes les données nécessaires
+    res.render('prix', {
+      produit,
+      date_debut,
+      date_retour_prevue,
+      nbJours,
+      total
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { message: 'Erreur préparation paiement', code: 500 });
+  }
+});
+
+
+
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const { produit_id, date_debut, date_retour_prevue } = req.body;
   if (!produit_id || !date_debut || !date_retour_prevue) return res.status(400).send("Champs requis");
@@ -307,20 +366,27 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
     const prixLoc = prods[0].prix_location;
 
     // Nombre de jours prévu
-    const joursPayants = Math.max(0, nbJours - 3);
-    let prixBase = joursPayants * prixLoc;
+const joursPayants = Math.max(0, nbJours - 3);
+let prixBase = joursPayants * prixLoc;
 
-    // Réduction selon paliers (à l’avantage du client)
-    // 4–7 jours : 4%, 8–14 : 2%, 15–30 : 1%, 31–60 : 0%
-    let remise = 0;
-    if (nbJours >= 4 && nbJours <= 7) remise = 0.04;
-    else if (nbJours >= 8 && nbJours <= 14) remise = 0.02;
-    else if (nbJours >= 15 && nbJours <= 30) remise = 0.01;
+// Réduction selon paliers (à l’avantage du client)
+// 4–7 jours : 4%, 8–14 : 2%, 15–30 : 1%, 31–60 : 0%
+let remise = 0;
+if (nbJours >= 4 && nbJours <= 7) remise = 0.04;
+else if (nbJours >= 8 && nbJours <= 14) remise = 0.02;
+else if (nbJours >= 15 && nbJours <= 30) remise = 0.01;
 
-    prixBase = prixBase * (1 - remise);
+// 1) Appliquer la remise de palier
+prixBase = prixBase * (1 - remise);
 
-    // Arrondi à l’avantage du client (on peut arrondir au centime inférieur)
-    const total = Math.floor(prixBase * 100) / 100;
+// 2) Si plus de 7 jours, appliquer EN PLUS -10%
+if (nbJours > 7) {
+  prixBase = prixBase * 0.9;
+}
+
+// Arrondi à l’avantage du client (au centime inférieur)
+const total = Math.floor(prixBase * 100) / 100;
+
 
     await pool.query(
       "INSERT INTO location (date_debut, date_retour_prevue, prix_total, utilisateur_id, produit_id) VALUES (?, ?, ?, ?, ?)",
@@ -660,9 +726,7 @@ app.post("/inscription_agent", authMiddleware, isAdmin, upload.single("image"), 
   }
 });
 
-app.get("/prix", (req, res) => {
-  res.render("prix", { message: null });
-});
+
 
 // ============================================
 // DÉMARRAGE
