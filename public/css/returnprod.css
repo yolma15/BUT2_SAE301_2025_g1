@@ -1,188 +1,275 @@
+/* =========================================
+   1. RESET & BASES
+   ========================================= */
+:root {
+    --primary-color: #FD5035;
+    --text-color: #343a40;
+    --bg-color: #fff;
+    --card-bg: #fff;
+}
+
 body {
-  font-family: 'Lexend', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #fff;
-  color: #FD5035;
+    font-family: 'Lexend', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 .titre {
-  text-align: center;
-  margin: 40px 0 20px 0;
+    text-align: center;
+    margin: 40px 0 30px 0;
 }
 
 h1 {
-  color: #F1653D;
-  font-weight: 500;
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 2.5rem;
 }
 
 .main {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 60px;
+    width: 100%;
 }
 
-.form-container {
-  background: #fff;
-  margin: 2%;
+/* =========================================
+   2. GRILLE DE RETOURS (LAYOUT)
+   ========================================= */
+.returns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
+    padding: 20px;
+    width: 90%;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.no-returns {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.5rem;
+    color: #888;
+    grid-column: 1 / -1; /* Prend toute la largeur */
 }
 
-.input-row {
-  display: flex;
-  gap: 20px;
-  width: 100%;
+/* =========================================
+   3. CARTES (DESIGN)
+   ========================================= */
+.return-card {
+    background: var(--card-bg);
+    border: 2px solid var(--primary-color);
+    border-radius: 25px; /* Arrondi DA */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
 }
 
-.input-row input[type="text"],
-.input-row input[type="date"],
-.input-row input[type="number"] {
-  flex: 1;
-  padding: 12px 16px;
-  border: 1px solid #F1653D;
-  border-radius: 25px;
-  font-size: 16px;
-  text-align: center;
-  outline: none;
-  box-sizing: border-box;
+.return-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(253, 80, 53, 0.15);
 }
 
-.input-row input::placeholder {
-  text-align: center;
+/* En-tête de la carte (Image + Titre) */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
 }
 
-.input-row input:focus {
-  border: 2px solid #F1653D;
+.prod-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #f5f5f5;
+    border: 1px solid #eee;
 }
 
-.etat-produit {
-  text-align: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 50px;
-  margin-top: 20px;
+.prod-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #000;
+    font-weight: 600;
 }
 
-.etat-produit label {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #000;
-  top: 10px;
+.prod-info p {
+    margin: 2px 0 0 0;
+    font-size: 0.85rem;
+    color: #666;
 }
 
-.icon-group {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin-top: 10px;
+/* Info Client (Fond coloré) */
+.client-info {
+    background: #fff5f3; /* Très léger orange */
+    padding: 12px;
+    border-radius: 15px;
+    font-size: 0.95rem;
+    line-height: 1.4;
 }
 
-.icon-group i {
-  font-size: 28px;
-  color: #000;
-  cursor: pointer;
-  transition: color 0.3s ease, transform 0.2s ease;
+.client-info strong {
+    color: var(--primary-color);
 }
 
-.icon-group i:hover {
-  transform: scale(1.1);
-  color: #F1653D;
+/* Info Dates & Badges */
+.dates-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #555;
 }
 
+.late-badge {
+    background: #ffebeb;
+    color: #d63031;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+/* =========================================
+   4. ACTIONS (INPUTS & BOUTONS)
+   ========================================= */
+.action-area {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: auto; /* Pousse les actions vers le bas */
+    padding-top: 10px;
+}
+
+/* Champ Surcoût */
+.input-cout {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    font-size: 1rem;
+    outline: none;
+    text-align: center;
+    font-family: 'Lexend', sans-serif;
+    transition: border 0.3s;
+}
+
+.input-cout:focus {
+    border: 1px solid var(--primary-color);
+}
+
+/* Bouton Valider */
+.btn-validate {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Lexend', sans-serif;
+}
+
+.btn-validate:hover {
+    background: #fff;
+    color: var(--primary-color);
+    box-shadow: inset 0 0 0 2px var(--primary-color);
+}
+
+/* =========================================
+   5. POPUP (MODAL)
+   ========================================= */
 .popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
 }
 
 .popup.active {
-  display: flex;
+    display: flex;
 }
 
 .popup-content {
-  background: #fff;
-  border-radius: 20px;
-  padding: 30px 40px;
-  text-align: center;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  animation: pop 0.3s ease;
+    background: #fff;
+    border-radius: 25px;
+    padding: 30px 50px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: pop 0.3s ease;
+    border: 2px solid var(--primary-color);
 }
 
 #popup-message {
-  font-size: 20px;
-  margin-bottom: 20px;
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+    font-weight: 500;
 }
 
 #close-popup {
-  padding: 10px 20px;
-  border: none;
-  background: #F1653D;
-  color: white;
-  border-radius: 25px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    padding: 10px 30px;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: 'Lexend', sans-serif;
+    transition: all 0.3s ease;
 }
 
 #close-popup:hover {
-  background: #fff;
-  color: #F1653D;
-  border: 2px solid #F1653D;
+    background: #fff;
+    color: var(--primary-color);
+    box-shadow: inset 0 0 0 2px var(--primary-color);
 }
 
 @keyframes pop {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
-@media (max-width: 900px) {
-  .input-row {
-    flex-direction: column;
-  }
-  .input-row input[type="text"],
-  .input-row input[type="date"],
-  .input-row input[type="number"] {
-    width: 100%;
-  }
-  .etat-produit {
-    flex-direction: column;
-    gap: 20px;
-  }
-  .icon-group {
-    gap: 20px;
-  }
-  .etat-produit label {
-    font-size: 1.2rem;
-  }
-}
+/* =========================================
+   6. RESPONSIVE
+   ========================================= */
+@media (max-width: 600px) {
+    .returns-grid {
+        grid-template-columns: 1fr; /* Une seule colonne */
+        padding: 10px;
+        width: 95%;
+    }
 
-@media (max-width: 500px) {
-  .input-row input[type="text"],
-  .input-row input[type="date"],
-  .input-row input[type="number"] {
-    font-size: 14px;
-    padding: 10px 12px;
-  }
-  .icon-group i {
-    font-size: 24px;
-  }
-  .etat-produit label {
-    font-size: 1rem;
-  }
+    .action-area {
+        flex-direction: column; /* Input et bouton l'un sous l'autre */
+        width: 100%;
+    }
+
+    .input-cout, .btn-validate {
+        width: 100%;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
 }

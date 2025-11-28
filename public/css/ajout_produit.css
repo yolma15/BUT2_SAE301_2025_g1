@@ -78,6 +78,7 @@ input:focus, select:focus, textarea:focus {
     border-radius: 15px;
     margin-bottom: 20px;
     flex-grow: 1; /* Prend l'espace disponible */
+    display: none;
 }
 
 /* Conteneur pour le bouton et le texte en bas */

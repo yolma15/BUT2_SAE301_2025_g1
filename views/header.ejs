@@ -25,7 +25,7 @@
                     
                     <% } else if (userRole === 'admin') { %>
                         <a href="/home">Accueil</a>
-                        <a href="/admin/inscription_agent">Tableau de bord</a>
+                        <a href="/inscription_agent">Tableau de bord</a>
                     
                     <% } else if (userRole === 'agent') { %>
                         <a href="/home">Accueil</a>
@@ -49,17 +49,23 @@
                     <div class="user-menu">
                         
                         <% 
-                            // Logique de protection :
-                            let avatarSrc = '/img/avatar-default.png';
-                            if (typeof userImg !== 'undefined' && userImg) {
-                                avatarSrc = '/img/' + userImg;
+                            // 1. Image par défaut (fall back local)
+                            let avatarSrc = '/img/default.jpg';
+                            
+                            // 2. CORRECTION : On utilise le chemin /img/ pour les images BDD,
+                            // car c'est le chemin qui fonctionne sur la page profil.
+                            if (typeof userImg !== 'undefined' && userImg && userImg !== 'null' && userImg.trim() !== '') {
+                                avatarSrc = '/img/' + userImg; // Chemin corrigé pour correspondre à /profil
                             }
                         %>
 
                         <img class="avatar" 
-                            src="<%= avatarSrc %>" 
-                            alt="profil" 
-                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />
+                             src="<%= avatarSrc %>" 
+                             alt="profil" 
+                             
+                             onerror="this.onerror=null; this.src='/img/default.jpg';"
+                             
+                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid white; cursor: pointer;">
 
                         <span class="username"><%= typeof username !== 'undefined' ? username : 'Utilisateur' %></span>
 
@@ -97,29 +103,23 @@
             
             if (!userMenu) return; 
 
-            // 1. Gérer l'ouverture/fermeture au clic sur le menu utilisateur complet
+            // 1. Gérer l'ouverture au clic
             userMenu.addEventListener('click', function(event) {
-                // Si l'utilisateur clique sur un lien de déconnexion, laisser l'action se faire.
                 if (event.target.closest('.dropdown-item')) {
                     return; 
                 }
-                
-                // Empêcher la propagation pour ne pas déclencher immédiatement le document listener de fermeture
                 event.stopPropagation();
-                
-                // Basculer la classe 'open'
                 userMenu.classList.toggle('open');
             });
 
-            // 2. Gérer la fermeture lorsque l'utilisateur clique n'importe où ailleurs sur la page
+            // 2. Fermer si clic ailleurs
             document.addEventListener('click', function(event) {
-                // Vérifier si l'élément cliqué n'est pas à l'intérieur du .user-menu
                 if (userMenu.classList.contains('open') && !userMenu.contains(event.target)) {
                     userMenu.classList.remove('open');
                 }
             });
 
-            // 3. Empêcher le menu de se fermer si l'on clique à l'intérieur (mais pas sur un lien)
+            // 3. Empêcher fermeture si clic dans le dropdown
             const dropdownMenu = userMenu.querySelector('.dropdown-menu');
             if (dropdownMenu) {
                 dropdownMenu.addEventListener('click', function(event) {
@@ -131,5 +131,4 @@
         });
     </script>
 </body>
-
 </html>

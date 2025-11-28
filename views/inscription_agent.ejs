@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/inscription_agent.css">
-    <title>Document</title>
+    <link rel="stylesheet" href="/css/inscription_agent.css"> 
+    <title>Ajout Agent</title>
 </head>
 <body>
      <%- include('header'); %>
 
     <main>
     <h1>Ajout Agent</h1>
+    
+    <% if (typeof message !== 'undefined' && message) { %>
+        <div style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+            <%= message %>
+        </div>
+    <% } %>
 
     <form action="/inscription_agent" method="POST" enctype="multipart/form-data">
+      
       <div class="colonnes">
         <div class="gauche">
           <input type="text" id="nom" name="nom" placeholder="Nom" required>
@@ -21,14 +28,29 @@
           <input type="text" id="prenom" name="prenom" placeholder="Prénom" required>
         </div>
       </div>
-      <input type="email" id="email" name="email" placeholder="Email" required>
-      <input type="password" id="motdepasse" name="motdepasse" placeholder="Mot de passe" required>
 
-      <input type="submit" value="Ajouter">
+      <div class="colonnes" style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <div style="flex: 1;">
+            <input type="text" name="login" placeholder="Identifiant (Login)" required style="width: 100%; padding: 10px;">
+        </div>
+        <div style="flex: 1;">
+            <input type="date" name="ddn" required style="width: 100%; padding: 10px; color: #666;">
+        </div>
+      </div>
+
+      <input type="email" id="email" name="email" placeholder="Email" required>
+      
+      <input type="password" id="password" name="password" placeholder="Mot de passe" required>
+
+      <div style="margin: 15px 0;">
+        <label for="image" style="display:block; margin-bottom:5px;">Photo de profil :</label>
+        <input type="file" id="image" name="image" accept="image/*">
+      </div>
+
+      <input type="submit" value="Ajouter l'agent">
     </form>
   </main>
 
-
-      <%- include('footer'); %>
+  <%- include('footer'); %>
 </body>
 </html>

@@ -2,108 +2,139 @@
 <html lang="fr">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/css/returnprod.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <title>Retour Produit</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion des Retours</title>
+    <link rel="stylesheet" href="/css/returnprod.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
 <body>
-  <%- include('header'); %>
+    <%- include('header'); %>
 
-    <div class="titre">
-      <h1>Retours Produits</h1>
+    <div class="titre" style="text-align: center; margin-top: 30px;">
+        <h1>Retours en attente (<%= locations.length %>)</h1>
     </div>
 
     <div class="main">
-      <div class="form-container" id="form1">
-        <form id="returnForm1" action="/returnprod" method="POST" enctype="multipart/form-data">
-          <div class="input-row">
-            <input type="text" name="name" placeholder="Nom du matériel" required />
-            <input type="text" name="locataire" placeholder="Locataire" required />
-            <input type="date" name="date" required />
-            <input type="number" name="cout" placeholder="Coûts complémentaires" required />
-          </div>
-          <div class="etat-produit">
-            <label>Validé :</label>
-            <div class="icon-group">
-              <i class="fa-solid fa-check" id="valide1"></i>
-              <i class="fa-solid fa-circle-minus" id="refuse1"></i>
-            </div>
-          </div>
-          <input type="hidden" name="etat" id="etat1" required />
-        </form>
-      </div>
-    </div>
+        
+        <div class="returns-grid">
+            
+            <% if (locations.length === 0) { %>
+                <div class="no-returns">
+                    <i class="fa-regular fa-calendar-check" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                    Aucun produit en cours de location. <br> Tout a été rendu !
+                </div>
+            <% } %>
 
-    <div class="main">
-      <div class="form-container" id="form2">
-        <form id="returnForm2" action="/returnprod" method="POST" enctype="multipart/form-data">
-          <div class="input-row">
-            <input type="text" name="name" placeholder="Nom du matériel" required />
-            <input type="text" name="locataire" placeholder="Locataire" required />
-            <input type="date" name="date" required />
-            <input type="number" name="cout" placeholder="Coûts complémentaires" required />
-          </div>
-          <div class="etat-produit">
-            <label>Validé :</label>
-            <div class="icon-group">
-              <i class="fa-solid fa-check" id="valide2"></i>
-              <i class="fa-solid fa-circle-minus" id="refuse2"></i>
-            </div>
-          </div>
-          <input type="hidden" name="etat" id="etat2" required />
-        </form>
-      </div>
-    </div>
+            <% locations.forEach(loc => { 
+                // Calcul du retard pour affichage visuel
+                const today = new Date();
+                const due = new Date(loc.date_retour_prevue);
+                const isLate = today > due;
+            %>
+                <div class="return-card" id="card-<%= loc.id %>">
+                    
+                    <div class="card-header">
+                        
+                        <div class="img-container">
+                            <% if (loc.img) { %>
+                                <% if (loc.img.startsWith('img/') || loc.img.startsWith('http')) { %>
+                                    <img src="/<%= loc.img %>" class="prod-img" alt="Produit">
+                                <% } else { %>
+                                    <img src="/uploads/<%= loc.img %>" class="prod-img" alt="Produit">
+                                <% } %>
+                            <% } else { %>
+                                <img src="https://placehold.co/60x60?text=No+Img" class="prod-img" alt="Image par défaut">
+                            <% } %>
+                        </div>
 
-    <div id="popup" class="popup">
-      <div class="popup-content">
-        <p id="popup-message"></p>
-        <button id="close-popup">Fermer</button>
-      </div>
+                        <div class="prod-info">
+                            <h3><%= loc.marque %> <%= loc.modele %></h3>
+                            <p>ID Location: #<%= loc.id %></p>
+                        </div>
+                    </div>
+
+                    <div class="client-info">
+                        <i class="fa-solid fa-user"></i> 
+                        <strong><%= loc.prenom %> <%= loc.nom %></strong><br>
+                        <small><%= loc.email %></small>
+                    </div>
+
+                    <div class="dates-info">
+                        <span>Retour prévu : <br><strong><%= new Date(loc.date_retour_prevue).toLocaleDateString() %></strong></span>
+                        <% if (isLate) { %>
+                            <span class="late-badge">⚠️ En retard</span>
+                        <% } else { %>
+                            <span style="color: green;">Dans les temps</span>
+                        <% } %>
+                    </div>
+
+                    <div class="action-area">
+                        <input type="number" 
+                               id="cout-<%= loc.id %>" 
+                               class="input-cout" 
+                               placeholder="Surcoût (€)" 
+                               min="0" 
+                               step="0.01">
+                        
+                        <button class="btn-validate" onclick="validerRetour(<%= loc.id %>)">
+                            <i class="fa-solid fa-check"></i> Valider
+                        </button>
+                    </div>
+
+                </div>
+            <% }) %>
+
+        </div>
     </div>
 
     <%- include('footer'); %>
 
-      <script>
-        const popup = document.getElementById('popup')
-        const popupMessage = document.getElementById('popup-message')
-        const closePopup = document.getElementById('close-popup')
+    <script>
+        async function validerRetour(id) {
+            const inputCout = document.getElementById('cout-' + id);
+            const surcout = parseFloat(inputCout.value) || 0;
+            const card = document.getElementById('card-' + id);
 
-        function showPopup(message, color) {
-          popupMessage.textContent = message
-          popupMessage.style.color = color
-          popup.classList.add('active')
+            if (!confirm(`Valider le retour de la location #${id} ?\nSurcoût appliqué : ${surcout} €`)) {
+                return;
+            }
+
+            try {
+                // On appelle l'API agent pour finaliser
+                const response = await fetch(`/agent/finaliser_location/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ surcout: surcout })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Animation de succès et suppression de la carte
+                    card.style.transition = "all 0.5s ease";
+                    card.style.opacity = "0";
+                    card.style.transform = "scale(0.9)";
+                    
+                    setTimeout(() => {
+                        card.remove();
+                        // Vérifier s'il reste des cartes, sinon afficher le message vide
+                        const grid = document.querySelector('.returns-grid');
+                        if (grid.children.length === 0) {
+                            grid.innerHTML = '<div class="no-returns">Aucun produit en cours de location.</div>';
+                        }
+                        alert(`✅ Retour validé !\nPrix final total : ${data.prix_final.toFixed(2)} €`);
+                    }, 500);
+                } else {
+                    alert('❌ Erreur : ' + data.error);
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert('❌ Erreur de connexion au serveur.');
+            }
         }
-
-        closePopup.addEventListener('click', () => {
-          popup.classList.remove('active')
-        })
-
-        function setupForm(id) {
-          const formContainer = document.getElementById('form' + id)
-          const etatInput = document.getElementById('etat' + id)
-          const valide = document.getElementById('valide' + id)
-          const refuse = document.getElementById('refuse' + id)
-
-          valide.addEventListener('click', () => {
-            etatInput.value = 'oui'
-            showPopup('Retour accepté', '#FD5035')
-            formContainer.remove()
-          })
-
-          refuse.addEventListener('click', () => {
-            etatInput.value = 'non'
-            showPopup('Retour refusé', '#FD5035')
-            formContainer.remove()
-          })
-        }
-
-        setupForm(1)
-        setupForm(2)
-      </script>
+    </script>
 </body>
-
 </html>

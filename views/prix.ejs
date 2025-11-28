@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Paiement</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/prix.css">
+</head>
+
+<body>
+  <div class="payment-container">
+
+    <!-- FORMULAIRE -->
+    <form class="payment-form" id="payment-form" action="/locations/create" method="POST">
+      <h1>Paiement sécurisé</h1>
+
+
+      <!-- RÉCAPITULATIF RÉSERVATION -->
+      <div class="section">
+        <h2>Récapitulatif</h2>
+        <p><strong>
+            <%= produit.marque %>
+              <%= produit.modele %>
+          </strong></p>
+        <p>
+          Du <%= new Date(date_debut).toLocaleDateString('fr-FR') %>
+            au <%= new Date(date_retour_prevue).toLocaleDateString('fr-FR') %>
+              ( <%= nbJours %> jour(s) )
+        </p>
+        <p style="margin-top: 8px;">
+          Montant à payer : <strong>
+            <%= total %> €
+          </strong>
+        </p>
+
+        <div class="summary">
+          <span>Total</span>
+          <strong>
+            <%= total %> €
+          </strong>
+        </div>
+      </div>
+
+      <!-- Champs cachés pour créer la location côté serveur -->
+      <input type="hidden" name="produit_id" value="<%= produit.id %>">
+      <input type="hidden" name="date_debut" value="<%= date_debut %>">
+      <input type="hidden" name="date_retour_prevue" value="<%= date_retour_prevue %>">
+
+
+      <div class="section">
+        <h2>Informations de cartes</h2>
+
+        <label for="card-name">Nom sur la carte</label>
+        <input type="text" id="card-name" placeholder="Quentin Dupont" required>
+
+        <label for="card-number">Numéro de carte</label>
+        <input type="text" id="card-number" maxlength="19" placeholder="1234 5678 9012 3456" required>
+
+        <div class="row">
+          <div class="field">
+            <label for="card-expiry">Expiration</label>
+            <input type="text" id="card-expiry" placeholder="MM / AA" required>
+          </div>
+          <div class="field">
+            <label for="card-cvv">CVV</label>
+            <input type="password" id="card-cvv" maxlength="4" placeholder="123" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Adresse de facturation</h2>
+
+        <label for="full-name">Nom complet</label>
+        <input type="text" id="full-name" placeholder="Quentin Dupont" required>
+
+        <label for="address">Adresse</label>
+        <input type="text" id="address" placeholder="12 rue des Designers" required>
+
+        <div class="row">
+          <div class="field">
+            <label for="city">Ville</label>
+            <input type="text" id="city" placeholder="Lannion" required>
+          </div>
+          <div class="field">
+            <label for="zip">Code postal</label>
+            <input type="text" id="zip" placeholder="22300" required>
+          </div>
+        </div>
+      </div>
+
+      
+
+      <button type="submit" class="btn-primary">Payer maintenant</button>
+      <p class="helper-text">Tes données sont chiffrées et transmises de façon sécurisée.</p>
+    </form>
+
+    <!-- MESSAGE DE CONFIRMATION -->
+    <div class="success-message hidden" id="success-message">
+      <div class="success-icon">✓</div>
+      <h1>Paiement validé</h1>
+      <p>Merci pour votre achat.</p>
+      <p>Un e‑mail de confirmation vient de vous être envoyé.</p>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('payment-form');
+    const success = document.getElementById('success-message');
+
+    form.addEventListener('submit', function (event) {
+
+    });
+  </script>
+</body>
+
+</html>

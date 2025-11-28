@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="UTF-8" />
@@ -8,92 +8,252 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <title>Document</title>
+  <title>
+    <%= produit.marque %>
+      <%= produit.modele %>
+  </title>
 </head>
 
 <body>
-
   <%- include('header'); %>
 
-    <main>
-      <div class="gauche">
-        <div class="G_img">
-          <span><i class="fa-solid fa-chevron-left"></i></span>
-          <img src="https://picsum.photos/300/300" alt="" />
-          <span><i class="fa-solid fa-chevron-right"></i></span>
-        </div>
+    <% 
+    // Gestion intelligente du chemin de l'image
+    let imagePath = "https://placehold.co/600x600?text=No+Image"; 
+    if (produit.img) {
+        // Si c'est une URL ou une image locale statique
+        if (produit.img.startsWith('img/') || produit.img.startsWith('http')) {
+            imagePath = "/" + produit.img;
+        } else {
+            // Sinon c'est un upload Multer
+            imagePath = "/uploads/" + produit.img;
+        }
+    }
+  %>
 
-        <div class="P_img">
-          <img src="https://picsum.photos/300/300" alt="" />
-          <img src="https://picsum.photos/300/300" alt="" />
-          <img src="https://picsum.photos/300/300" alt="" />
-          <img src="https://picsum.photos/300/300" alt="" />
-          <img src="https://picsum.photos/300/300" alt="" />
-        </div>
-      </div>
-      <div class="droite">
-        <h1>Nom du produit</h1>
-        <h2 class="prix">Prix</h2>
-        <p class="description">Description</p>
-        <button>Louer</button>
-      </div>
-    </main>
 
-    <%- include('footer'); %>
+      <main>
+    <div class="gauche">
+      <div class="G_img">
+        <span><i class="fa-solid fa-chevron-left"></i></span>
+        <img src="<%= imagePath %>" alt="<%= produit.modele %>" id="mainDisplayImg" />
+        <span><i class="fa-solid fa-chevron-right"></i></span>
+      </div>
+
+      <div class="P_img">
+        <img src="<%= imagePath %>" class="thumb-img active" alt="Vue 1" />
+        <img src="<%= imagePath %>" class="thumb-img" alt="Vue 2" />
+        <img src="<%= imagePath %>" class="thumb-img" alt="Vue 3" />
+      </div>
+    </div>
+
+        <div class="droite">
+      <h1><%= produit.marque %> <%= produit.modele %></h1>
+      
+      <p style="color: #888; margin-bottom: 10px; font-weight: 500; text-transform: uppercase;"><%= produit.type %></p>
+      
+      <h2 class="prix"><%= produit.prix_location %> € <span style="font-size: 0.6em; color: #666;">/ jour</span></h2>
+      
+      <p id="totalPrice" style="font-weight:600; margin-top:5px;">
+      Prix total : 0 € 
+      </p>
+
+      <p class="description">
+        <%= produit.description || "Aucune description disponible." %>
+      </p>
+
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+      <% 
+          // On vérifie seulement si le produit est PHYSIQUEMENT disponible
+          // (pas cassé, pas perdu). Les dates sont gérées par le JS.
+          const etatActuel = (produit.etat || '').toLowerCase().trim();
+          const etatsBloquants = ['hors service', 'en réparation', 'supprimé', 'perdu'];
+          const estPhysiquementDisponible = !etatsBloquants.includes(etatActuel);
+      %>
+
+      <% if (estPhysiquementDisponible) { %>
+          
+          <form action="/prix" method="POST" class="rental-form" id="rentalForm">
+  <input type="hidden" name="produit_id" value="<%= produit.id %>">
+
+  <div class="date-inputs">
+    <div style="flex: 1;">
+      <label for="start">Début</label>
+      <input type="date" name="date_debut" id="start" required>
+    </div>
+    <div style="flex: 1;">
+      <label for="end">Fin</label>
+      <input type="date" name="date_retour_prevue" id="end" required>
+    </div>
+  </div>
+
+                 <p id="date-error" style="color: #d63031; display: none; font-size: 0.9em; margin-top: 10px; font-weight: 500; text-align: center;"></p>
+
+  <% if (isLoggedIn) { %>
+    <button type="submit" id="btn-submit" style="margin-top: 15px;">
+      Louer ce produit
+    </button>
+  <% } else { %>
+    <a href="/login" class="btn-login-link" style="margin-top: 15px;">
+      Connectez-vous pour louer
+    </a>
+  <% } %>
+</form>
+
+
+              < <% if (typeof reservations !== 'undefined' && reservations.length > 0) { %>
+            <div style="margin-top: 20px; font-size: 0.9em; color: #666; background: #fff5f3; padding: 15px; border-radius: 10px; border: 1px solid #ffebe8;">
+                <strong style="color: #FD5035;">⚠️ Ce produit est déjà réservé sur ces périodes :</strong>
+                <ul style="list-style: none; padding: 0; margin-top: 5px;">
+                    <% reservations.forEach(res => { %>
+                        <li>
+                            • Du <strong><%= new Date(res.date_debut).toLocaleDateString() %></strong> 
+                            au <strong><%= new Date(res.date_retour_prevue).toLocaleDateString() %></strong>
+                        </li>
+                    <% }) %>
+                </ul>
+            </div>
+          <% } %>
+
+      <% } else { %>
+
+          <div class="unavailable-box" style="background-color: #fff0ed; border: 1px solid #ffccc7; color: #d63031; padding: 25px; border-radius: 20px; text-align: center; margin-top: 20px;">
+              <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; margin-bottom: 15px; display:block;"></i>
+              <h3 style="margin: 0 0 10px 0; font-size: 1.3rem;">Produit Indisponible</h3>
+              <p style="margin: 0; color: #555;">Raison : <strong><%= produit.etat %></strong></p>
+              
+              <a href="/catalogue" style="display: inline-block; margin-top: 20px; text-decoration: none; color: #555; border-bottom: 1px solid #555;">
+                  ← Voir d'autres produits
+              </a>
+          </div>
+
+      <% } %>
+
+    </div>
+  </main>
+
+  <%- include('footer'); %>
 
 </body>
+
 <script>
-  const mainImage = document.querySelector('.G_img img');
+  // --- 0. PRIX PAR JOUR (depuis EJS) ---
+  const prixParJour = <%= produit.prix_location %>;
+
+  // --- 1. GESTION DU CARROUSEL ---
+  const mainImage = document.getElementById('mainDisplayImg');
   const thumbnails = document.querySelectorAll('.P_img img');
   const leftArrow = document.querySelector('.fa-chevron-left');
   const rightArrow = document.querySelector('.fa-chevron-right');
 
+  const dbImage = "<%= imagePath %>";
+  const images = [dbImage, dbImage, dbImage];
   let currentIndex = 0;
 
-  const images = [
-    'https://picsum.photos/600/600?1',
-    'https://picsum.photos/600/600?2',
-    'https://picsum.photos/600/600?3',
-    'https://picsum.photos/600/600?4',
-    'https://picsum.photos/600/600?5'
-  ];
-
-  // Mettre à jour l'image principale
   function updateMainImage(index) {
     currentIndex = index;
     mainImage.src = images[currentIndex];
-    // Optionnel : mettre un style sur la miniature active
+
     thumbnails.forEach((thumb, i) => {
-      thumb.style.border = i === currentIndex ? '2px solid #FD5035' : '1px solid #FD5035';
+      if (i === currentIndex) {
+        thumb.classList.add('active');
+        thumb.style.opacity = '1';
+      } else {
+        thumb.classList.remove('active');
+        thumb.style.opacity = '0.7';
+      }
     });
   }
 
-  // Cliquer sur les flèches
-  leftArrow.addEventListener('click', () => {
-    const nextIndex = (currentIndex - 1 + images.length) % images.length;
-    updateMainImage(nextIndex);
-  });
-
-  rightArrow.addEventListener('click', () => {
-    const nextIndex = (currentIndex + 1) % images.length;
-    updateMainImage(nextIndex);
-  });
-
-  // Cliquer sur une miniature
-  thumbnails.forEach((thumb, i) => {
-    thumb.addEventListener('click', () => {
-      updateMainImage(i);
+  if (leftArrow) {
+    leftArrow.addEventListener('click', () => {
+      const nextIndex = (currentIndex - 1 + images.length) % images.length;
+      updateMainImage(nextIndex);
     });
+  }
+
+  if (rightArrow) {
+    rightArrow.addEventListener('click', () => {
+      const nextIndex = (currentIndex + 1) % images.length;
+      updateMainImage(nextIndex);
+    });
+  }
+
+  thumbnails.forEach((thumb, i) => {
+    thumb.addEventListener('click', () => updateMainImage(i));
   });
 
-  // Initialiser
   updateMainImage(0);
+
+  // --- 2. GESTION DES DATES & PRIX ---
+  const startInput = document.getElementById('start');
+  const endInput = document.getElementById('end');
+  const totalPriceEl = document.getElementById('totalPrice');
+
+  function calculerNbJours(debut, fin) {
+    const d1 = new Date(debut);
+    const d2 = new Date(fin);
+    const diffTime = d2.getTime() - d1.getTime();
+    const diffJours = diffTime / (1000 * 60 * 60 * 24);
+    return diffJours > 0 ? diffJours : 0;
+  }
+
+  function majPrixTotal() {
+    if (!startInput || !endInput || !totalPriceEl) return;
+
+    const dateDebut = startInput.value;
+    const dateFin = endInput.value;
+
+    if (dateDebut && dateFin) {
+      const nbJours = calculerNbJours(dateDebut, dateFin);
+      if (nbJours > 0) {
+        const joursPayants = Math.max(0, nbJours - 3);
+        let total = joursPayants * prixParJour;
+        let texteRemise = '';
+
+        // Réduction de 10 % au-dessus de 7 jours
+        if (nbJours > 7) {
+          total = total * 0.9;
+          texteRemise = ' avec 10% de réduction';
+        }
+
+        totalPriceEl.textContent =
+          `Prix total : ${total.toFixed(2)} € (${nbJours} jour(s) dont 3 gratuit(s)${texteRemise})`;
+      } else {
+        totalPriceEl.textContent = 'Prix total : 0 €';
+      }
+    } else {
+      totalPriceEl.textContent = 'Prix total : 0 €';
+    }
+  }
+
+  if (startInput && endInput) {
+    const today = new Date().toISOString().split('T')[0];
+    startInput.setAttribute('min', today);
+    endInput.setAttribute('min', today);
+
+    startInput.addEventListener('change', function () {
+      const startDate = this.value;
+      endInput.setAttribute('min', startDate);
+      if (endInput.value && endInput.value < startDate) {
+        endInput.value = "";
+      }
+      majPrixTotal();
+    });
+
+    endInput.addEventListener('change', function () {
+      majPrixTotal();
+    });
+  }
+
+  // --- 3. RÉSERVATIONS (une seule fois) ---
+  const reservations = <%- JSON.stringify(typeof reservations !== 'undefined' ? reservations : []) %>;
 </script>
+
 
 </html>

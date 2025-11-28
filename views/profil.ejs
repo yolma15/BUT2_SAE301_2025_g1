@@ -10,9 +10,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
-        rel="stylesheet" />
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
@@ -33,7 +30,6 @@
                 }
             }
             
-            // Affichage des messages de session
             const profilMessage = typeof message !== 'undefined' ? message : null;
         %>
 
@@ -54,30 +50,25 @@
 
         <form id="profile-form" class="profile-card info-section">
             <h2>Mes informations</h2>
-
             <div id="info-error" class="inline-error"></div>
-
             <div class="field-group-container">
                 <div class="field-group">
                     <label for="nom">Nom :</label>
                     <input type="text" id="nom" name="nom" value="<%= utilisateur.nom || '' %>" required readonly>
                 </div>
             </div>
-
             <div class="field-group-container">
                 <div class="field-group">
                     <label for="prenom">Prénom :</label>
                     <input type="text" id="prenom" name="prenom" value="<%= utilisateur.prenom || '' %>" required readonly>
                 </div>
             </div>
-
             <div class="field-group-container">
                 <div class="field-group">
                     <label for="email">Email :</label>
                     <input type="email" id="email" name="email" value="<%= utilisateur.email || '' %>" required readonly>
                 </div>
             </div>
-
             <div class="field-group-container">
                 <div class="field-group">
                     <label for="ddn">Anniversaire :</label>
@@ -89,12 +80,10 @@
                 <button type="button" id="edit-button" class="save-button" onclick="toggleEditMode()">
                     <i class="fa-solid fa-pen"></i> Modifier
                 </button>
-
-                <button type="button" id="save-button" class="save-button" onclick="saveProfileInfo()" style="display: none;">
+                <button type="button" id="save-button" class="save-button" onclick="saveProfileInfo()">
                     <i class="fa-solid fa-save"></i> Sauvegarder les modifications
                 </button>
-                
-                <button type="button" id="cancel-button" class="annuler-button" onclick="toggleEditMode(true)" style="display: none;">
+                <button type="button" id="cancel-button" class="annuler-button" onclick="toggleEditMode(true)">
                     Annuler
                 </button>
             </div>
@@ -102,16 +91,13 @@
 
         <form id="password-form" class="profile-card info-section">
             <h2>Changer mon mot de passe</h2>
-
             <div id="password-error" class="inline-error"></div>
-
             <div id="password-display" class="field-group-container">
                 <div class="field-group">
                     <label for="password-placeholder">Mot de passe :</label>
                     <input type="password" id="password-placeholder" value="********" readonly>
                 </div>
             </div>
-
             <div id="password-fields" class="password-fields-hidden">
                 <div class="field-group-container">
                     <div class="field-group">
@@ -119,14 +105,12 @@
                         <input type="password" id="ancien_mdp" name="ancien_mdp" placeholder="Entrez votre ancien mot de passe" required>
                     </div>
                 </div>
-
                 <div class="field-group-container">
                     <div class="field-group">
                         <label for="nouveau_mdp">Nouveau mot de passe :</label>
                         <input type="password" id="nouveau_mdp" name="nouveau_mdp" placeholder="Entrez votre nouveau mot de passe" minlength="4" required>
                     </div>
                 </div>
-
                 <div class="field-group-container">
                     <div class="field-group">
                         <label for="confirmer_mdp">Confirmer le mot de passe :</label>
@@ -139,27 +123,28 @@
                 <button type="button" id="edit-password-button" class="save-button" onclick="togglePasswordEditMode()">
                     <i class="fa-solid fa-pen"></i> Modifier
                 </button>
-
-                <button type="button" id="save-password-button" class="save-button" onclick="savePassword()" style="display: none;">
+                <button type="button" id="save-password-button" class="save-button" onclick="savePassword()">
                     <i class="fa-solid fa-save"></i> Sauvegarder les modifications
                 </button>
-                
-                <button type="button" id="cancel-password-button" class="annuler-button" onclick="togglePasswordEditMode(true)" style="display: none;">
+                <button type="button" id="cancel-password-button" class="annuler-button" onclick="togglePasswordEditMode(true)">
                     Annuler
                 </button>
             </div>
         </form>
         
         <div class="profile-card delete-section">
-            <button class="supp">Supprimer le compte</button>
+            <button class="supp"
+                    id="delete-account-button"
+                    <%= hasActiveRentals ? 'disabled' : '' %>
+                    title="<%= hasActiveRentals ? 'Rendez votre matériel avant de supprimer le compte.' : 'Supprimer le compte.' %>">
+                Supprimer le compte
+            </button>
         </div>
 
     </main>
     
     <script>
-        // ========================================
-        // GESTION DU FORMULAIRE D'INFORMATIONS
-        // ========================================
+        // --- Le script JS est inchangé dans sa logique fonctionnelle ---
         let originalValues = {};
 
         function toggleEditMode(isCancel = false) {
@@ -173,31 +158,22 @@
             const isReadonly = inputs[0].readOnly;
 
             if (isReadonly) {
-                // Passage en mode édition
                 inputs.forEach(input => {
                     input.removeAttribute('readonly');
                     originalValues[input.id] = input.value;
                 });
-
-                // Masquer le message d'erreur
                 errorDiv.classList.remove('show');
-
                 editButton.style.display = 'none';
                 saveButton.style.display = 'block';
                 cancelButton.style.display = 'block';
-                
             } else {
-                // Revenir en mode lecture seule
                 inputs.forEach(input => {
                     if (isCancel) {
                         input.value = originalValues[input.id] || '';
                     }
                     input.setAttribute('readonly', true);
                 });
-                
-                // Masquer le message d'erreur
                 errorDiv.classList.remove('show');
-
                 editButton.style.display = 'block';
                 saveButton.style.display = 'none';
                 cancelButton.style.display = 'none';
@@ -211,14 +187,12 @@
             const ddn = document.getElementById('ddn').value;
             const errorDiv = document.getElementById('info-error');
 
-            // Validation
             if (!nom || !prenom || !email || !ddn) {
                 errorDiv.textContent = 'Tous les champs sont requis.';
                 errorDiv.classList.add('show');
                 return;
             }
 
-            // Validation email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 errorDiv.textContent = 'Format d\'email invalide.';
@@ -226,20 +200,16 @@
                 return;
             }
 
-            // Envoi des données
             try {
                 const response = await fetch('/profil/informations', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nom, prenom, email, ddn })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    // Recharger la page pour afficher le message de succès
                     window.location.href = '/profil?message=success_info';
                 } else {
                     errorDiv.textContent = data.error || 'Erreur lors de la mise à jour.';
@@ -251,9 +221,6 @@
             }
         }
 
-        // ========================================
-        // GESTION DU FORMULAIRE DE MOT DE PASSE
-        // ========================================
         function togglePasswordEditMode(isCancel = false) {
             const passwordDisplay = document.getElementById('password-display');
             const passwordFields = document.getElementById('password-fields');
@@ -265,35 +232,22 @@
             const isHidden = passwordFields.classList.contains('password-fields-hidden');
 
             if (isHidden) {
-                // Passage en mode édition
                 passwordDisplay.style.display = 'none';
                 passwordFields.classList.remove('password-fields-hidden');
-
-                // Vider les champs
                 document.getElementById('ancien_mdp').value = '';
                 document.getElementById('nouveau_mdp').value = '';
                 document.getElementById('confirmer_mdp').value = '';
-
-                // Masquer le message d'erreur
                 errorDiv.classList.remove('show');
-
                 editButton.style.display = 'none';
                 saveButton.style.display = 'block';
                 cancelButton.style.display = 'block';
-                
             } else {
-                // Revenir en mode lecture seule
                 passwordDisplay.style.display = 'block';
                 passwordFields.classList.add('password-fields-hidden');
-
-                // Vider les champs
                 document.getElementById('ancien_mdp').value = '';
                 document.getElementById('nouveau_mdp').value = '';
                 document.getElementById('confirmer_mdp').value = '';
-                
-                // Masquer le message d'erreur
                 errorDiv.classList.remove('show');
-
                 editButton.style.display = 'block';
                 saveButton.style.display = 'none';
                 cancelButton.style.display = 'none';
@@ -306,7 +260,6 @@
             const confirmer_mdp = document.getElementById('confirmer_mdp').value;
             const errorDiv = document.getElementById('password-error');
 
-            // Validation
             if (!ancien_mdp || !nouveau_mdp || !confirmer_mdp) {
                 errorDiv.textContent = 'Veuillez remplir tous les champs du mot de passe.';
                 errorDiv.classList.add('show');
@@ -331,20 +284,16 @@
                 return;
             }
 
-            // Envoi des données
             try {
                 const response = await fetch('/profil/password', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ancien_mdp, nouveau_mdp, confirmer_mdp })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    // Recharger la page pour afficher le message de succès
                     window.location.href = '/profil?message=success_mdp';
                 } else {
                     errorDiv.textContent = data.error || 'Erreur lors du changement de mot de passe.';
@@ -356,28 +305,43 @@
             }
         }
         
-        // Initialisation au chargement de la page
+        // --- 3. GESTION SUPPRESSION COMPTE (Logique Client) ---
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Formulaire d'informations en lecture seule
-            const profileForm = document.getElementById('profile-form');
-            const profileInputs = profileForm.querySelectorAll('input');
-            profileInputs.forEach(input => input.setAttribute('readonly', true));
-            
+            // Initialisation des boutons... (omitted for brevity)
             document.getElementById('edit-button').style.display = 'block';
             document.getElementById('save-button').style.display = 'none';
             document.getElementById('cancel-button').style.display = 'none';
 
-            // 2. Formulaire de mot de passe : affichage simple par défaut
-            document.getElementById('password-display').style.display = 'block';
-            document.getElementById('password-fields').classList.add('password-fields-hidden');
-            
             document.getElementById('edit-password-button').style.display = 'block';
             document.getElementById('save-password-button').style.display = 'none';
             document.getElementById('cancel-password-button').style.display = 'none';
+
+            const btnDelete = document.querySelector('.supp');
+            if (btnDelete && !btnDelete.disabled) { // Vérifie si le bouton n'est pas déjà désactivé par EJS
+                btnDelete.addEventListener('click', async () => {
+                    if (!confirm('⚠️ ATTENTION !\n\nÊtes-vous sûr de vouloir supprimer votre compte ?\nCette action est définitive et annulera vos locations en cours.')) {
+                        return;
+                    }
+
+                    try {
+                        const res = await fetch('/profil/delete', { method: 'DELETE' });
+                        const data = await res.json();
+
+                        if (data.success) {
+                            alert('✅ Compte supprimé. Au revoir !');
+                            window.location.href = '/login';
+                        } else {
+                            // Le serveur a bloqué la suppression (ex: locations en cours)
+                            alert('❌ ' + data.error);
+                        }
+                    } catch (err) {
+                        alert('❌ Erreur serveur.');
+                    }
+                });
+            }
         });
     </script>
 
     <%- include('footer'); %>
 </body>
-
 </html>
