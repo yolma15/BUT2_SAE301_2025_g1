@@ -532,6 +532,34 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
     res.status(500).render("locations", { locations: [], message: "Erreur" });
   }
 });
+
+app.get("/agent/locations", authMiddleware, isAgent, async (req, res) => {
+  try {
+    const [locations] = await pool.query(`
+      SELECT location.*, util.email, util.nom, util.prenom, produit.type, produit.marque, produit.modele
+      FROM location
+      JOIN utilisateur AS util ON location.utilisateur_id = util.id
+      JOIN produit ON location.produit_id = produit.id
+      ORDER BY location.date_debut DESC
+    `);
+
+    // Passe la variable locations à la vue
+    res.render("locations", {
+      locations: locations,
+      message: null,
+      userRole: req.user.role,
+    });
+  } catch (err) {
+    console.error("Erreur récupération locations:", err);
+    res
+      .status(500)
+      .render("error", {
+        message: "Erreur lors de la récupération des locations",
+        code: 500,
+      });
+  }
+});
+
 // ============================================
 // NOUVELLES ROUTES AGENT
 // ============================================

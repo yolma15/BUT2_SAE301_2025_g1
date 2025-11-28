@@ -5,7 +5,8 @@
 
   <% if (message) { %>
   <div class="alert"><%= message %></div>
-  <% } %> <% if (locations.length === 0) { %>
+  <% } %> 
+  <% if (locations.length === 0) { %>
   <p>Aucune location enregistrée.</p>
   <% } else { %>
   <table style="width: 100%; border-collapse: collapse; margin-top: 1rem">
@@ -79,7 +80,7 @@
         <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
           <% if (!location.date_retour_effective) { %>
           <button
-            onclick="finaliserLocation( <%= location.id %> )"
+            onclick="finaliserLocation( <%= locations.id %> )"
             class="btn btn--primary"
             style="padding: 0.5rem 1rem; cursor: pointer"
           >

@@ -12,16 +12,16 @@
       <h2>S'inscrire</h2>
       <p><% if (this.message){ %> <%= message %> <% } %></p>
 
-      <form class="login-form" action="/login" method="POST">
+      <form class="login-form" action="/register" method="POST">
         <label for="login"><b>Nom</b></label>
-        <input type="text" placeholder="Entrez Prenom" name="login" required />
-        <input type="text" placeholder="Entrez Nom de famille " name="login" required />
+        <input type="text" placeholder="Entrez Prenom"  required />
+        <input type="text" placeholder="Entrez Nom de famille "  required />
         
         <label for="login"><b>Identifiant</b></label>
-        <input type="text" placeholder="Entrez l'Identifiant" name="login" />
+        <input type="text" placeholder="Entrez l'Identifiant"  />
 
         <label for="login"><b>Adresse mail</b></label>
-        <input type="text" placeholder="Entrez votre adresse mail" name="login" required />
+        <input type="text" placeholder="Entrez votre adresse mail"  required />
 
         <label for="password"><b>Mot de passe :</b></label>
         <input type="password" placeholder="Enter 1234" name="password" required />
