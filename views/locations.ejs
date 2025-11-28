@@ -1,134 +1,126 @@
-<%- include('header') %>
+<!DOCTYPE html>
+<html lang="fr">
 
-<main class="container" style="padding: 2rem">
-  <h1>📋 Gestion des locations</h1>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion des Locations</title>
+    <link rel="stylesheet" href="/css/locations.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
 
-  <% if (message) { %>
-  <div class="alert"><%= message %></div>
-  <% } %> 
-  <% if (locations.length === 0) { %>
-  <p>Aucune location enregistrée.</p>
-  <% } else { %>
-  <table style="width: 100%; border-collapse: collapse; margin-top: 1rem">
-    <thead>
-      <tr style="background-color: var(--color-secondary); text-align: left">
-        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          #
-        </th>
-        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          Client
-        </th>
-        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          Email
-        </th>
-        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          Produit
-        </th>
-        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          Début
-        </th>
-        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          Retour prévu
-        </th>
-        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          Retour effectif
-        </th>
-        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          Prix
-        </th>
-        <th style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          Actions
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <% locations.forEach(location => { %>
-      <tr>
-        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          #<%= location.id %>
-        </td>
-        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          <%= location.nom %> <%= location.prenom %>
-        </td>
-        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          <%= location.email %>
-        </td>
-        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          <%= location.type %> - <%= location.marque %> <%= location.modele %>
-        </td>
-        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          <%= new Date(location.date_debut).toLocaleDateString('fr-FR') %>
-        </td>
-        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          <%= new Date(location.date_retour_prevue).toLocaleDateString('fr-FR')
-          
-          %>
-        </td>
-        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          <% if (location.date_retour_effective) { %>
-          <span style="color: var(--color-success)"
-            >✅ <%= new
-            Date(location.date_retour_effective).toLocaleDateString('fr-FR')
-            %></span
-          >
-          <% } else { %>
-          <span style="color: var(--color-warning)">⏳ En cours</span>
-          <% } %>
-        </td>
-        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          <%= location.prix_total %> €
-        </td>
-        <td style="padding: 0.75rem; border: 1px solid var(--color-border)">
-          <% if (!location.date_retour_effective) { %>
-          <button
-            onclick="finaliserLocation( <%= location.id %> )"
-            class="btn btn--primary"
-            style="padding: 0.5rem 1rem; cursor: pointer"
-          >
-            ✅ Finaliser
-          </button>
-          <% } else { %>
-          <span class="status status--success">Terminée</span>
-          <% } %>
-        </td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
-  <% } %>
-</main>
+<body>
+    <%- include('header') %>
 
-<script>
-  async function finaliserLocation(id) {
-    if (
-      !confirm(
-        "⚠️ Confirmer la finalisation de cette location ?\n\nLe produit sera remis en disponibilité et les surcoûts éventuels seront calculés."
-      )
-    ) {
-      return;
-    }
+    <main class="container">
+        <h1>Gestion des locations</h1>
 
-    try {
-      const res = await fetch(`/agent/finaliser_location/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+        <% if (typeof message !== 'undefined' && message) { %>
+            <div class="alert-message">
+                <%= message %>
+            </div>
+        <% } %>
 
-      const data = await res.json();
+        <% if (locations.length === 0) { %>
+            <div class="empty-state">
+                <p>Aucune location enregistrée pour le moment.</p>
+            </div>
+        <% } else { %>
+            
+            <div class="table-wrapper">
+                <table class="locations-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Client</th>
+                            <th>Email</th>
+                            <th>Produit</th>
+                            <th>Début</th>
+                            <th>Retour prévu</th>
+                            <th>Statut</th>
+                            <th>Prix</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% locations.forEach(location => { %>
+                            <tr>
+                                <td class="fw-bold">#<%= location.id %></td>
+                                
+                                <td>
+                                    <div class="user-info">
+                                        <span class="user-name"><%= location.prenom %> <%= location.nom %></span>
+                                    </div>
+                                </td>
+                                
+                                <td class="text-light"><%= location.email %></td>
+                                
+                                <td>
+                                    <span class="product-name"><%= location.marque %> <%= location.modele %></span>
+                                    <br>
+                                    <small class="text-light"><%= location.type %></small>
+                                </td>
+                                
+                                <td><%= new Date(location.date_debut).toLocaleDateString('fr-FR') %></td>
+                                
+                                <td><%= new Date(location.date_retour_prevue).toLocaleDateString('fr-FR') %></td>
+                                
+                                <td>
+                                    <% if (location.date_retour_effective) { %>
+                                        <span class="status-badge status-done">
+                                            Rendu le <%= new Date(location.date_retour_effective).toLocaleDateString('fr-FR') %>
+                                        </span>
+                                    <% } else { %>
+                                        <span class="status-badge status-active">En cours</span>
+                                    <% } %>
+                                </td>
+                                
+                                <td class="fw-bold price"><%= location.prix_total %> €</td>
+                                
+                                <td>
+                                    <% if (!location.date_retour_effective) { %>
+                                        <button onclick="finaliserLocation(<%= location.id %>)" class="btn-finalize">
+                                            Finaliser
+                                        </button>
+                                    <% } else { %>
+                                        <span class="text-light text-small">Clôturée</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </main>
 
-      if (data.success) {
-        alert(
-          `✅ Location finalisée avec succès !\n\nPrix final : ${data.prix_final}€`
-        );
-        location.reload();
-      } else {
-        alert("❌ Erreur : " + data.error);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("❌ Erreur lors de la finalisation");
-    }
-  }
-</script>
+    <%- include('footer') %>
 
-<%- include('footer') %>
+    <script>
+        async function finaliserLocation(id) {
+            if (!confirm("Confirmer la finalisation de cette location ?\n\nLe produit sera remis en disponibilité et les surcoûts éventuels seront calculés.")) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/agent/finaliser_location/${id}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    alert(`Location finalisée avec succès !\nPrix final : ${data.prix_final}€`);
+                    location.reload();
+                } else {
+                    alert("Erreur : " + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erreur lors de la finalisation");
+            }
+        }
+    </script>
+</body>
+</html>
