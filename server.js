@@ -150,7 +150,7 @@ app.post("/register", async (req, res) => {
   if (m < 0 || (m === 0 && today.getDate() < dateNaissance.getDate())) { age--; }
 
   if (age < 18) {
-      return res.render("register", { message: "⛔ Inscription impossible : Vous devez être majeur." });
+    return res.render("register", { message: "⛔ Inscription impossible : Vous devez être majeur." });
   }
 
   try {
@@ -243,21 +243,21 @@ app.get("/product/:id", async (req, res) => {
   try {
     const [produits] = await pool.query("SELECT * FROM produit WHERE id = ?", [req.params.id]);
     if (produits.length === 0) return res.status(404).render("404");
-    
+
     const produit = produits[0];
 
     // Récupérer toutes les plages de location futures ou en cours pour ce produit
     const [reservations] = await pool.query(
-        `SELECT date_debut, date_retour_prevue 
+      `SELECT date_debut, date_retour_prevue 
          FROM location 
          WHERE produit_id = ? AND date_retour_effective IS NULL`,
-        [req.params.id]
+      [req.params.id]
     );
 
-    res.render("product", { 
-        produit: produit, 
-        message: req.query.message || null,
-        reservations: reservations // Liste des dates occupées
+    res.render("product", {
+      produit: produit,
+      message: req.query.message || null,
+      reservations: reservations // Liste des dates occupées
     });
   } catch (err) {
     res.status(500).render("error", { message: "Erreur chargement produit", code: 500 });
@@ -292,15 +292,15 @@ app.get("/profil", authMiddleware, isClient, async (req, res) => {
     let profilMessage = null;
     const msg = req.query.message;
     const msgMap = {
-        success_info: { type: "success", text: "Informations mises à jour." },
-        success_mdp: { type: "success", text: "Mot de passe changé." },
+      success_info: { type: "success", text: "Informations mises à jour." },
+      success_mdp: { type: "success", text: "Mot de passe changé." },
     };
     if (msg && msgMap[msg]) profilMessage = msgMap[msg];
 
-    res.render("profil", { 
-      utilisateur: users[0], 
+    res.render("profil", {
+      utilisateur: users[0],
       profilMessage,
-      hasActiveRentals: hasActiveRentals 
+      hasActiveRentals: hasActiveRentals
     });
   } catch (err) {
     res.status(500).render("error", { message: "Erreur chargement profil", code: 500 });
@@ -373,35 +373,41 @@ app.post('/prix', authMiddleware, isClient, async (req, res) => {
   const { produit_id, date_debut, date_retour_prevue } = req.body;
 
   try {
+    // 1. Récupérer le produit
     const [prods] = await pool.query('SELECT * FROM produit WHERE id = ?', [produit_id]);
     if (prods.length === 0) {
       return res.status(404).render('error', { message: 'Produit introuvable', code: 404 });
     }
     const produit = prods[0];
 
+    // 2. Calcul du nombre de jours
     const debut = new Date(date_debut);
     const fin = new Date(date_retour_prevue);
     const nbJours = Math.max(1, Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)));
 
-    const prixParJour = produit.prixlocation;
+    // 3. Calcul du total (3 jours gratuits + -10 % après 7 jours)
+    const prixParJour = produit.prix_location; // bien "prix_location"
     const joursPayants = Math.max(0, nbJours - 3);
     let total = joursPayants * prixParJour;
+
     if (nbJours > 7) {
       total = total * 0.9;
     }
 
+    // 4. Rendre la vue avec un nombre bien formaté
     res.render('prix', {
       produit,
       date_debut,
       date_retour_prevue,
       nbJours,
-      total: total.toFixed(2)
+      total: total.toFixed(2)   // => string "81.00"
     });
   } catch (err) {
     console.error(err);
     res.status(500).render('error', { message: 'Erreur préparation paiement', code: 500 });
   }
 });
+
 
 
 // --- CRÉATION DE LOCATION (Sécurisée : check chevauchement + limite 6 mois) ---
@@ -412,7 +418,7 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const debut = new Date(date_debut);
   const fin = new Date(date_retour_prevue);
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
 
   if (debut < today) return res.status(400).send("Date début invalide.");
   if (fin <= debut) return res.status(400).send("Date fin invalide.");
@@ -421,29 +427,39 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const dateLimite = new Date(debut);
   dateLimite.setMonth(dateLimite.getMonth() + 6);
   if (fin > dateLimite) {
-      return res.status(400).send("⛔ Erreur : La durée maximale de location est de 6 mois.");
+    return res.status(400).send("⛔ Erreur : La durée maximale de location est de 6 mois.");
   }
 
   try {
     // 1. VÉRIFICATION DE CHEVAUCHEMENT (Overlap)
     // On vérifie si la période demandée [debut, fin] n'entre pas en conflit avec une réservation existante
     const [collisions] = await pool.query(
-        `SELECT * FROM location 
+      `SELECT * FROM location 
          WHERE produit_id = ? 
          AND date_retour_effective IS NULL
-         AND NOT (date_retour_prevue <= ? OR date_debut >= ?)`, 
-        [produit_id, date_debut, date_retour_prevue]
+         AND NOT (date_retour_prevue <= ? OR date_debut >= ?)`,
+      [produit_id, date_debut, date_retour_prevue]
     );
 
     if (collisions.length > 0) {
-        return res.status(400).send("⛔ Ce produit est déjà réservé sur cette période.");
+      return res.status(400).send("⛔ Ce produit est déjà réservé sur cette période.");
     }
 
-    // 2. Création de la location
+    // 2. Création de la location (même logique que sur /prix)
     const [prods] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [produit_id]);
     const prixLoc = prods[0].prix_location;
+
+    // nombre de jours de location
     const nbJours = Math.max(1, Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)));
-    const total = nbJours * prixLoc;
+
+    // 3 jours gratuits
+    const joursPayants = Math.max(0, nbJours - 3);
+    let total = joursPayants * prixLoc;
+
+    // -10 % au‑delà de 7 jours
+    if (nbJours > 7) {
+      total = total * 0.9;
+    }
 
     await pool.query(
       "INSERT INTO location (date_debut, date_retour_prevue, prix_total, utilisateur_id, produit_id) VALUES (?, ?, ?, ?, ?)",
@@ -477,8 +493,8 @@ app.get("/locations", authMiddleware, isAgent, async (req, res) => {
 });
 
 app.get("/agent/returnprod", authMiddleware, isAgent, async (req, res) => {
-    try {
-        const [locations] = await pool.query(`
+  try {
+    const [locations] = await pool.query(`
             SELECT l.id, l.date_debut, l.date_retour_prevue, l.prix_total, 
                    p.marque, p.modele, p.img, p.prix_location,
                    u.nom, u.prenom, u.email
@@ -488,11 +504,11 @@ app.get("/agent/returnprod", authMiddleware, isAgent, async (req, res) => {
             WHERE l.date_retour_effective IS NULL
             ORDER BY l.date_retour_prevue ASC
         `);
-        res.render("returnprod", { locations });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Erreur serveur");
-    }
+    res.render("returnprod", { locations });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erreur serveur");
+  }
 });
 
 app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, res) => {
@@ -509,20 +525,20 @@ app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, r
     const dateDebut = new Date(location.date_debut);
     const dateRetourEffective = new Date();
     const dureeReelle = Math.ceil((dateRetourEffective - dateDebut) / (1000 * 60 * 60 * 24));
-    
+
     let prixFinal = parseFloat(location.prix_total);
     if (surcout) {
-        prixFinal += parseFloat(surcout);
+      prixFinal += parseFloat(surcout);
     }
 
     if (dureeReelle > 60) {
-        const [produits] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [location.produit_id]);
-        prixFinal += parseFloat(produits[0].prix_location) * 0.2;
+      const [produits] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [location.produit_id]);
+      prixFinal += parseFloat(produits[0].prix_location) * 0.2;
     }
 
     await pool.query("UPDATE location SET date_retour_effective = NOW(), prix_total = ? WHERE id = ?", [prixFinal, locationId]);
     await pool.query("UPDATE produit SET etat = 'disponible' WHERE id = ?", [location.produit_id]);
-    
+
     res.json({ success: true, message: "Location finalisée.", prix_final: prixFinal });
   } catch (err) {
     res.status(500).json({ error: "Erreur finalisation" });

@@ -8,17 +8,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Medula+One&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <title><%= produit.marque %> <%= produit.modele %></title>
+  <title>
+    <%= produit.marque %>
+      <%= produit.modele %>
+  </title>
 </head>
 
 <body>
 
-  <%- include('header'); %>
-
-  <% 
+    <% 
     // Gestion intelligente du chemin de l'image
     let imagePath = "https://placehold.co/600x600?text=No+Image"; 
     if (produit.img) {
@@ -32,7 +34,8 @@
     }
   %>
 
-  <main>
+
+      <main>
     <div class="gauche">
       <div class="G_img">
         <span><i class="fa-solid fa-chevron-left"></i></span>
@@ -47,7 +50,7 @@
       </div>
     </div>
 
-    <div class="droite">
+        <div class="droite">
       <h1><%= produit.marque %> <%= produit.modele %></h1>
       
       <p style="color: #888; margin-bottom: 10px; font-weight: 500; text-transform: uppercase;"><%= produit.type %></p>
@@ -88,7 +91,7 @@
     </div>
   </div>
 
-  <p id="date-error" style="color: #d63031; display: none; font-size: 0.9em; margin-top: 10px; font-weight: 500; text-align: center;"></p>
+                 <p id="date-error" style="color: #d63031; display: none; font-size: 0.9em; margin-top: 10px; font-weight: 500; text-align: center;"></p>
 
   <% if (isLoggedIn) { %>
     <button type="submit" id="btn-submit" style="margin-top: 15px;">
@@ -102,7 +105,7 @@
 </form>
 
 
-          <% if (typeof reservations !== 'undefined' && reservations.length > 0) { %>
+              < <% if (typeof reservations !== 'undefined' && reservations.length > 0) { %>
             <div style="margin-top: 20px; font-size: 0.9em; color: #666; background: #fff5f3; padding: 15px; border-radius: 10px; border: 1px solid #ffebe8;">
                 <strong style="color: #FD5035;">⚠️ Ce produit est déjà réservé sur ces périodes :</strong>
                 <ul style="list-style: none; padding: 0; margin-top: 5px;">
@@ -154,11 +157,11 @@
   function updateMainImage(index) {
     currentIndex = index;
     mainImage.src = images[currentIndex];
-    
+
     thumbnails.forEach((thumb, i) => {
       if (i === currentIndex) {
-          thumb.classList.add('active');
-          thumb.style.opacity = '1';
+        thumb.classList.add('active');
+        thumb.style.opacity = '1';
       } else {
         thumb.classList.remove('active');
         thumb.style.opacity = '0.7';
@@ -166,18 +169,18 @@
     });
   }
 
-  if(leftArrow) {
-      leftArrow.addEventListener('click', () => {
-        const nextIndex = (currentIndex - 1 + images.length) % images.length;
-        updateMainImage(nextIndex);
-      });
+  if (leftArrow) {
+    leftArrow.addEventListener('click', () => {
+      const nextIndex = (currentIndex - 1 + images.length) % images.length;
+      updateMainImage(nextIndex);
+    });
   }
 
-  if(rightArrow) {
-      rightArrow.addEventListener('click', () => {
-        const nextIndex = (currentIndex + 1) % images.length;
-        updateMainImage(nextIndex);
-      });
+  if (rightArrow) {
+    rightArrow.addEventListener('click', () => {
+      const nextIndex = (currentIndex + 1) % images.length;
+      updateMainImage(nextIndex);
+    });
   }
 
   thumbnails.forEach((thumb, i) => {
@@ -188,9 +191,10 @@
 
 
   // --- 2. GESTION DES DATES (Sécurité) ---
-  
+
   // Récupération des réservations envoyées par le serveur
-  const reservations = <%- JSON.stringify(typeof reservations !== 'undefined' ? reservations : []) %>;
+  const reservations = <% - JSON.stringify(typeof reservations !== 'undefined' ? reservations : []) %>;
+
 
   const startInput = document.getElementById('start');
   const endInput = document.getElementById('end');
@@ -205,55 +209,55 @@
   }
 
   function majPrixTotal() {
-  if (!startInput || !endInput || !totalPriceEl) return;
+    if (!startInput || !endInput || !totalPriceEl) return;
 
-  const dateDebut = startInput.value;
-  const dateFin = endInput.value;
+    const dateDebut = startInput.value;
+    const dateFin = endInput.value;
 
-  if (dateDebut && dateFin) {
-    const nbJours = calculerNbJours(dateDebut, dateFin);
-    if (nbJours > 0) {
-      const joursPayants = Math.max(0, nbJours - 3);
+    if (dateDebut && dateFin) {
+      const nbJours = calculerNbJours(dateDebut, dateFin);
+      if (nbJours > 0) {
+        const joursPayants = Math.max(0, nbJours - 3);
 
-      let total = joursPayants * prixParJour;
-      let texteRemise = '';
+        let total = joursPayants * prixParJour;
+        let texteRemise = '';
 
-      // Réduction de 10 % au-dessus de 7 jours
-      if (nbJours > 7) {
-        total = total * 0.9; // -10 %
-        texteRemise = ' avec 10% de réduction';
+        // Réduction de 10 % au-dessus de 7 jours
+        if (nbJours > 7) {
+          total = total * 0.9; // -10 %
+          texteRemise = ' avec 10% de réduction';
+        }
+
+        totalPriceEl.textContent =
+          `Prix total : ${total.toFixed(2)} € (${nbJours} jour(s) dont 3 gratuit(s)${texteRemise})`;
+      } else {
+        totalPriceEl.textContent = 'Prix total : 0 €';
       }
-
-      totalPriceEl.textContent =
-        `Prix total : ${total.toFixed(2)} € (${nbJours} jour(s) dont 3 gratuit(s)${texteRemise})`;
     } else {
       totalPriceEl.textContent = 'Prix total : 0 €';
     }
-  } else {
-    totalPriceEl.textContent = 'Prix total : 0 €';
   }
-}
 
 
 
   if (startInput && endInput) {
-      // Date min = Aujourd'hui
-      const today = new Date().toISOString().split('T')[0];
-      startInput.setAttribute('min', today);
-      endInput.setAttribute('min', today);
+    // Date min = Aujourd'hui
+    const today = new Date().toISOString().split('T')[0];
+    startInput.setAttribute('min', today);
+    endInput.setAttribute('min', today);
 
-      startInput.addEventListener('change', function() {
-          const startDate = this.value;
-          endInput.setAttribute('min', startDate);
-          if(endInput.value && endInput.value < startDate) {
-              endInput.value = ""; 
-          }
-          majPrixTotal();
-      });
+    startInput.addEventListener('change', function () {
+      const startDate = this.value;
+      endInput.setAttribute('min', startDate);
+      if (endInput.value && endInput.value < startDate) {
+        endInput.value = "";
+      }
+      majPrixTotal();
+    });
 
-      endInput.addEventListener('change', function() {
-          majPrixTotal();
-      });
+    endInput.addEventListener('change', function () {
+      majPrixTotal();
+    });
   }
 </script>
 
