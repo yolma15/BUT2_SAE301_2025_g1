@@ -4,10 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestion des Retours - Agent</title>
+    <title>Gestion des Retours</title>
     <link rel="stylesheet" href="/css/returnprod.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
@@ -24,37 +22,34 @@
             
             <% if (locations.length === 0) { %>
                 <div class="no-returns">
-                    <i class="fa-solid fa-clipboard-check" style="font-size: 4rem; margin-bottom: 20px; color: #ddd; display: block;"></i>
+                    <i class="fa-solid fa-clipboard-check"></i>
                     <p>Aucun produit en cours de location.</p>
                     <small>Tout le matériel a été rendu.</small>
                 </div>
             <% } %>
 
             <% locations.forEach(loc => { 
-                // 1. Calcul du retard
+                // Calcul du retard pour affichage visuel
                 const today = new Date();
                 const due = new Date(loc.date_retour_prevue);
-                // On compare les timestamps pour la précision
                 const isLate = today.setHours(0,0,0,0) > due.setHours(0,0,0,0);
-
-                // 2. Gestion de l'image (Logique Catalogue)
-                let imagePath = "https://placehold.co/600x600?text=No+Img";
-                if (loc.img) {
-                    if (loc.img.startsWith('img/') || loc.img.startsWith('http')) {
-                        imagePath = "/" + loc.img;
-                    } else {
-                        imagePath = "/uploads/" + loc.img;
-                    }
-                }
             %>
                 <div class="return-card" id="card-<%= loc.id %>">
                     
                     <div class="card-header">
-                        <img src="<%= imagePath %>" 
-                             class="prod-img" 
-                             alt="Produit"
-                             onerror="this.src='https://placehold.co/60x60?text=Err'">
                         
+                        <div class="img-container">
+                            <% if (loc.img) { %>
+                                <% if (loc.img.startsWith('img/') || loc.img.startsWith('http')) { %>
+                                    <img src="/<%= loc.img %>" class="prod-img" alt="Produit">
+                                <% } else { %>
+                                    <img src="/uploads/<%= loc.img %>" class="prod-img" alt="Produit">
+                                <% } %>
+                            <% } else { %>
+                                <img src="https://placehold.co/60x60?text=No+Img" class="prod-img" alt="Image par défaut">
+                            <% } %>
+                        </div>
+
                         <div class="prod-info">
                             <h3><%= loc.marque %> <%= loc.modele %></h3>
                             <p>Loc #<%= loc.id %> • <span style="font-weight:500; color:#FD5035"><%= loc.prix_total %> €</span></p>
@@ -74,7 +69,9 @@
                         </div>
                         
                         <% if (isLate) { %>
-                            <span class="late-badge">⚠️ En retard</span>
+                            <span class="late-badge">
+                                <i class="fa-solid fa-triangle-exclamation"></i> En retard
+                            </span>
                         <% } else { %>
                             <span style="color: #27ae60; font-weight: 600; font-size: 0.9rem;">
                                 <i class="fa-regular fa-clock"></i> À l'heure
@@ -83,7 +80,7 @@
                     </div>
 
                     <div class="action-area">
-                        <div class="input-wrapper" style="flex: 1;">
+                        <div class="input-wrapper">
                             <input type="number" 
                                    id="cout-<%= loc.id %>" 
                                    class="input-cout" 
@@ -93,7 +90,7 @@
                         </div>
                         
                         <button class="btn-validate" onclick="validerRetour(<%= loc.id %>)">
-                            Valider
+                            <i class="fa-solid fa-check"></i> Valider
                         </button>
                     </div>
 
@@ -111,13 +108,11 @@
             const surcout = parseFloat(inputCout.value) || 0;
             const card = document.getElementById('card-' + id);
 
-            // Confirmation simple
             if (!confirm(`Confirmer le retour de la location #${id} ?\n(Surcoût appliqué : ${surcout} €)`)) {
                 return;
             }
 
             try {
-                // Appel à l'API Agent
                 const response = await fetch(`/agent/finaliser_location/${id}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -127,27 +122,21 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Effet visuel de suppression
-                    card.style.transition = "all 0.5s ease";
-                    card.style.transform = "scale(0.9)";
                     card.style.opacity = "0";
+                    card.style.transform = "scale(0.9)";
                     
                     setTimeout(() => {
                         card.remove();
-                        
-                        // Si c'était la dernière carte, on affiche le message vide
                         const grid = document.querySelector('.returns-grid');
                         if (grid.children.length === 0) {
                             grid.innerHTML = `
                                 <div class="no-returns">
-                                    <i class="fa-solid fa-clipboard-check" style="font-size: 4rem; margin-bottom: 20px; color: #ddd; display: block;"></i>
+                                    <i class="fa-solid fa-clipboard-check"></i>
                                     <p>Plus aucun retour en attente.</p>
                                 </div>`;
                         }
-                        
                         alert(`✅ Retour validé avec succès !\nPrix final : ${data.prix_final.toFixed(2)} €`);
                     }, 500);
-
                 } else {
                     alert('❌ Erreur : ' + data.error);
                 }

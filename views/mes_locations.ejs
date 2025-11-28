@@ -36,11 +36,12 @@
           const dateDebut = new Date(location.date_debut);
           const dateRetourPrevue = new Date(location.date_retour_prevue);
           
-          // Vérification si la date est passée
-          const isTimePassed = now > dateRetourPrevue;
+          // Vérification si la date de retour est dépassée (comparaison simple)
+          // On compare les timestamps pour être précis
+          const isTimePassed = now.setHours(0,0,0,0) > dateRetourPrevue.setHours(0,0,0,0);
 
           // On peut annuler SEULEMENT si la location n'a pas encore commencé
-          const peutAnnuler = dateDebut > now;
+          const peutAnnuler = dateDebut > new Date(); 
         %>
         
         <div class="location-card">
@@ -74,8 +75,8 @@
                 <p class="label">Statut</p>
                 
                 <% if (isTimePassed) { %>
-                    <span class="status-pill status-pill--pending">
-                        ⏳ En attente de validation
+                    <span class="status-pill status-pill--late">
+                        ⏳ En attente de retour
                     </span>
                 <% } else { %>
                     <span class="status-pill status-pill--ongoing">
@@ -97,13 +98,13 @@
                 <% } %>
 
                 <% if (isTimePassed) { %>
-                     <span style="font-size: 0.8rem; color: #e67e22; font-weight: 500;">
-                        Veuillez rapporter le produit en magasin.
-                     </span>
+                     <div style="text-align: right; font-size: 0.85rem; color: #d63031; font-weight: 600;">
+                        ⚠️ Date dépassée.<br>Veuillez rapporter le matériel.
+                     </div>
                 <% } else { %>
-                    <a href="/returnprod?location_id=<%= location.id %>" class="btn-success">
-                        Signaler le retour
-                    </a>
+                    <div style="text-align: right; font-size: 0.85rem; color: #27ae60; font-weight: 500;">
+                        ✓ Location active
+                    </div>
                 <% } %>
 
             </div>
