@@ -271,7 +271,7 @@ app.get("/product/:id", async (req, res) => {
   }
 });
 
-// --- CRÉATION DE LOCATION (Sécurisée) ---
+// --- CRÉATION DE LOCATION (limite 60 jours) ---
 app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const { produit_id, date_debut, date_retour_prevue } = req.body;
   if (!produit_id || !date_debut || !date_retour_prevue) return res.status(400).send("Champs requis");
@@ -279,56 +279,61 @@ app.post("/locations/create", authMiddleware, isClient, async (req, res) => {
   const debut = new Date(date_debut);
   const fin = new Date(date_retour_prevue);
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
 
-  // Validations dates
-  if (debut < today) return res.status(400).send("Date début invalide (passé).");
-  if (fin <= debut) return res.status(400).send("La date de fin doit être après le début.");
+  if (debut < today) return res.status(400).send("Date début invalide.");
+  if (fin <= debut) return res.status(400).send("Date fin invalide.");
 
-  // VÉRIFICATION LIMITE 6 MOIS
-  const dateLimite = new Date(debut);
-  dateLimite.setMonth(dateLimite.getMonth() + 6);
-  if (fin > dateLimite) {
-      return res.status(400).send("⛔ Erreur : La durée maximale de location est de 6 mois.");
+  // Limite stricte : 60 jours max
+  const nbJours = Math.max(1, Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)));
+  if (nbJours > 60) {
+    return res.status(400).send("⛔ Erreur : La durée maximale de location est de 60 jours.");
   }
 
   try {
-    // VÉRIFICATION DE CHEVAUCHEMENT (Overlap)
+    // Vérif de chevauchement identique à ton code
     const [collisions] = await pool.query(
-        `SELECT * FROM location 
+      `SELECT * FROM location 
          WHERE produit_id = ? 
          AND date_retour_effective IS NULL
-         AND NOT (date_retour_prevue <= ? OR date_debut >= ?)`, 
-        [produit_id, date_debut, date_retour_prevue]
+         AND NOT (date_retour_prevue <= ? OR date_debut >= ?)`,
+      [produit_id, date_debut, date_retour_prevue]
     );
-
     if (collisions.length > 0) {
-        return res.status(400).send("⛔ Ce produit est déjà réservé sur cette période.");
+      return res.status(400).send("⛔ Ce produit est déjà réservé sur cette période.");
     }
 
-    // Création de la location
     const [prods] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [produit_id]);
     const prixLoc = prods[0].prix_location;
-    const nbJours = Math.max(1, Math.ceil((fin - debut) / (1000 * 60 * 60 * 24)));
-    
-    // Calcul prix (3 jours gratuits + dégressif si > 7 jours)
+
+    // Nombre de jours prévu
     const joursPayants = Math.max(0, nbJours - 3);
-    let total = joursPayants * prixLoc;
-    if (nbJours > 7) total = total * 0.9;
+    let prixBase = joursPayants * prixLoc;
+
+    // Réduction selon paliers (à l’avantage du client)
+    // 4–7 jours : 4%, 8–14 : 2%, 15–30 : 1%, 31–60 : 0%
+    let remise = 0;
+    if (nbJours >= 4 && nbJours <= 7) remise = 0.04;
+    else if (nbJours >= 8 && nbJours <= 14) remise = 0.02;
+    else if (nbJours >= 15 && nbJours <= 30) remise = 0.01;
+
+    prixBase = prixBase * (1 - remise);
+
+    // Arrondi à l’avantage du client (on peut arrondir au centime inférieur)
+    const total = Math.floor(prixBase * 100) / 100;
 
     await pool.query(
       "INSERT INTO location (date_debut, date_retour_prevue, prix_total, utilisateur_id, produit_id) VALUES (?, ?, ?, ?, ?)",
       [date_debut, date_retour_prevue, total, req.session.userId, produit_id]
     );
-    
-    // Note : On ne change PAS l'état du produit ici, car il peut être loué sur des plages différentes
-    
-    res.redirect('/mes-locations');
+
+    res.redirect("/mes-locations");
   } catch (err) {
     console.error(err);
     res.status(500).send("Erreur création location");
   }
 });
+
 
 // ============================================
 // 6. ROUTES CLIENT (ESPACE PERSO)
@@ -524,44 +529,55 @@ app.post("/agent/finaliser_location/:id", authMiddleware, isAgent, async (req, r
     const dateDebut = new Date(location.date_debut);
     const dateRetourPrevue = new Date(location.date_retour_prevue);
     const dateRetourEffective = new Date();
-    const dureeReelle = Math.ceil((dateRetourEffective - dateDebut) / (1000 * 60 * 60 * 24));
 
-    // Calcul du prix de base (comme dans /prix et /locations/create)
+    const nbJoursPrevus = Math.max(1, Math.ceil((dateRetourPrevue - dateDebut) / (1000 * 60 * 60 * 24)));
+    const nbJoursReels = Math.max(1, Math.ceil((dateRetourEffective - dateDebut) / (1000 * 60 * 60 * 24)));
+
+    // Recalcule le prix de base à partir des règles
     const [produits] = await pool.query("SELECT prix_location FROM produit WHERE id = ?", [location.produit_id]);
     const prixLoc = produits[0].prix_location;
-    const nbJours = Math.max(1, Math.ceil((dateRetourPrevue - dateDebut) / (1000 * 60 * 60 * 24)));
-    const joursPayants = Math.max(0, nbJours - 3);
-    let prixBasique = joursPayants * prixLoc;
-    if (nbJours > 7) {
-      prixBasique = prixBasique * 0.9; // -10% au-delà de 7 jours
-    }
+    const joursPayants = Math.max(0, nbJoursPrevus - 3);
+    let prixBase = joursPayants * prixLoc;
 
-    // Appliquer le surcoût de 20% si le retour est en retard
-    let prixFinal = prixBasique;
+    let remise = 0;
+    if (nbJoursPrevus >= 4 && nbJoursPrevus <= 7) remise = 0.04;
+    else if (nbJoursPrevus >= 8 && nbJoursPrevus <= 14) remise = 0.02;
+    else if (nbJoursPrevus >= 15 && nbJoursPrevus <= 30) remise = 0.01;
+
+    prixBase = prixBase * (1 - remise);
+
+    // Arrondi à l’avantage du client (au centime inférieur)
+    let prixFinal = Math.floor(prixBase * 100) / 100;
+
+    // Surcoût manuel optionnel
     if (surcout) {
-        prixFinal += parseFloat(surcout);
+      prixFinal += parseFloat(surcout);
     }
 
-    // Si le retour est en retard (date_retour_effective > date_retour_prevue)
-    if (dateRetourEffective > dateRetourPrevue) {
-      prixFinal = prixFinal * 1.2; // +20%
+    // Surcoût 20 % si :
+    // - le produit est rendu en retard par rapport à la date prévue
+    //   OU
+    // - la durée réelle dépasse 60 jours
+    if (dateRetourEffective > dateRetourPrevue || nbJoursReels > 60) {
+      prixFinal = prixFinal * 1.20;
     }
 
-    // Si la durée réelle dépasse 60 jours, ajouter 20% du prix journalier
-    if (dureeReelle > 60) {
-      prixFinal += parseFloat(produits[0].prix_location) * 0.2;
-    }
+    // Arrondi final à l’avantage du client
+    prixFinal = Math.floor(prixFinal * 100) / 100;
 
-    // Mettre à jour la location et le produit
-    await pool.query("UPDATE location SET date_retour_effective = NOW(), prix_total = ? WHERE id = ?", [prixFinal, locationId]);
+    await pool.query(
+      "UPDATE location SET date_retour_effective = NOW(), prix_total = ? WHERE id = ?",
+      [prixFinal, locationId]
+    );
     await pool.query("UPDATE produit SET etat = 'disponible' WHERE id = ?", [location.produit_id]);
-    
+
     res.json({ success: true, message: "Location finalisée.", prix_final: prixFinal });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Erreur finalisation" });
   }
 });
+
 
 // Gestion Produits (Agent)
 app.post("/agent/supprimer_produit/:id", authMiddleware, isAgent, async (req, res) => {
