@@ -506,7 +506,7 @@ app.get("/agent/locations", authMiddleware, isAgent, async (req, res) => {
     res.render("locations", {
       locations: locations,
       message: null,
-      userRole: req.user.role,
+      userRole: req.userRole,
     });
   } catch (err) {
     console.error("Erreur récupération locations:", err);
