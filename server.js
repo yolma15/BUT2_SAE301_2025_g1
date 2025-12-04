@@ -380,7 +380,7 @@ else if (nbJours >= 15 && nbJours <= 30) remise = 0.01;
 prixBase = prixBase * (1 - remise);
 
 // 2) Si plus de 7 jours, appliquer EN PLUS -10%
-if (nbJours > 7) {
+if (nbJours > 7 && nbJours <= 9) {
   prixBase = prixBase * 0.9;
 }
 
